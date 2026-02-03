@@ -1,0 +1,5 @@
+{
+  "name": "eBBot LLM Testing Dashboard",
+  "description": "A comprehensive dashboard for visualizing and analyzing eBBot's LLM testing framework results, covering Structure, Discount, and Rules LLM components.",
+  "requestFramePermissions": []
+}
