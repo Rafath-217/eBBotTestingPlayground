@@ -3,8 +3,15 @@ import { Card, CardContent, CardHeader, CardTitle, CodeBlock, Badge, Table, Tabl
 import { ResultsTable } from '../components/ResultsTable';
 import { EnrichedResult } from '../services/dataService';
 import { RulesLLMSpec } from '../types';
+import { ViewMode } from '../components/Layout';
 
-const RulesLLM = ({ results, spec }: { results: EnrichedResult[], spec: RulesLLMSpec }) => {
+interface RulesLLMProps {
+  results: EnrichedResult[];
+  spec: RulesLLMSpec;
+  viewMode: ViewMode;
+}
+
+const RulesLLM: React.FC<RulesLLMProps> = ({ results, spec, viewMode }) => {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-2">
@@ -69,7 +76,7 @@ const RulesLLM = ({ results, spec }: { results: EnrichedResult[], spec: RulesLLM
 
       <div className="space-y-4">
         <h3 className="text-xl font-semibold">Test Results</h3>
-        <ResultsTable results={results} />
+        <ResultsTable results={results} viewMode={viewMode} />
       </div>
     </div>
   );

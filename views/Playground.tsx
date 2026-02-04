@@ -3,6 +3,8 @@ import { Play, Copy, Check, AlertCircle, Loader2, Clock, Zap } from 'lucide-reac
 import { Card, CardHeader, CardTitle, CardContent, Button, Badge, CodeBlock, cn } from '../components/ui';
 import { PipelineResult, TraceEntry } from '../types';
 import { runPipeline, parseCollections, parseProducts } from '../services/pipelineApi';
+import { ViewMode } from '../components/Layout';
+import { PMResultView } from '../components/PMViews';
 
 const TraceTimeline: React.FC<{ trace: TraceEntry[] }> = ({ trace }) => {
   const getBadgeVariant = (entry: TraceEntry) => {
@@ -106,7 +108,11 @@ const TraceTimeline: React.FC<{ trace: TraceEntry[] }> = ({ trace }) => {
   );
 };
 
-const Playground: React.FC = () => {
+interface PlaygroundProps {
+  viewMode: ViewMode;
+}
+
+const Playground: React.FC<PlaygroundProps> = ({ viewMode }) => {
   const [merchantText, setMerchantText] = useState('');
   const [collectionsInput, setCollectionsInput] = useState('');
   const [productsInput, setProductsInput] = useState('');
@@ -247,65 +253,72 @@ const Playground: React.FC = () => {
           {/* Status Summary */}
           <Card>
             <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Status</p>
+                  <Badge variant={getStatusBadge().variant} className="mt-1">
+                    {getStatusBadge().text}
+                  </Badge>
+                </div>
+                {getTotalDuration() !== null && (
                   <div>
-                    <p className="text-sm text-muted-foreground">Status</p>
-                    <Badge variant={getStatusBadge().variant} className="mt-1">
-                      {getStatusBadge().text}
-                    </Badge>
+                    <p className="text-sm text-muted-foreground">LLM Time</p>
+                    <p className="font-mono text-sm mt-1">{getTotalDuration()}ms</p>
                   </div>
-                  {getTotalDuration() !== null && (
-                    <div>
-                      <p className="text-sm text-muted-foreground">LLM Time</p>
-                      <p className="font-mono text-sm mt-1">{getTotalDuration()}ms</p>
-                    </div>
-                  )}
-                  <div>
-                    <p className="text-sm text-muted-foreground">Steps</p>
-                    <p className="font-mono text-sm mt-1">{result._trace?.length || 0}</p>
-                  </div>
+                )}
+                <div>
+                  <p className="text-sm text-muted-foreground">Steps</p>
+                  <p className="font-mono text-sm mt-1">{result._trace?.length || 0}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Pipeline Trace */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Pipeline Trace</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {result._trace ? (
-                <TraceTimeline trace={result._trace} />
-              ) : (
-                <p className="text-muted-foreground text-sm">No trace available</p>
-              )}
-            </CardContent>
-          </Card>
+          {/* Pipeline Trace (Dev mode only) */}
+          {viewMode === 'dev' && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Pipeline Trace</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {result._trace ? (
+                  <TraceTimeline trace={result._trace} />
+                ) : (
+                  <p className="text-muted-foreground text-sm">No trace available</p>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Final Result */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Final Result</CardTitle>
-              <Button variant="outline" size="sm" onClick={handleCopy}>
-                {copied ? (
-                  <>
-                    <Check className="w-4 h-4 mr-2" />
-                    Copied!
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-4 h-4 mr-2" />
-                    Copy JSON
-                  </>
-                )}
-              </Button>
-            </CardHeader>
-            <CardContent>
-              <CodeBlock code={result.bundleConfig} />
-            </CardContent>
-          </Card>
+          {viewMode === 'dev' ? (
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Final Result (Dev Mode)</CardTitle>
+                <Button variant="outline" size="sm" onClick={handleCopy}>
+                  {copied ? (
+                    <>
+                      <Check className="w-4 h-4 mr-2" />
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-4 h-4 mr-2" />
+                      Copy JSON
+                    </>
+                  )}
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <CodeBlock code={result.bundleConfig} />
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Bundle Configuration (PM Mode)</h3>
+              <PMResultView config={result.bundleConfig} />
+            </div>
+          )}
         </>
       )}
     </div>

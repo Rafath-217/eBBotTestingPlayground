@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, Badge, Table, TableHeader, Ta
 import { EnrichedResult } from '../services/dataService';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, Cell } from 'recharts';
 import { Category, Style } from '../types';
+import { ViewMode } from '../components/Layout';
 import { Search, Filter, X } from 'lucide-react';
 
 interface FilterState {
@@ -34,13 +35,14 @@ const FilterDropdown = ({
   </select>
 );
 
-const TestResults = ({
-    structure, discount, rules
-}: {
-    structure: EnrichedResult[],
-    discount: EnrichedResult[],
-    rules: EnrichedResult[]
-}) => {
+interface TestResultsProps {
+  structure: EnrichedResult[];
+  discount: EnrichedResult[];
+  rules: EnrichedResult[];
+  viewMode: ViewMode;
+}
+
+const TestResults: React.FC<TestResultsProps> = ({ structure, discount, rules, viewMode }) => {
     const [searchTerm, setSearchTerm] = React.useState('');
     const [filters, setFilters] = React.useState<FilterState>({
       category: '',

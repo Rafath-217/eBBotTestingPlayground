@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, Badge, Table, TableHeader, TableRow, TableHead, TableBody, TableCell, CategoryBadge, StyleBadge } from '../components/ui';
 import { Activity, Database, FileText, Layers, AlertTriangle, MessageSquare } from 'lucide-react';
 import { Metrics, Style } from '../types';
+import { ViewMode } from '../components/Layout';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 const categoryBarColors: Record<string, string> = {
@@ -41,7 +42,12 @@ const writingStyleInfo: Record<Style, { description: string; example: string }> 
   }
 };
 
-const Overview = ({ metrics }: { metrics: Metrics }) => {
+interface OverviewProps {
+  metrics: Metrics;
+  viewMode: ViewMode;
+}
+
+const Overview: React.FC<OverviewProps> = ({ metrics, viewMode }) => {
   const categoryData = Object.entries(metrics.byCategory).map(([name, data]) => ({
     name: name.replace('_', ' '),
     originalName: name,

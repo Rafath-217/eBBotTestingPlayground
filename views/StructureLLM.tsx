@@ -3,9 +3,16 @@ import { Card, CardContent, CardHeader, CardTitle, CodeBlock, Badge } from '../c
 import { ResultsTable } from '../components/ResultsTable';
 import { EnrichedResult } from '../services/dataService';
 import { StructureLLMSpec } from '../types';
+import { ViewMode } from '../components/Layout';
 import { ChevronRight } from 'lucide-react';
 
-const StructureLLM = ({ results, spec }: { results: EnrichedResult[], spec: StructureLLMSpec }) => {
+interface StructureLLMProps {
+  results: EnrichedResult[];
+  spec: StructureLLMSpec;
+  viewMode: ViewMode;
+}
+
+const StructureLLM: React.FC<StructureLLMProps> = ({ results, spec, viewMode }) => {
   
   const getColorClasses = (color: string) => {
       switch(color) {
@@ -75,7 +82,7 @@ const StructureLLM = ({ results, spec }: { results: EnrichedResult[], spec: Stru
 
       <div className="space-y-4">
         <h3 className="text-xl font-semibold">Test Results</h3>
-        <ResultsTable results={results} />
+        <ResultsTable results={results} viewMode={viewMode} />
       </div>
     </div>
   );

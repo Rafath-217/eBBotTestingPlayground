@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Layout } from './components/Layout';
+import { Layout, ViewMode } from './components/Layout';
 import Overview from './views/Overview';
 import StructureLLM from './views/StructureLLM';
 import DiscountLLM from './views/DiscountLLM';
@@ -13,6 +13,7 @@ import { Metrics, LLMSpecs, TestCase } from './types';
 function App() {
   const [activeTab, setActiveTab] = useState('overview');
   const [isDark, setIsDark] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>('pm');
   
   // Data State
   const [metrics, setMetrics] = useState<Metrics | null>(null);
@@ -94,19 +95,21 @@ function App() {
   }
 
   return (
-    <Layout 
-        activeTab={activeTab} 
+    <Layout
+        activeTab={activeTab}
         onTabChange={setActiveTab}
         isDark={isDark}
         toggleDark={toggleDark}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
     >
-        {activeTab === 'overview' && metrics && <Overview metrics={metrics} />}
-        {activeTab === 'structure' && specs && <StructureLLM results={structureResults} spec={specs.structureLLM} />}
-        {activeTab === 'discount' && specs && <DiscountLLM results={discountResults} spec={specs.discountLLM} />}
-        {activeTab === 'rules' && specs && <RulesLLM results={rulesResults} spec={specs.rulesLLM} />}
-        {activeTab === 'assembly' && <Assembly testCases={testCases} />}
-        {activeTab === 'results' && <TestResults structure={structureResults} discount={discountResults} rules={rulesResults} />}
-        {activeTab === 'playground' && <Playground />}
+        {activeTab === 'overview' && metrics && <Overview metrics={metrics} viewMode={viewMode} />}
+        {activeTab === 'structure' && specs && <StructureLLM results={structureResults} spec={specs.structureLLM} viewMode={viewMode} />}
+        {activeTab === 'discount' && specs && <DiscountLLM results={discountResults} spec={specs.discountLLM} viewMode={viewMode} />}
+        {activeTab === 'rules' && specs && <RulesLLM results={rulesResults} spec={specs.rulesLLM} viewMode={viewMode} />}
+        {activeTab === 'assembly' && <Assembly testCases={testCases} viewMode={viewMode} />}
+        {activeTab === 'results' && <TestResults structure={structureResults} discount={discountResults} rules={rulesResults} viewMode={viewMode} />}
+        {activeTab === 'playground' && <Playground viewMode={viewMode} />}
     </Layout>
   );
 }

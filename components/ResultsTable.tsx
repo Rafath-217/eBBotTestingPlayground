@@ -1,8 +1,171 @@
 import React from 'react';
 import { EnrichedResult } from '../services/dataService';
-import { Card, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Badge, CodeBlock, Button, CategoryBadge, StyleBadge, StatusBadge } from './ui';
-import { ChevronDown, ChevronUp, Filter, X } from 'lucide-react';
+import { Card, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Badge, CodeBlock, Button, CategoryBadge, StyleBadge, StatusBadge, cn } from './ui';
+import { ChevronDown, ChevronUp, Filter, X, CheckCircle, XCircle } from 'lucide-react';
 import { Category, Style } from '../types';
+import { ViewMode } from './Layout';
+
+// PM-friendly view for Structure LLM output
+const PMStructureView: React.FC<{ data: any; label: string }> = ({ data, label }) => {
+  if (!data) return <div className="text-muted-foreground text-sm">No data</div>;
+
+  const structureType = data.structureType;
+  const steps = data.steps || [];
+
+  return (
+    <div className="border rounded-lg p-4 bg-background">
+      <h4 className="text-xs font-semibold text-muted-foreground mb-3">{label}</h4>
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium">Type:</span>
+          <span className={cn(
+            "px-2 py-1 rounded text-xs font-medium",
+            structureType === 'SINGLE_STEP' ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300" :
+            structureType === 'MULTI_STEP' ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300" :
+            "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
+          )}>
+            {structureType || 'null (rejected)'}
+          </span>
+        </div>
+        {steps.length > 0 && (
+          <div className="space-y-2">
+            <span className="text-sm font-medium">Steps:</span>
+            {steps.map((step: any, i: number) => (
+              <div key={i} className="ml-4 p-2 border rounded bg-muted/30">
+                <div className="flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">{i + 1}</span>
+                  <span className="text-sm">{step.label || `Step ${i + 1}`}</span>
+                </div>
+                {step.collectionHints?.length > 0 && (
+                  <div className="ml-8 mt-1 text-xs text-muted-foreground">
+                    Hints: {step.collectionHints.join(', ')}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// PM-friendly view for Discount LLM output
+const PMDiscountView: React.FC<{ data: any; label: string }> = ({ data, label }) => {
+  if (!data) return <div className="text-muted-foreground text-sm">No data</div>;
+
+  // Handle both direct and nested discountConfiguration structures
+  const config = data.discountConfiguration || data;
+  const discountMode = config.discountMode;
+  const rules = config.rules || [];
+
+  const getModeColor = (mode: string) => {
+    if (mode === 'PERCENTAGE') return "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300";
+    if (mode === 'FIXED') return "bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300";
+    if (mode === 'FIXED_BUNDLE_PRICE') return "bg-teal-100 text-teal-700 dark:bg-teal-900 dark:text-teal-300";
+    return "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300";
+  };
+
+  const getSymbol = () => {
+    if (discountMode === 'PERCENTAGE') return '%';
+    return '$';
+  };
+
+  return (
+    <div className="border rounded-lg p-4 bg-background">
+      <h4 className="text-xs font-semibold text-muted-foreground mb-3">{label}</h4>
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium">Mode:</span>
+          <span className={cn("px-2 py-1 rounded text-xs font-medium", getModeColor(discountMode))}>
+            {discountMode || 'null (no discount)'}
+          </span>
+        </div>
+        {rules.length > 0 && (
+          <div className="space-y-2">
+            <span className="text-sm font-medium">Rules:</span>
+            {rules.map((rule: any, i: number) => (
+              <div key={i} className="ml-4 p-3 border rounded bg-muted/30 grid grid-cols-3 gap-2 text-sm">
+                <div>
+                  <span className="text-xs text-muted-foreground block">Qualifier</span>
+                  <span className="font-medium">{rule.type === 'quantity' ? 'Quantity' : rule.type === 'amount' ? 'Amount' : rule.type}</span>
+                </div>
+                <div>
+                  <span className="text-xs text-muted-foreground block">Threshold</span>
+                  <span className="font-medium">{rule.type === 'amount' ? '$' : ''}{rule.value}{rule.type === 'quantity' ? ' items' : ''}</span>
+                </div>
+                <div>
+                  <span className="text-xs text-muted-foreground block">Discount</span>
+                  <span className="font-medium">{rule.discountValue}{getSymbol()}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// PM-friendly view for Rules LLM output
+const PMRulesView: React.FC<{ data: any; label: string }> = ({ data, label }) => {
+  if (!data) return <div className="text-muted-foreground text-sm">No data</div>;
+
+  // Handle multiple structures:
+  // 1. Array directly: [{type, condition, value}]
+  // 2. Nested: {conditions: {rules: [...]}}
+  // 3. Partial: {rules: [...]}
+  let rules: any[] = [];
+  if (Array.isArray(data)) {
+    rules = data;
+  } else if (data.conditions?.rules) {
+    rules = data.conditions.rules;
+  } else if (data.rules) {
+    rules = data.rules;
+  }
+
+  const getConditionLabel = (condition: string) => {
+    if (condition === 'greaterThanOrEqualTo') return 'At least';
+    if (condition === 'lessThanOrEqualTo') return 'At most';
+    if (condition === 'equalTo') return 'Exactly';
+    return condition;
+  };
+
+  return (
+    <div className="border rounded-lg p-4 bg-background">
+      <h4 className="text-xs font-semibold text-muted-foreground mb-3">{label}</h4>
+      <div className="space-y-3">
+        {rules.length > 0 ? (
+          <div className="space-y-2">
+            {rules.map((rule: any, i: number) => (
+              <div key={i} className="p-3 border rounded bg-muted/30 grid grid-cols-3 gap-2 text-sm">
+                <div>
+                  <span className="text-xs text-muted-foreground block">Type</span>
+                  <span className="font-medium">{rule.type === 'quantity' ? 'Quantity' : rule.type === 'amount' ? 'Amount' : rule.type}</span>
+                </div>
+                <div>
+                  <span className="text-xs text-muted-foreground block">Condition</span>
+                  <span className="font-medium">{getConditionLabel(rule.condition)}</span>
+                </div>
+                <div>
+                  <span className="text-xs text-muted-foreground block">Value</span>
+                  <span className="font-medium">{rule.value}</span>
+                </div>
+                {rule.stepIndex && (
+                  <div className="col-span-3">
+                    <span className="text-xs text-muted-foreground">Step: {rule.stepIndex}</span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-sm text-muted-foreground italic">Default rules (any quantity)</div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 interface FilterState {
   category: string;
@@ -33,7 +196,12 @@ const FilterDropdown = ({
   </select>
 );
 
-export const ResultsTable = ({ results }: { results: EnrichedResult[] }) => {
+interface ResultsTableProps {
+  results: EnrichedResult[];
+  viewMode: ViewMode;
+}
+
+export const ResultsTable: React.FC<ResultsTableProps> = ({ results, viewMode }) => {
   const [expandedRow, setExpandedRow] = React.useState<string | null>(null);
   const [filters, setFilters] = React.useState<FilterState>({
     category: '',
@@ -189,8 +357,33 @@ export const ResultsTable = ({ results }: { results: EnrichedResult[] }) => {
                           )}
                         </div>
                         <div className="space-y-4">
-                          <CodeBlock label="Expected Output" code={result.llmType === 'structure' ? testCase.expectedStructure : result.llmType === 'discount' ? testCase.expectedDiscount : testCase.expectedRules} />
-                          <CodeBlock label="Actual Output" code={result.actual} />
+                          {viewMode === 'dev' ? (
+                            <>
+                              <CodeBlock label="Expected Output" code={result.llmType === 'structure' ? testCase.expectedStructure : result.llmType === 'discount' ? testCase.expectedDiscount : testCase.expectedRules} />
+                              <CodeBlock label="Actual Output" code={result.actual} />
+                            </>
+                          ) : (
+                            <>
+                              {result.llmType === 'structure' && (
+                                <>
+                                  <PMStructureView data={testCase.expectedStructure} label="Expected" />
+                                  <PMStructureView data={result.actual} label="Actual" />
+                                </>
+                              )}
+                              {result.llmType === 'discount' && (
+                                <>
+                                  <PMDiscountView data={testCase.expectedDiscount} label="Expected" />
+                                  <PMDiscountView data={result.actual} label="Actual" />
+                                </>
+                              )}
+                              {result.llmType === 'rules' && (
+                                <>
+                                  <PMRulesView data={testCase.expectedRules} label="Expected" />
+                                  <PMRulesView data={result.actual} label="Actual" />
+                                </>
+                              )}
+                            </>
+                          )}
                         </div>
                       </div>
                     </TableCell>

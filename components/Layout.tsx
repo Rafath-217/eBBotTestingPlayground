@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, FileJson, Tag, ShieldCheck, BarChart3, Moon, Sun, Menu, ChevronRight, Play, Boxes } from 'lucide-react';
+import { LayoutDashboard, FileJson, Tag, ShieldCheck, BarChart3, Moon, Sun, Menu, ChevronRight, Play, Boxes, Code, Users } from 'lucide-react';
 import { Button, cn } from './ui';
 
 interface SidebarItemProps {
@@ -24,15 +24,19 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ icon: Icon, label, active, on
   </button>
 );
 
+export type ViewMode = 'dev' | 'pm';
+
 interface LayoutProps {
   children: React.ReactNode;
   activeTab: string;
   onTabChange: (tab: string) => void;
   isDark: boolean;
   toggleDark: () => void;
+  viewMode: ViewMode;
+  onViewModeChange: (mode: ViewMode) => void;
 }
 
-export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange, isDark, toggleDark }) => {
+export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange, isDark, toggleDark, viewMode, onViewModeChange }) => {
   const [sidebarOpen, setSidebarOpen] = React.useState(true);
 
   return (
@@ -116,7 +120,38 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
             </div>
           </div>
 
-          <div className="p-4 border-t">
+          <div className="p-4 border-t space-y-3">
+            {/* View Mode Toggle */}
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-muted-foreground px-1">View Mode</p>
+              <div className="flex bg-muted rounded-lg p-1">
+                <button
+                  onClick={() => onViewModeChange('pm')}
+                  className={cn(
+                    "flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                    viewMode === 'pm'
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <Users className="w-4 h-4" />
+                  PM
+                </button>
+                <button
+                  onClick={() => onViewModeChange('dev')}
+                  className={cn(
+                    "flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                    viewMode === 'dev'
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <Code className="w-4 h-4" />
+                  Dev
+                </button>
+              </div>
+            </div>
+
             <Button variant="outline" className="w-full justify-start space-x-2" onClick={toggleDark}>
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
               <span>{isDark ? 'Light Mode' : 'Dark Mode'}</span>

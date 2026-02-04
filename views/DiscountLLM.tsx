@@ -3,9 +3,16 @@ import { Card, CardContent, CardHeader, CardTitle, CodeBlock, Badge } from '../c
 import { ResultsTable } from '../components/ResultsTable';
 import { EnrichedResult } from '../services/dataService';
 import { DiscountLLMSpec } from '../types';
+import { ViewMode } from '../components/Layout';
 import { Info } from 'lucide-react';
 
-const DiscountLLM = ({ results, spec }: { results: EnrichedResult[], spec: DiscountLLMSpec }) => {
+interface DiscountLLMProps {
+  results: EnrichedResult[];
+  spec: DiscountLLMSpec;
+  viewMode: ViewMode;
+}
+
+const DiscountLLM: React.FC<DiscountLLMProps> = ({ results, spec, viewMode }) => {
   
   const getColorClasses = (color: string) => {
     switch(color) {
@@ -62,7 +69,7 @@ const DiscountLLM = ({ results, spec }: { results: EnrichedResult[], spec: Disco
 
       <div className="space-y-4">
         <h3 className="text-xl font-semibold">Test Results</h3>
-        <ResultsTable results={results} />
+        <ResultsTable results={results} viewMode={viewMode} />
       </div>
     </div>
   );

@@ -2,12 +2,15 @@ import React from 'react';
 import { Card, CodeBlock, Badge, CategoryBadge, StyleBadge } from '../components/ui';
 import { ChevronDown, ChevronUp, CheckCircle, XCircle } from 'lucide-react';
 import { TestCase, Category, Style } from '../types';
+import { ViewMode } from '../components/Layout';
+import { PMResultView } from '../components/PMViews';
 
 interface AssemblyProps {
   testCases: TestCase[];
+  viewMode: ViewMode;
 }
 
-const Assembly: React.FC<AssemblyProps> = ({ testCases }) => {
+const Assembly: React.FC<AssemblyProps> = ({ testCases, viewMode }) => {
   const [expandedCase, setExpandedCase] = React.useState<string | null>(null);
   const [filterCategory, setFilterCategory] = React.useState<string>('');
   const [filterStyle, setFilterStyle] = React.useState<string>('');
@@ -108,8 +111,8 @@ const Assembly: React.FC<AssemblyProps> = ({ testCases }) => {
 
             {expandedCase === tc.id && (
               <div className="border-t p-4 bg-muted/30">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Left: Inputs */}
+                {viewMode === 'pm' ? (
+                  /* PM View - Visual panels */
                   <div className="space-y-4">
                     <div>
                       <h4 className="text-xs font-semibold uppercase text-muted-foreground mb-2">Merchant Input</h4>
@@ -117,59 +120,80 @@ const Assembly: React.FC<AssemblyProps> = ({ testCases }) => {
                         "{tc.input}"
                       </div>
                     </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      {tc.collections && tc.collections.length > 0 && (
-                        <div>
-                          <h4 className="text-xs font-semibold uppercase text-muted-foreground mb-2">Collections</h4>
-                          <div className="p-3 bg-background rounded border text-xs font-mono space-y-1">
-                            {tc.collections.map((col, i) => (
-                              <div key={i}>
-                                <span className="text-blue-600 dark:text-blue-400">{col.title}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      {tc.products && tc.products.length > 0 && (
-                        <div>
-                          <h4 className="text-xs font-semibold uppercase text-muted-foreground mb-2">Products</h4>
-                          <div className="p-3 bg-background rounded border text-xs font-mono space-y-1">
-                            {tc.products.map((prod, i) => (
-                              <div key={i}>
-                                <span className="text-green-600 dark:text-green-400">{prod.title}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    <div>
-                      <h4 className="text-xs font-semibold uppercase text-muted-foreground mb-2">LLM Outputs (Inputs to Assembly)</h4>
-                      <div className="space-y-2">
-                        <CodeBlock label="Structure LLM" code={tc.expectedStructure} />
-                        <CodeBlock label="Discount LLM" code={tc.expectedDiscount} />
-                        <CodeBlock label="Rules LLM" code={tc.expectedRules} />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Right: Assembled Output */}
-                  <div>
-                    <h4 className="text-xs font-semibold uppercase text-muted-foreground mb-2">
-                      Assembled Output (Final Bundle Config)
-                    </h4>
                     {hasError(tc) ? (
                       <div className="p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded">
                         <p className="text-red-700 dark:text-red-300 font-medium">Assembly Error:</p>
                         <p className="text-red-600 dark:text-red-400 text-sm mt-1">{tc.assembledOutput?.error}</p>
                       </div>
                     ) : (
-                      <CodeBlock label="" code={tc.assembledOutput} />
+                      <PMResultView config={tc.assembledOutput?.bundleConfig || tc.assembledOutput} />
                     )}
                   </div>
-                </div>
+                ) : (
+                  /* Dev View - JSON code blocks */
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Left: Inputs */}
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="text-xs font-semibold uppercase text-muted-foreground mb-2">Merchant Input</h4>
+                        <div className="p-3 bg-background rounded border text-sm italic">
+                          "{tc.input}"
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        {tc.collections && tc.collections.length > 0 && (
+                          <div>
+                            <h4 className="text-xs font-semibold uppercase text-muted-foreground mb-2">Collections</h4>
+                            <div className="p-3 bg-background rounded border text-xs font-mono space-y-1">
+                              {tc.collections.map((col, i) => (
+                                <div key={i}>
+                                  <span className="text-blue-600 dark:text-blue-400">{col.title}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {tc.products && tc.products.length > 0 && (
+                          <div>
+                            <h4 className="text-xs font-semibold uppercase text-muted-foreground mb-2">Products</h4>
+                            <div className="p-3 bg-background rounded border text-xs font-mono space-y-1">
+                              {tc.products.map((prod, i) => (
+                                <div key={i}>
+                                  <span className="text-green-600 dark:text-green-400">{prod.title}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <div>
+                        <h4 className="text-xs font-semibold uppercase text-muted-foreground mb-2">LLM Outputs (Inputs to Assembly)</h4>
+                        <div className="space-y-2">
+                          <CodeBlock label="Structure LLM" code={tc.expectedStructure} />
+                          <CodeBlock label="Discount LLM" code={tc.expectedDiscount} />
+                          <CodeBlock label="Rules LLM" code={tc.expectedRules} />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right: Assembled Output */}
+                    <div>
+                      <h4 className="text-xs font-semibold uppercase text-muted-foreground mb-2">
+                        Assembled Output (Final Bundle Config)
+                      </h4>
+                      {hasError(tc) ? (
+                        <div className="p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded">
+                          <p className="text-red-700 dark:text-red-300 font-medium">Assembly Error:</p>
+                          <p className="text-red-600 dark:text-red-400 text-sm mt-1">{tc.assembledOutput?.error}</p>
+                        </div>
+                      ) : (
+                        <CodeBlock label="" code={tc.assembledOutput} />
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </Card>
