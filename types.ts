@@ -51,6 +51,7 @@ export interface TestCase {
   expectedStructure?: any;
   expectedDiscount?: any;
   expectedRules?: any;
+  assembledOutput?: any;
 }
 
 export interface TestResult {

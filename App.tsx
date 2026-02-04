@@ -4,10 +4,11 @@ import Overview from './views/Overview';
 import StructureLLM from './views/StructureLLM';
 import DiscountLLM from './views/DiscountLLM';
 import RulesLLM from './views/RulesLLM';
+import Assembly from './views/Assembly';
 import TestResults from './views/TestResults';
 import Playground from './views/Playground';
-import { getMetrics, getAllResults, getEnrichedResults, EnrichedResult, getLLMSpecs } from './services/dataService';
-import { Metrics, LLMSpecs } from './types';
+import { getMetrics, getAllResults, getEnrichedResults, EnrichedResult, getLLMSpecs, getTestCases } from './services/dataService';
+import { Metrics, LLMSpecs, TestCase } from './types';
 
 function App() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -16,6 +17,7 @@ function App() {
   // Data State
   const [metrics, setMetrics] = useState<Metrics | null>(null);
   const [specs, setSpecs] = useState<LLMSpecs | null>(null);
+  const [testCases, setTestCases] = useState<TestCase[]>([]);
   const [structureResults, setStructureResults] = useState<EnrichedResult[]>([]);
   const [discountResults, setDiscountResults] = useState<EnrichedResult[]>([]);
   const [rulesResults, setRulesResults] = useState<EnrichedResult[]>([]);
@@ -26,9 +28,10 @@ function App() {
   useEffect(() => {
     const fetchData = async () => {
         try {
-            const [m, s, structRes, discRes, rulesRes] = await Promise.all([
+            const [m, s, tc, structRes, discRes, rulesRes] = await Promise.all([
                 getMetrics(),
                 getLLMSpecs(),
+                getTestCases(),
                 getEnrichedResults('structure'),
                 getEnrichedResults('discount'),
                 getEnrichedResults('rules'),
@@ -36,6 +39,7 @@ function App() {
 
             setMetrics(m);
             setSpecs(s);
+            setTestCases(tc);
             setStructureResults(structRes);
             setDiscountResults(discRes);
             setRulesResults(rulesRes);
@@ -100,6 +104,7 @@ function App() {
         {activeTab === 'structure' && specs && <StructureLLM results={structureResults} spec={specs.structureLLM} />}
         {activeTab === 'discount' && specs && <DiscountLLM results={discountResults} spec={specs.discountLLM} />}
         {activeTab === 'rules' && specs && <RulesLLM results={rulesResults} spec={specs.rulesLLM} />}
+        {activeTab === 'assembly' && <Assembly testCases={testCases} />}
         {activeTab === 'results' && <TestResults structure={structureResults} discount={discountResults} rules={rulesResults} />}
         {activeTab === 'playground' && <Playground />}
     </Layout>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, FileJson, Tag, ShieldCheck, BarChart3, Moon, Sun, Menu, ChevronRight, Play } from 'lucide-react';
+import { LayoutDashboard, FileJson, Tag, ShieldCheck, BarChart3, Moon, Sun, Menu, ChevronRight, Play, Boxes } from 'lucide-react';
 import { Button, cn } from './ui';
 
 interface SidebarItemProps {
@@ -68,23 +68,29 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
             <div className="pt-4 pb-2">
               <h4 className="px-2 text-xs font-semibold text-muted-foreground tracking-wider uppercase mb-2">Components</h4>
               <div className="space-y-1">
-                <SidebarItem 
-                  icon={FileJson} 
-                  label="Structure LLM" 
-                  active={activeTab === 'structure'} 
-                  onClick={() => onTabChange('structure')} 
+                <SidebarItem
+                  icon={FileJson}
+                  label="Structure LLM"
+                  active={activeTab === 'structure'}
+                  onClick={() => onTabChange('structure')}
                 />
-                <SidebarItem 
-                  icon={Tag} 
-                  label="Discount LLM" 
-                  active={activeTab === 'discount'} 
-                  onClick={() => onTabChange('discount')} 
+                <SidebarItem
+                  icon={Tag}
+                  label="Discount LLM"
+                  active={activeTab === 'discount'}
+                  onClick={() => onTabChange('discount')}
                 />
-                <SidebarItem 
-                  icon={ShieldCheck} 
-                  label="Rules LLM" 
-                  active={activeTab === 'rules'} 
-                  onClick={() => onTabChange('rules')} 
+                <SidebarItem
+                  icon={ShieldCheck}
+                  label="Rules LLM"
+                  active={activeTab === 'rules'}
+                  onClick={() => onTabChange('rules')}
+                />
+                <SidebarItem
+                  icon={Boxes}
+                  label="Assembly"
+                  active={activeTab === 'assembly'}
+                  onClick={() => onTabChange('assembly')}
                 />
               </div>
             </div>
