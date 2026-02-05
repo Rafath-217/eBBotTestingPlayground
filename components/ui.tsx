@@ -63,20 +63,42 @@ export const Badge = ({ className, variant = "default", children }: { className?
 
 // --- CATEGORY BADGE (auto-colored) ---
 const categoryColors: Record<string, BadgeVariant> = {
+  // Existing 6
   TIERED_DISCOUNT: "blue",
   FIXED_BUNDLE_PRICE: "emerald",
   MULTI_STEP: "violet",
   GOAL_STATEMENT: "indigo",
   ADVERSARIAL: "orange",
+  SPEND_BASED: "teal",
+  // New 8
+  SINGLE_STEP_MULTI_CATEGORY: "purple",
+  RULES_V5_RANGE: "cyan",
+  RULES_V5_TEXT_WINS: "amber",
+  RULES_V5_FIXED_STRICT: "rose",
+  RULES_V5_MULTI_STEP_PARTIAL: "violet",
+  RULES_V5_FIXED_MULTI_STEP: "pink",
+  RULES_V5_EXACT: "lime",
+  BUNDLE_AS_UNIT: "secondary",
 };
 
 // Minimal text-only colors for table context
 const categoryTextColors: Record<string, string> = {
+  // Existing 6
   TIERED_DISCOUNT: "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800",
   FIXED_BUNDLE_PRICE: "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950 border-emerald-200 dark:border-emerald-800",
   MULTI_STEP: "text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-950 border-violet-200 dark:border-violet-800",
   GOAL_STATEMENT: "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950 border-indigo-200 dark:border-indigo-800",
   ADVERSARIAL: "text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950 border-orange-200 dark:border-orange-800",
+  SPEND_BASED: "text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-950 border-teal-200 dark:border-teal-800",
+  // New 8
+  SINGLE_STEP_MULTI_CATEGORY: "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950 border-indigo-200 dark:border-indigo-800",
+  RULES_V5_RANGE: "text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-950 border-cyan-200 dark:border-cyan-800",
+  RULES_V5_TEXT_WINS: "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950 border-amber-200 dark:border-amber-800",
+  RULES_V5_FIXED_STRICT: "text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950 border-rose-200 dark:border-rose-800",
+  RULES_V5_MULTI_STEP_PARTIAL: "text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-950 border-violet-200 dark:border-violet-800",
+  RULES_V5_FIXED_MULTI_STEP: "text-fuchsia-600 dark:text-fuchsia-400 bg-fuchsia-50 dark:bg-fuchsia-950 border-fuchsia-200 dark:border-fuchsia-800",
+  RULES_V5_EXACT: "text-lime-600 dark:text-lime-400 bg-lime-50 dark:bg-lime-950 border-lime-200 dark:border-lime-800",
+  BUNDLE_AS_UNIT: "text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950 border-sky-200 dark:border-sky-800",
 };
 
 export const CategoryBadge = ({ category, minimal = false }: { category: string; minimal?: boolean }) => {
@@ -130,6 +152,41 @@ export const StatusBadge = ({ status }: { status: 'PASS' | 'FAIL' }) => {
   return (
     <span className={cn("inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-semibold", colors)}>
       {status}
+    </span>
+  );
+};
+
+// --- ACCURACY BADGE (color-coded by percentage) ---
+export const AccuracyBadge = ({ accuracy, showLabel = true }: { accuracy: number; showLabel?: boolean }) => {
+  const getColors = (acc: number) => {
+    if (acc >= 90) return "text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950 border-emerald-200 dark:border-emerald-800";
+    if (acc >= 70) return "text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950 border-amber-200 dark:border-amber-800";
+    return "text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800";
+  };
+
+  return (
+    <span className={cn("inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-semibold", getColors(accuracy))}>
+      {accuracy.toFixed(1)}%{showLabel && ' accuracy'}
+    </span>
+  );
+};
+
+// --- TREND INDICATOR (improvement/regression) ---
+export const TrendIndicator = ({ value, inverted = false }: { value: number; inverted?: boolean }) => {
+  if (value === 0) {
+    return <span className="text-slate-400 dark:text-slate-500 text-xs">-</span>;
+  }
+
+  const isPositive = inverted ? value < 0 : value > 0;
+  const displayValue = Math.abs(value);
+  const arrow = value > 0 ? '\u2191' : '\u2193';
+  const colors = isPositive
+    ? "text-emerald-600 dark:text-emerald-400"
+    : "text-red-600 dark:text-red-400";
+
+  return (
+    <span className={cn("inline-flex items-center text-xs font-medium", colors)}>
+      {arrow} {displayValue.toFixed(1)}%
     </span>
   );
 };

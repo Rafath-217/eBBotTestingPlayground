@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, Badge, Table, TableHeader, TableRow, TableHead, TableBody, TableCell, Button, CategoryBadge } from '../components/ui';
 import { EnrichedResult } from '../services/dataService';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, Cell } from 'recharts';
-import { Category, Style } from '../types';
+import { Category, Style, CATEGORIES } from '../types';
 import { ViewMode } from '../components/Layout';
 import { Search, Filter, X } from 'lucide-react';
 
@@ -70,7 +70,7 @@ const TestResults: React.FC<TestResultsProps> = ({ structure, discount, rules, v
         return (passed / filtered.length) * 100;
     };
 
-    const categories = Object.values(Category);
+    const categories = [...CATEGORIES];
     const categoryChartData = categories.map(cat => ({
         name: cat,
         Structure: calculatePassRate(structure, 'category', cat),

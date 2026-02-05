@@ -2,7 +2,7 @@ import React from 'react';
 import { EnrichedResult } from '../services/dataService';
 import { Card, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Badge, CodeBlock, Button, CategoryBadge, StyleBadge, StatusBadge, cn } from './ui';
 import { ChevronDown, ChevronUp, Filter, X, CheckCircle, XCircle } from 'lucide-react';
-import { Category, Style } from '../types';
+import { Category, Style, CATEGORIES } from '../types';
 import { ViewMode } from './Layout';
 
 // PM-friendly view for Structure LLM output
@@ -231,7 +231,7 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({ results, viewMode })
     return true;
   });
 
-  const categories = Object.values(Category);
+  const categories = [...CATEGORIES];
   const styles = Object.values(Style);
   const statuses = ['PASS', 'FAIL'];
 

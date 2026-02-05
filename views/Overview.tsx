@@ -1,7 +1,7 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle, Badge, Table, TableHeader, TableRow, TableHead, TableBody, TableCell, CategoryBadge, StyleBadge } from '../components/ui';
-import { Activity, Database, FileText, Layers, AlertTriangle, MessageSquare } from 'lucide-react';
-import { Metrics, Style } from '../types';
+import { Card, CardContent, CardHeader, CardTitle, Badge, Button, Table, TableHeader, TableRow, TableHead, TableBody, TableCell, CategoryBadge, StyleBadge, AccuracyBadge } from '../components/ui';
+import { Activity, Database, FileText, Layers, AlertTriangle, MessageSquare, History, ExternalLink, Hash } from 'lucide-react';
+import { Metrics, Style, EvaluationRunDetail, PromptVersionStats } from '../types';
 import { ViewMode } from '../components/Layout';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
@@ -45,9 +45,12 @@ const writingStyleInfo: Record<Style, { description: string; example: string }> 
 interface OverviewProps {
   metrics: Metrics;
   viewMode: ViewMode;
+  latestRun?: EvaluationRunDetail | null;
+  promptVersions?: PromptVersionStats | null;
+  onViewAllRuns?: () => void;
 }
 
-const Overview: React.FC<OverviewProps> = ({ metrics, viewMode }) => {
+const Overview: React.FC<OverviewProps> = ({ metrics, viewMode, latestRun, promptVersions, onViewAllRuns }) => {
   const categoryData = Object.entries(metrics.byCategory).map(([name, data]) => ({
     name: name.replace('_', ' '),
     originalName: name,
@@ -61,24 +64,71 @@ const Overview: React.FC<OverviewProps> = ({ metrics, viewMode }) => {
     passRate: parseFloat(data.passRate)
   }));
 
+  // Use accuracy from latest run if available, otherwise fallback to metrics
+  const displayAccuracy = latestRun?.summary.overall.accuracy ?? parseFloat(metrics.results.overall.rate);
+  const displayTestCases = latestRun?.testCasesCount ?? metrics.totalTestCases;
+
+  // Use prompt versions from API if available, otherwise fallback to metrics
+  const currentPromptVersions = promptVersions?.currentVersions ?? metrics.promptVersions;
+
   return (
     <div className="space-y-6">
       {/* Hero */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
+      <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 pb-2">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
             eBBot LLM Testing Framework
           </h1>
           <p className="text-slate-500 dark:text-slate-400 mt-1">Validating merchant bundle configuration parsing</p>
-          <div className="flex gap-2 mt-3">
-            <span className="text-xs text-slate-500 border border-slate-200 dark:border-slate-700 rounded px-2 py-1">Struct: {metrics.promptVersions.structure}</span>
-            <span className="text-xs text-slate-500 border border-slate-200 dark:border-slate-700 rounded px-2 py-1">Disc: {metrics.promptVersions.discount}</span>
-            <span className="text-xs text-slate-500 border border-slate-200 dark:border-slate-700 rounded px-2 py-1">Rules: {metrics.promptVersions.rules}</span>
+          {/* Prompt Versions with hashes */}
+          <div className="flex flex-wrap gap-2 mt-3">
+            <span className="inline-flex items-center gap-1 text-xs text-slate-500 border border-slate-200 dark:border-slate-700 rounded px-2 py-1">
+              <Hash className="w-3 h-3" />
+              Struct: {currentPromptVersions.structure}
+            </span>
+            <span className="inline-flex items-center gap-1 text-xs text-slate-500 border border-slate-200 dark:border-slate-700 rounded px-2 py-1">
+              <Hash className="w-3 h-3" />
+              Disc: {currentPromptVersions.discount}
+            </span>
+            <span className="inline-flex items-center gap-1 text-xs text-slate-500 border border-slate-200 dark:border-slate-700 rounded px-2 py-1">
+              <Hash className="w-3 h-3" />
+              Rules: {currentPromptVersions.rules}
+            </span>
           </div>
         </div>
-        <div className="flex items-center space-x-3">
-          <span className="text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg">{metrics.model}</span>
-          <span className="text-sm text-slate-500 dark:text-slate-400">Last run: {new Date(metrics.timestamp).toLocaleDateString()}</span>
+        <div className="flex flex-col items-end space-y-3">
+          <div className="flex items-center space-x-3">
+            <span className="text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg">{metrics.model}</span>
+          </div>
+          {/* Latest Evaluation Run Summary */}
+          {latestRun && (
+            <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg p-3 min-w-[280px]">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide flex items-center gap-1">
+                  <History className="w-3 h-3" />
+                  Latest Evaluation
+                </span>
+                <span className="text-xs text-slate-400 font-mono">{latestRun.runId.slice(0, 8)}...</span>
+              </div>
+              <div className="flex items-center justify-between mb-2">
+                <AccuracyBadge accuracy={latestRun.summary.overall.accuracy} />
+                <span className="text-xs text-slate-500">
+                  {new Date(latestRun.startedAt).toLocaleDateString()}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 mb-3">
+                <span className="text-emerald-600 dark:text-emerald-400">{latestRun.summary.overall.passed} passed</span>
+                <span className="text-red-600 dark:text-red-400">{latestRun.summary.overall.failed} failed</span>
+                <span className="text-amber-600 dark:text-amber-400">{latestRun.summary.overall.partial} partial</span>
+              </div>
+              {onViewAllRuns && (
+                <Button variant="outline" size="sm" className="w-full gap-2" onClick={onViewAllRuns}>
+                  <ExternalLink className="w-3 h-3" />
+                  View All Runs
+                </Button>
+              )}
+            </div>
+          )}
         </div>
       </div>
 

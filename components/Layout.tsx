@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, FileJson, Tag, ShieldCheck, BarChart3, Moon, Sun, Menu, ChevronRight, Play, Boxes, Code, Users, History } from 'lucide-react';
+import { LayoutDashboard, FileJson, Tag, ShieldCheck, BarChart3, Moon, Sun, Menu, ChevronRight, Play, Boxes, Code, Users, History, ListChecks, ArrowLeftRight } from 'lucide-react';
 import { Button, cn } from './ui';
 
 interface SidebarItemProps {
@@ -34,9 +34,10 @@ interface LayoutProps {
   toggleDark: () => void;
   viewMode: ViewMode;
   onViewModeChange: (mode: ViewMode) => void;
+  compareRuns?: [string, string] | null;
 }
 
-export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange, isDark, toggleDark, viewMode, onViewModeChange }) => {
+export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange, isDark, toggleDark, viewMode, onViewModeChange, compareRuns }) => {
   const [sidebarOpen, setSidebarOpen] = React.useState(true);
 
   return (
@@ -101,12 +102,28 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
 
             <div className="pt-4 pb-2">
               <h4 className="px-2 text-xs font-semibold text-muted-foreground tracking-wider uppercase mb-2">Analysis</h4>
-              <SidebarItem
-                icon={BarChart3}
-                label="Test Results"
-                active={activeTab === 'results'}
-                onClick={() => onTabChange('results')}
-              />
+              <div className="space-y-1">
+                <SidebarItem
+                  icon={BarChart3}
+                  label="Test Results"
+                  active={activeTab === 'results'}
+                  onClick={() => onTabChange('results')}
+                />
+                <SidebarItem
+                  icon={ListChecks}
+                  label="Evaluation Runs"
+                  active={activeTab === 'evaluationRuns'}
+                  onClick={() => onTabChange('evaluationRuns')}
+                />
+                {compareRuns && (
+                  <SidebarItem
+                    icon={ArrowLeftRight}
+                    label="Run Comparison"
+                    active={activeTab === 'runComparison'}
+                    onClick={() => onTabChange('runComparison')}
+                  />
+                )}
+              </div>
             </div>
 
             <div className="pt-4 pb-2">

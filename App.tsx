@@ -8,8 +8,11 @@ import Assembly from './views/Assembly';
 import TestResults from './views/TestResults';
 import Playground from './views/Playground';
 import PipelineHistory from './views/PipelineHistory';
+import EvaluationRuns from './views/EvaluationRuns';
+import RunComparison from './views/RunComparison';
 import { getMetrics, getAllResults, getEnrichedResults, EnrichedResult, getLLMSpecs, getTestCases } from './services/dataService';
-import { Metrics, LLMSpecs, TestCase } from './types';
+import { getLatestEvaluationRun, getPromptVersionStats } from './services/evaluationApi';
+import { Metrics, LLMSpecs, TestCase, EvaluationRunDetail, PromptVersionStats } from './types';
 
 function App() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -26,17 +29,24 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Evaluation features state
+  const [latestRun, setLatestRun] = useState<EvaluationRunDetail | null>(null);
+  const [promptVersions, setPromptVersions] = useState<PromptVersionStats | null>(null);
+  const [compareRuns, setCompareRuns] = useState<[string, string] | null>(null);
+
   // Load Data
   useEffect(() => {
     const fetchData = async () => {
         try {
-            const [m, s, tc, structRes, discRes, rulesRes] = await Promise.all([
+            const [m, s, tc, structRes, discRes, rulesRes, latestRunData, promptVersionsData] = await Promise.all([
                 getMetrics(),
                 getLLMSpecs(),
                 getTestCases(),
                 getEnrichedResults('structure'),
                 getEnrichedResults('discount'),
                 getEnrichedResults('rules'),
+                getLatestEvaluationRun().catch(() => null),
+                getPromptVersionStats().catch(() => null),
             ]);
 
             setMetrics(m);
@@ -45,6 +55,8 @@ function App() {
             setStructureResults(structRes);
             setDiscountResults(discRes);
             setRulesResults(rulesRes);
+            setLatestRun(latestRunData);
+            setPromptVersions(promptVersionsData);
         } catch (err) {
             console.error("Failed to load dashboard data", err);
             setError(err instanceof Error ? err.message : 'Unknown error');
@@ -103,15 +115,33 @@ function App() {
         toggleDark={toggleDark}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
+        compareRuns={compareRuns}
     >
-        {activeTab === 'overview' && metrics && <Overview metrics={metrics} viewMode={viewMode} />}
-        {activeTab === 'structure' && specs && <StructureLLM results={structureResults} spec={specs.structureLLM} viewMode={viewMode} />}
-        {activeTab === 'discount' && specs && <DiscountLLM results={discountResults} spec={specs.discountLLM} viewMode={viewMode} />}
-        {activeTab === 'rules' && specs && <RulesLLM results={rulesResults} spec={specs.rulesLLM} viewMode={viewMode} />}
-        {activeTab === 'assembly' && <Assembly testCases={testCases} viewMode={viewMode} />}
+        {activeTab === 'overview' && metrics && (
+          <Overview
+            metrics={metrics}
+            viewMode={viewMode}
+            latestRun={latestRun}
+            promptVersions={promptVersions}
+            onViewAllRuns={() => setActiveTab('evaluationRuns')}
+          />
+        )}
+        {activeTab === 'structure' && specs && <StructureLLM spec={specs.structureLLM} viewMode={viewMode} />}
+        {activeTab === 'discount' && specs && <DiscountLLM spec={specs.discountLLM} viewMode={viewMode} />}
+        {activeTab === 'rules' && specs && <RulesLLM spec={specs.rulesLLM} viewMode={viewMode} />}
+        {activeTab === 'assembly' && <Assembly viewMode={viewMode} />}
         {activeTab === 'results' && <TestResults structure={structureResults} discount={discountResults} rules={rulesResults} viewMode={viewMode} />}
         {activeTab === 'playground' && <Playground viewMode={viewMode} />}
         {activeTab === 'history' && <PipelineHistory viewMode={viewMode} />}
+        {activeTab === 'evaluationRuns' && <EvaluationRuns viewMode={viewMode} onCompare={setCompareRuns} />}
+        {activeTab === 'runComparison' && compareRuns && (
+          <RunComparison
+            runId1={compareRuns[0]}
+            runId2={compareRuns[1]}
+            viewMode={viewMode}
+            onBack={() => { setCompareRuns(null); setActiveTab('evaluationRuns'); }}
+          />
+        )}
     </Layout>
   );
 }
