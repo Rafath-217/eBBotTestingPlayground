@@ -7,6 +7,7 @@ import RulesLLM from './views/RulesLLM';
 import Assembly from './views/Assembly';
 import TestResults from './views/TestResults';
 import Playground from './views/Playground';
+import PipelineHistory from './views/PipelineHistory';
 import { getMetrics, getAllResults, getEnrichedResults, EnrichedResult, getLLMSpecs, getTestCases } from './services/dataService';
 import { Metrics, LLMSpecs, TestCase } from './types';
 
@@ -110,6 +111,7 @@ function App() {
         {activeTab === 'assembly' && <Assembly testCases={testCases} viewMode={viewMode} />}
         {activeTab === 'results' && <TestResults structure={structureResults} discount={discountResults} rules={rulesResults} viewMode={viewMode} />}
         {activeTab === 'playground' && <Playground viewMode={viewMode} />}
+        {activeTab === 'history' && <PipelineHistory viewMode={viewMode} />}
     </Layout>
   );
 }

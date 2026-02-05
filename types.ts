@@ -210,3 +210,50 @@ export interface PipelineResponse {
   message: string;
   data: PipelineResult;
 }
+
+// --- PIPELINE HISTORY TYPES ---
+
+export interface PipelineHistoryInput {
+  merchantText: string;
+  products: { id: string; title: string; productType: string }[];
+  collections: { id: string; title: string }[];
+}
+
+export interface PipelineHistoryOutput {
+  structureLLM: any;
+  discountLLM: any;
+  rulesLLM: any;
+  assembledResult: any;
+}
+
+export interface PipelineHistoryLog {
+  id: string;
+  timestamp: string;
+  status: 'AUTO' | 'DOWNGRADED_TO_MANUAL' | 'MANUAL';
+  input: PipelineHistoryInput;
+  output: PipelineHistoryOutput;
+  durationMs?: number;
+}
+
+export interface PipelineHistoryPagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface PipelineHistoryResponse {
+  statusCode: number;
+  message: string;
+  data: {
+    logs: PipelineHistoryLog[];
+    pagination: PipelineHistoryPagination;
+  };
+}
+
+export interface PipelineHistoryQuery {
+  startDate?: string;
+  endDate?: string;
+  page?: number;
+  limit?: number;
+}
