@@ -21,9 +21,9 @@ let cachedData: DashboardData | null = null;
 async function fetchDashboardData(): Promise<DashboardData> {
   if (cachedData) return cachedData;
 
-  console.log('Fetching dashboard data from:', `${API_BASE_URL}/api/internalUtility/eBBotTesting/dashboard`);
+  console.log('Fetching dashboard data from:', `${API_BASE_URL}/api/internalUtility/bundleSetupLlmPipeline/dashboard`);
 
-  const response = await fetch(`${API_BASE_URL}/api/internalUtility/eBBotTesting/dashboard`);
+  const response = await fetch(`${API_BASE_URL}/api/internalUtility/bundleSetupLlmPipeline/dashboard`);
   if (!response.ok) {
     const text = await response.text();
     console.error('Dashboard API error:', response.status, text);

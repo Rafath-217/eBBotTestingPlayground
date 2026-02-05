@@ -74,8 +74,8 @@ Raw JSON output for debugging:
 
 The dashboard fetches data from the backend API:
 
-- `GET /api/internalUtility/eBBotTesting/dashboard` - All dashboard data
-- `POST /api/internalUtility/eBBotTesting/pipeline/run` - Run pipeline (Playground)
+- `GET /api/internalUtility/bundleSetupLlmPipeline/dashboard` - All dashboard data
+- `POST /api/internalUtility/bundleSetupLlmPipeline/pipeline/run` - Run pipeline (Playground)
 
 ## Tech Stack
 

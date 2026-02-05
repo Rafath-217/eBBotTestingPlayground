@@ -22,7 +22,7 @@ export async function getPipelineHistory(query: PipelineHistoryQuery = {}): Prom
   }
 
   const queryString = params.toString();
-  const url = `${API_BASE_URL}/api/internalUtility/eBBotTesting/pipelineHistory${queryString ? `?${queryString}` : ''}`;
+  const url = `${API_BASE_URL}/api/internalUtility/bundleSetupLlmPipeline/pipelineHistory${queryString ? `?${queryString}` : ''}`;
 
   const response = await fetch(url);
 
