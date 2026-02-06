@@ -31,7 +31,7 @@ export function parseProducts(input: string): { id: string; productType: string 
  * Run the pipeline with the given inputs
  */
 export async function runPipeline(request: PipelineRequest): Promise<PipelineResponse> {
-  const response = await fetch(`${API_BASE_URL}/api/internalUtility/bundleSetupLlmPipeline/run`, {
+  const response = await fetch(`${API_BASE_URL}/api/bundleSetupLlmPipeline/run`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

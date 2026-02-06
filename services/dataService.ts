@@ -30,7 +30,7 @@ async function fetchDashboardData(): Promise<DashboardData> {
     return stored;
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/internalUtility/bundleSetupLlmPipeline/dashboard`, {
+  const response = await fetch(`${API_BASE_URL}/api/bundleSetupLlmPipeline/dashboard`, {
     headers: { 'secret-key': API_SECRET_KEY },
   });
   if (!response.ok) {

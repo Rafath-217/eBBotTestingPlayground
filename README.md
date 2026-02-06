@@ -75,8 +75,8 @@ Raw JSON output for debugging:
 
 The dashboard fetches data from the backend API:
 
-- `GET /api/internalUtility/bundleSetupLlmPipeline/dashboard` - All dashboard data
-- `POST /api/internalUtility/bundleSetupLlmPipeline/pipeline/run` - Run pipeline (Playground)
+- `GET /api/bundleSetupLlmPipeline/dashboard` - All dashboard data
+- `POST /api/bundleSetupLlmPipeline/pipeline/run` - Run pipeline (Playground)
 
 ## Tech Stack
 

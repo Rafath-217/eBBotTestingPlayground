@@ -10,7 +10,7 @@ import { getCached, setCache, removeCacheByPrefix } from './cache';
 
 const API_BASE = process.env.API_BASE_URL || 'http://localhost:3001';
 const API_SECRET_KEY = process.env.DASHBOARD_KEY || '';
-const BASE_PATH = '/api/internalUtility/bundleSetupLlmPipeline';
+const BASE_PATH = '/api/bundleSetupLlmPipeline';
 
 /**
  * Generic fetch wrapper with error handling
