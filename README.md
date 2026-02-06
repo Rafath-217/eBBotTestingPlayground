@@ -38,7 +38,8 @@ Raw JSON output for debugging:
 
 2. Configure environment:
    - Copy `.env.local.example` to `.env.local`
-   - Set `VITE_API_BASE_URL` to your backend URL (default: `http://localhost:3001`)
+   - Set `API_BASE_URL` to your backend URL (default: `http://localhost:3001`)
+   - Set `DASHBOARD_KEY` to your backend's `EXTERNAL_AUTH_GENERIC_SECRET` value
 
 3. Run the app:
    ```bash

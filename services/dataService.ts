@@ -1,7 +1,8 @@
 import { TestCase, TestResult, Metrics, LLMType, LLMSpecs } from '../types';
 import { getCached, setCache, clearAllCache } from './cache';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:3001';
+const API_SECRET_KEY = process.env.DASHBOARD_KEY || '';
 
 interface DashboardData {
   metrics: Metrics;
@@ -29,7 +30,9 @@ async function fetchDashboardData(): Promise<DashboardData> {
     return stored;
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/internalUtility/bundleSetupLlmPipeline/dashboard`);
+  const response = await fetch(`${API_BASE_URL}/api/internalUtility/bundleSetupLlmPipeline/dashboard`, {
+    headers: { 'secret-key': API_SECRET_KEY },
+  });
   if (!response.ok) {
     const text = await response.text();
     console.error('Dashboard API error:', response.status, text);

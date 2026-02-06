@@ -1,6 +1,7 @@
 import { PipelineRequest, PipelineResponse } from '../types';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:3001';
+const API_SECRET_KEY = process.env.DASHBOARD_KEY || '';
 
 /**
  * Parse comma-separated collection titles into API format
@@ -34,6 +35,7 @@ export async function runPipeline(request: PipelineRequest): Promise<PipelineRes
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'secret-key': API_SECRET_KEY,
     },
     body: JSON.stringify(request),
   });

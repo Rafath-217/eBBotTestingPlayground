@@ -8,7 +8,8 @@ import {
 } from '../types';
 import { getCached, setCache, removeCacheByPrefix } from './cache';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+const API_BASE = process.env.API_BASE_URL || 'http://localhost:3001';
+const API_SECRET_KEY = process.env.DASHBOARD_KEY || '';
 const BASE_PATH = '/api/internalUtility/bundleSetupLlmPipeline';
 
 /**
@@ -16,7 +17,11 @@ const BASE_PATH = '/api/internalUtility/bundleSetupLlmPipeline';
  */
 async function apiFetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const url = `${API_BASE}${BASE_PATH}${endpoint}`;
-  const response = await fetch(url, options);
+  const headers = {
+    ...options?.headers,
+    'secret-key': API_SECRET_KEY,
+  };
+  const response = await fetch(url, { ...options, headers });
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ message: 'Network error' }));

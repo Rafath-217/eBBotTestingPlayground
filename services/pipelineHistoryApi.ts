@@ -1,6 +1,7 @@
 import { PipelineHistoryResponse, PipelineHistoryQuery } from '../types';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:3001';
+const API_SECRET_KEY = process.env.DASHBOARD_KEY || '';
 
 /**
  * Fetch pipeline history with optional filtering and pagination
@@ -24,7 +25,9 @@ export async function getPipelineHistory(query: PipelineHistoryQuery = {}): Prom
   const queryString = params.toString();
   const url = `${API_BASE_URL}/api/internalUtility/bundleSetupLlmPipeline/pipelineHistory${queryString ? `?${queryString}` : ''}`;
 
-  const response = await fetch(url);
+  const response = await fetch(url, {
+    headers: { 'secret-key': API_SECRET_KEY },
+  });
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ message: 'Network error' }));
