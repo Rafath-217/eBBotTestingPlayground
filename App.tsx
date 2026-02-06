@@ -133,7 +133,7 @@ function App() {
         {activeTab === 'results' && <TestResults structure={structureResults} discount={discountResults} rules={rulesResults} viewMode={viewMode} />}
         {activeTab === 'playground' && <Playground viewMode={viewMode} />}
         {activeTab === 'history' && <PipelineHistory viewMode={viewMode} />}
-        {activeTab === 'evaluationRuns' && <EvaluationRuns viewMode={viewMode} onCompare={setCompareRuns} />}
+        {activeTab === 'evaluationRuns' && <EvaluationRuns viewMode={viewMode} onCompare={(runs) => { setCompareRuns(runs); setActiveTab('runComparison'); }} />}
         {activeTab === 'runComparison' && compareRuns && (
           <RunComparison
             runId1={compareRuns[0]}

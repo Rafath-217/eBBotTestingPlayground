@@ -51,25 +51,54 @@ interface OverviewProps {
 }
 
 const Overview: React.FC<OverviewProps> = ({ metrics, viewMode, latestRun, promptVersions, onViewAllRuns }) => {
-  const categoryData = Object.entries(metrics.byCategory).map(([name, data]) => ({
-    name: name.replace('_', ' '),
-    originalName: name,
-    count: data.cases,
-    passRate: parseFloat(data.passRate)
-  }));
+  // Derive category data from latestRun.summary.byCategory, fallback to metrics
+  const categoryData = latestRun?.summary?.byCategory
+    ? Object.entries(latestRun.summary.byCategory).map(([name, data]) => {
+        const total = (data.passed || 0) + (data.failed || 0) + (data.partial || 0) + (data.errors || 0);
+        const passRate = total > 0 ? ((data.passed || 0) / total) * 100 : 0;
+        return { name: name.replace(/_/g, ' '), originalName: name, count: total, passRate };
+      })
+    : Object.entries(metrics.byCategory || {}).map(([name, data]) => ({
+        name: name.replace(/_/g, ' '), originalName: name, count: data.cases, passRate: parseFloat(data.passRate),
+      }));
 
-  const styleData = Object.entries(metrics.byStyle).map(([name, data]) => ({
-    name: name.replace('_', ' '),
-    count: data.cases,
-    passRate: parseFloat(data.passRate)
-  }));
+  // Derive style stats from latestRun.results, fallback to metrics
+  const styleStatsFromRun = React.useMemo(() => {
+    if (!latestRun?.results) return null;
+    const grouped: Record<string, { total: number; passed: number }> = {};
+    for (const r of latestRun.results) {
+      if (!grouped[r.style]) grouped[r.style] = { total: 0, passed: 0 };
+      grouped[r.style].total++;
+      if (r.status === 'PASS') grouped[r.style].passed++;
+    }
+    return grouped;
+  }, [latestRun]);
 
-  // Use accuracy from latest run if available, otherwise fallback to metrics
-  const displayAccuracy = latestRun?.summary.overall.accuracy ?? parseFloat(metrics.results.overall.rate);
-  const displayTestCases = latestRun?.testCasesCount ?? metrics.totalTestCases;
+  // Derive problematic cases from latestRun.results
+  const problematicCases = React.useMemo(() => {
+    if (!latestRun?.results) return metrics.problematicCases || [];
+    return latestRun.results
+      .filter(r => r.status === 'FAIL' || r.status === 'ERROR')
+      .map(r => {
+        const failedLLMs: string[] = [];
+        if (!r.structureResult?.match) failedLLMs.push('structure');
+        if (!r.discountResult?.match) failedLLMs.push('discount');
+        if (!r.rulesResult?.match) failedLLMs.push('rules');
+        return { id: r.testCaseId, category: r.category, style: r.style, failedLLMs };
+      });
+  }, [latestRun, metrics.problematicCases]);
+
+  const displayAccuracy = latestRun?.summary?.overall?.accuracy ?? (metrics.results ? parseFloat(metrics.results.overall.rate) : 0);
+  const displayTestCases = latestRun?.testCasesCount ?? metrics.totalTestCases ?? 0;
+  const categoriesCount = latestRun?.summary?.byCategory
+    ? Object.keys(latestRun.summary.byCategory).length
+    : Object.keys(metrics.byCategory || {}).length;
+  const stylesCount = styleStatsFromRun
+    ? Object.keys(styleStatsFromRun).length
+    : Object.keys(metrics.byStyle || {}).length;
 
   // Use prompt versions from API if available, otherwise fallback to metrics
-  const currentPromptVersions = promptVersions?.currentVersions ?? metrics.promptVersions;
+  const currentPromptVersions = promptVersions?.currentVersions ?? metrics.promptVersions ?? { structure: '-', discount: '-', rules: '-' };
 
   return (
     <div className="space-y-6">
@@ -98,7 +127,7 @@ const Overview: React.FC<OverviewProps> = ({ metrics, viewMode, latestRun, promp
         </div>
         <div className="flex flex-col items-end space-y-3">
           <div className="flex items-center space-x-3">
-            <span className="text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg">{metrics.model}</span>
+            <span className="text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg">{metrics.model || 'gemini-2.0-flash'}</span>
           </div>
           {/* Latest Evaluation Run Summary */}
           {latestRun && (
@@ -108,18 +137,18 @@ const Overview: React.FC<OverviewProps> = ({ metrics, viewMode, latestRun, promp
                   <History className="w-3 h-3" />
                   Latest Evaluation
                 </span>
-                <span className="text-xs text-slate-400 font-mono">{latestRun.runId.slice(0, 8)}...</span>
+                <span className="text-xs text-slate-400 font-mono">{latestRun.runId?.slice(0, 8) ?? ''}...</span>
               </div>
               <div className="flex items-center justify-between mb-2">
-                <AccuracyBadge accuracy={latestRun.summary.overall.accuracy} />
+                <AccuracyBadge accuracy={latestRun.summary?.overall?.accuracy ?? 0} />
                 <span className="text-xs text-slate-500">
-                  {new Date(latestRun.startedAt).toLocaleDateString()}
+                  {latestRun.startedAt ? new Date(latestRun.startedAt).toLocaleDateString() : '-'}
                 </span>
               </div>
               <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 mb-3">
-                <span className="text-emerald-600 dark:text-emerald-400">{latestRun.summary.overall.passed} passed</span>
-                <span className="text-red-600 dark:text-red-400">{latestRun.summary.overall.failed} failed</span>
-                <span className="text-amber-600 dark:text-amber-400">{latestRun.summary.overall.partial} partial</span>
+                <span className="text-emerald-600 dark:text-emerald-400">{latestRun.summary?.overall?.passed ?? 0} passed</span>
+                <span className="text-red-600 dark:text-red-400">{latestRun.summary?.overall?.failed ?? 0} failed</span>
+                <span className="text-amber-600 dark:text-amber-400">{latestRun.summary?.overall?.partial ?? 0} partial</span>
               </div>
               {onViewAllRuns && (
                 <Button variant="outline" size="sm" className="w-full gap-2" onClick={onViewAllRuns}>
@@ -137,28 +166,28 @@ const Overview: React.FC<OverviewProps> = ({ metrics, viewMode, latestRun, promp
         <Card>
           <CardContent className="flex flex-col items-center justify-center p-6">
             <Database className="w-8 h-8 mb-2 text-blue-500" />
-            <span className="text-3xl font-bold text-slate-900 dark:text-slate-100">{metrics.totalTestCases}</span>
+            <span className="text-3xl font-bold text-slate-900 dark:text-slate-100">{displayTestCases}</span>
             <span className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide mt-1">Total Test Cases</span>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="flex flex-col items-center justify-center p-6">
             <Activity className="w-8 h-8 mb-2 text-emerald-500" />
-            <span className="text-3xl font-bold text-slate-900 dark:text-slate-100">{metrics.results.overall.rate}</span>
+            <span className="text-3xl font-bold text-slate-900 dark:text-slate-100">{latestRun ? `${displayAccuracy.toFixed(1)}%` : (metrics.results?.overall.rate ?? '-')}</span>
             <span className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide mt-1">Overall Pass Rate</span>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="flex flex-col items-center justify-center p-6">
             <Layers className="w-8 h-8 mb-2 text-violet-500" />
-            <span className="text-3xl font-bold text-slate-900 dark:text-slate-100">{Object.keys(metrics.byCategory).length}</span>
+            <span className="text-3xl font-bold text-slate-900 dark:text-slate-100">{categoriesCount}</span>
             <span className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide mt-1">Categories</span>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="flex flex-col items-center justify-center p-6">
             <FileText className="w-8 h-8 mb-2 text-pink-500" />
-            <span className="text-3xl font-bold text-slate-900 dark:text-slate-100">{Object.keys(metrics.byStyle).length}</span>
+            <span className="text-3xl font-bold text-slate-900 dark:text-slate-100">{stylesCount}</span>
             <span className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide mt-1">Writing Styles</span>
           </CardContent>
         </Card>
@@ -214,25 +243,35 @@ const Overview: React.FC<OverviewProps> = ({ metrics, viewMode, latestRun, promp
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                             {metrics.problematicCases.slice(0, 3).map((pc) => (
-                                 <TableRow key={pc.id} className="border-b-red-100 dark:border-b-red-900/50">
-                                     <TableCell className="py-2 text-xs font-mono">TC-{String(pc.id).padStart(3, '0')}</TableCell>
-                                     <TableCell className="py-2"><CategoryBadge category={pc.category} minimal /></TableCell>
-                                     <TableCell className="py-2">
-                                         <div className="flex gap-1">
-                                             {pc.failedLLMs.map(llm => (
-                                                 <span key={llm} className="inline-flex items-center rounded-md border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950 px-2 py-0.5 text-[10px] font-medium text-red-600 dark:text-red-400">{llm}</span>
-                                             ))}
-                                         </div>
-                                     </TableCell>
-                                 </TableRow>
-                             ))}
-                             {metrics.problematicCases.length > 3 && (
+                             {problematicCases.length === 0 ? (
                                  <TableRow>
-                                     <TableCell colSpan={3} className="text-center text-xs text-muted-foreground pt-2">
-                                         + {metrics.problematicCases.length - 3} more cases
+                                     <TableCell colSpan={3} className="text-center text-muted-foreground py-4 text-sm">
+                                         {latestRun ? 'All test cases passing' : 'No evaluation data available'}
                                      </TableCell>
                                  </TableRow>
+                             ) : (
+                               <>
+                                 {problematicCases.slice(0, 3).map((pc) => (
+                                     <TableRow key={pc.id} className="border-b-red-100 dark:border-b-red-900/50">
+                                         <TableCell className="py-2 text-xs font-mono">TC-{String(pc.id).padStart(3, '0')}</TableCell>
+                                         <TableCell className="py-2"><CategoryBadge category={pc.category} minimal /></TableCell>
+                                         <TableCell className="py-2">
+                                             <div className="flex gap-1">
+                                                 {pc.failedLLMs.map(llm => (
+                                                     <span key={llm} className="inline-flex items-center rounded-md border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950 px-2 py-0.5 text-[10px] font-medium text-red-600 dark:text-red-400">{llm}</span>
+                                                 ))}
+                                             </div>
+                                         </TableCell>
+                                     </TableRow>
+                                 ))}
+                                 {problematicCases.length > 3 && (
+                                     <TableRow>
+                                         <TableCell colSpan={3} className="text-center text-xs text-muted-foreground pt-2">
+                                             + {problematicCases.length - 3} more cases
+                                         </TableCell>
+                                     </TableRow>
+                                 )}
+                               </>
                              )}
                         </TableBody>
                     </Table>
@@ -255,15 +294,21 @@ const Overview: React.FC<OverviewProps> = ({ metrics, viewMode, latestRun, promp
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {Object.entries(writingStyleInfo).map(([style, info]) => {
-              const styleMetrics = metrics.byStyle[style];
+              const metricsStyle = (metrics.byStyle || {})[style];
+              const runStyle = styleStatsFromRun?.[style];
+              const hasStats = runStyle || metricsStyle;
+              const passRate = runStyle
+                ? `${(runStyle.total > 0 ? (runStyle.passed / runStyle.total) * 100 : 0).toFixed(0)}%`
+                : metricsStyle?.passRate;
+              const caseCount = runStyle?.total ?? metricsStyle?.cases;
               return (
                 <div key={style} className="border border-slate-200 dark:border-slate-700 rounded-lg p-4 bg-slate-50 dark:bg-slate-800/50">
                   <div className="flex items-center justify-between mb-3">
                     <StyleBadge style={style} minimal />
-                    {styleMetrics && (
+                    {hasStats && (
                       <div className="text-right">
-                        <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">{styleMetrics.passRate}</span>
-                        <span className="text-xs text-slate-400 ml-1">({styleMetrics.cases})</span>
+                        <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">{passRate}</span>
+                        <span className="text-xs text-slate-400 ml-1">({caseCount})</span>
                       </div>
                     )}
                   </div>

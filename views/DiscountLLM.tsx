@@ -204,11 +204,11 @@ const DiscountLLM: React.FC<DiscountLLMProps> = ({ spec, viewMode }) => {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-2">
-        <h2 className="text-3xl font-bold tracking-tight">{spec.name} ({spec.version})</h2>
-        <p className="text-muted-foreground">{spec.purpose}</p>
+        <h2 className="text-3xl font-bold tracking-tight">{spec.name}{spec.version ? ` (${spec.version})` : ''}</h2>
+        {spec.purpose && <p className="text-muted-foreground">{spec.purpose}</p>}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {(spec.discountModes || []).length > 0 && <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {spec.discountModes.map((mode, idx) => {
           const colors = getColorClasses(mode.color);
           return (
@@ -230,9 +230,9 @@ const DiscountLLM: React.FC<DiscountLLMProps> = ({ spec, viewMode }) => {
             </Card>
           )
         })}
-      </div>
+      </div>}
 
-      <div className="flex items-start p-4 border rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300">
+      {(spec.keyRules || []).length > 0 && <div className="flex items-start p-4 border rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300">
         <Info className="w-5 h-5 mr-3 mt-0.5 flex-shrink-0" />
         <div className="text-sm">
           <p className="font-semibold mb-1">Key Normalization Rules</p>
@@ -242,7 +242,7 @@ const DiscountLLM: React.FC<DiscountLLMProps> = ({ spec, viewMode }) => {
             ))}
           </ul>
         </div>
-      </div>
+      </div>}
 
       {/* Evaluation Run Metadata */}
       {evaluationRun && (

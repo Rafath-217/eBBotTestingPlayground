@@ -6,6 +6,7 @@ import {
   RunComparison,
   PromptVersionStats,
 } from '../types';
+import { getCached, setCache, removeCacheByPrefix } from './cache';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
 const BASE_PATH = '/api/internalUtility/bundleSetupLlmPipeline';
@@ -31,13 +32,19 @@ async function apiFetch<T>(endpoint: string, options?: RequestInit): Promise<T> 
  * Backend: GET /evaluation/testCases
  */
 export async function getTestCases(category?: string): Promise<TestCaseDefinition[]> {
+  const cacheKey = `testCases_${category || 'all'}`;
+  const cached = getCached<TestCaseDefinition[]>(cacheKey);
+  if (cached !== undefined) return cached;
+
   const params = new URLSearchParams();
   if (category) {
     params.append('category', category);
   }
   const queryString = params.toString();
   const result = await apiFetch<{ testCases: TestCaseDefinition[] }>(`/evaluation/testCases${queryString ? `?${queryString}` : ''}`);
-  return result.testCases || result as unknown as TestCaseDefinition[];
+  const data = result.testCases || result as unknown as TestCaseDefinition[];
+  setCache(cacheKey, data);
+  return data;
 }
 
 /**
@@ -66,8 +73,13 @@ export async function getTestCaseHistory(id: number, limit?: number): Promise<an
  * Backend: GET /evaluation/categories
  */
 export async function getCategories(): Promise<{ name: string; count: number }[]> {
+  const cached = getCached<{ name: string; count: number }[]>('categories');
+  if (cached !== undefined) return cached;
+
   const result = await apiFetch<{ categories: { name: string; count: number }[] }>('/evaluation/categories');
-  return result.categories || result as unknown as { name: string; count: number }[];
+  const data = result.categories || result as unknown as { name: string; count: number }[];
+  setCache('categories', data);
+  return data;
 }
 
 /**
@@ -84,6 +96,10 @@ export async function getEvaluationRuns(
   page: number;
   totalPages: number;
 }> {
+  const cacheKey = `evalRuns_${page ?? ''}_${limit ?? ''}_${category ?? ''}`;
+  const cached = getCached<{ runs: EvaluationRun[]; total: number; page: number; totalPages: number }>(cacheKey);
+  if (cached !== undefined) return cached;
+
   const params = new URLSearchParams();
   if (page !== undefined) {
     params.append('page', String(page));
@@ -95,12 +111,33 @@ export async function getEvaluationRuns(
     params.append('category', category);
   }
   const queryString = params.toString();
-  return apiFetch<{
-    runs: EvaluationRun[];
+  const result = await apiFetch<{
+    runs: any[];
     total: number;
     page: number;
     totalPages: number;
   }>(`/evaluation/runs${queryString ? `?${queryString}` : ''}`);
+
+  // Backend returns flat fields (accuracy, passed, failed, partial, errors)
+  // but frontend expects nested summary.overall structure
+  const runs: EvaluationRun[] = (result.runs || []).map((run: any) => ({
+    ...run,
+    summary: run.summary || {
+      overall: {
+        accuracy: run.accuracy ?? 0,
+        passed: run.passed ?? 0,
+        failed: run.failed ?? 0,
+        partial: run.partial ?? 0,
+        errors: run.errors ?? 0,
+      },
+      byLlm: run.byLlm || {},
+      byCategory: run.byCategory || {},
+    },
+  }));
+
+  const data = { ...result, runs };
+  setCache(cacheKey, data);
+  return data;
 }
 
 /**
@@ -108,7 +145,13 @@ export async function getEvaluationRuns(
  * Backend: GET /evaluation/runs/:runId
  */
 export async function getEvaluationRun(runId: string): Promise<EvaluationRunDetail> {
-  return apiFetch<EvaluationRunDetail>(`/evaluation/runs/${runId}`);
+  const cacheKey = `evalRun_${runId}`;
+  const cached = getCached<EvaluationRunDetail>(cacheKey);
+  if (cached !== undefined) return cached;
+
+  const data = await apiFetch<EvaluationRunDetail>(`/evaluation/runs/${runId}`);
+  setCache(cacheKey, data);
+  return data;
 }
 
 /**
@@ -116,12 +159,18 @@ export async function getEvaluationRun(runId: string): Promise<EvaluationRunDeta
  * Backend: GET /evaluation/runs?limit=1
  */
 export async function getLatestEvaluationRun(): Promise<EvaluationRunDetail | null> {
+  const cached = getCached<EvaluationRunDetail | null>('latestRun');
+  if (cached !== undefined) return cached;
+
   try {
     const result = await getEvaluationRuns(1, 1);
     if (result.runs && result.runs.length > 0) {
       // Fetch full details of the latest run
-      return getEvaluationRun(result.runs[0].runId);
+      const run = await getEvaluationRun(result.runs[0].runId);
+      setCache('latestRun', run);
+      return run;
     }
+    setCache('latestRun', null);
     return null;
   } catch {
     return null;
@@ -153,13 +202,20 @@ export async function triggerEvaluation(options?: {
     body.dryRun = options.dryRun;
   }
 
-  return apiFetch<{ status: string; startedAt: string }>('/evaluation/run', {
+  const data = await apiFetch<{ status: string; startedAt: string }>('/evaluation/run', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(body),
   });
+
+  // Invalidate run-related caches so next fetch gets fresh data
+  removeCacheByPrefix('evalRun');
+  removeCacheByPrefix('latestRun');
+  removeCacheByPrefix('promptVersions');
+
+  return data;
 }
 
 /**
@@ -167,7 +223,13 @@ export async function triggerEvaluation(options?: {
  * Backend: GET /evaluation/compare?runId1=X&runId2=Y
  */
 export async function compareRuns(runId1: string, runId2: string): Promise<RunComparison> {
-  return apiFetch<RunComparison>(`/evaluation/compare?runId1=${encodeURIComponent(runId1)}&runId2=${encodeURIComponent(runId2)}`);
+  const cacheKey = `compare_${runId1}_${runId2}`;
+  const cached = getCached<RunComparison>(cacheKey);
+  if (cached !== undefined) return cached;
+
+  const data = await apiFetch<RunComparison>(`/evaluation/compare?runId1=${encodeURIComponent(runId1)}&runId2=${encodeURIComponent(runId2)}`);
+  setCache(cacheKey, data);
+  return data;
 }
 
 /**
@@ -175,5 +237,10 @@ export async function compareRuns(runId1: string, runId2: string): Promise<RunCo
  * Backend: GET /evaluation/promptVersions
  */
 export async function getPromptVersionStats(): Promise<PromptVersionStats> {
-  return apiFetch<PromptVersionStats>('/evaluation/promptVersions');
+  const cached = getCached<PromptVersionStats>('promptVersions');
+  if (cached !== undefined) return cached;
+
+  const data = await apiFetch<PromptVersionStats>('/evaluation/promptVersions');
+  setCache('promptVersions', data);
+  return data;
 }

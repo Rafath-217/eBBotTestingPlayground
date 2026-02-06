@@ -1,4 +1,5 @@
 import { TestCase, TestResult, Metrics, LLMType, LLMSpecs } from '../types';
+import { getCached, setCache, clearAllCache } from './cache';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
 
@@ -21,7 +22,12 @@ let cachedData: DashboardData | null = null;
 async function fetchDashboardData(): Promise<DashboardData> {
   if (cachedData) return cachedData;
 
-  console.log('Fetching dashboard data from:', `${API_BASE_URL}/api/internalUtility/bundleSetupLlmPipeline/dashboard`);
+  // Check localStorage cache
+  const stored = getCached<DashboardData>('dashboard');
+  if (stored) {
+    cachedData = stored;
+    return stored;
+  }
 
   const response = await fetch(`${API_BASE_URL}/api/internalUtility/bundleSetupLlmPipeline/dashboard`);
   if (!response.ok) {
@@ -31,13 +37,30 @@ async function fetchDashboardData(): Promise<DashboardData> {
   }
 
   const json = await response.json();
-  console.log('Dashboard data received:', json);
 
   if (!json.data) {
     throw new Error('No data in response');
   }
 
-  cachedData = json.data;
+  const raw = json.data;
+
+  // Map backend llmSpecs field names (structure/discount/rules)
+  // to frontend expected names (structureLLM/discountLLM/rulesLLM)
+  const llmSpecs: LLMSpecs = raw.llmSpecs?.structureLLM
+    ? raw.llmSpecs
+    : {
+        structureLLM: raw.llmSpecs?.structure || {},
+        discountLLM: raw.llmSpecs?.discount || {},
+        rulesLLM: raw.llmSpecs?.rules || {},
+      };
+
+  cachedData = {
+    metrics: raw.metrics,
+    llmSpecs,
+    testCases: raw.testCases || [],
+    results: raw.results || { structure: [], discount: [], rules: [] },
+  };
+  setCache('dashboard', cachedData);
   return cachedData!;
 }
 
@@ -46,6 +69,7 @@ async function fetchDashboardData(): Promise<DashboardData> {
  */
 export function clearCache(): void {
   cachedData = null;
+  clearAllCache();
 }
 
 export const getMetrics = async (): Promise<Metrics> => {

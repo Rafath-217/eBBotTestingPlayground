@@ -101,6 +101,22 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
             </div>
 
             <div className="pt-4 pb-2">
+              <h4 className="px-2 text-xs font-semibold text-muted-foreground tracking-wider uppercase mb-2">Live Testing</h4>
+              <SidebarItem
+                icon={Play}
+                label="Playground"
+                active={activeTab === 'playground'}
+                onClick={() => onTabChange('playground')}
+              />
+              <SidebarItem
+                icon={History}
+                label="Pipeline History"
+                active={activeTab === 'history'}
+                onClick={() => onTabChange('history')}
+              />
+            </div>
+
+            <div className="pt-4 pb-2">
               <h4 className="px-2 text-xs font-semibold text-muted-foreground tracking-wider uppercase mb-2">Analysis</h4>
               <div className="space-y-1">
                 <SidebarItem
@@ -124,22 +140,6 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
                   />
                 )}
               </div>
-            </div>
-
-            <div className="pt-4 pb-2">
-              <h4 className="px-2 text-xs font-semibold text-muted-foreground tracking-wider uppercase mb-2">Live Testing</h4>
-              <SidebarItem
-                icon={Play}
-                label="Playground"
-                active={activeTab === 'playground'}
-                onClick={() => onTabChange('playground')}
-              />
-              <SidebarItem
-                icon={History}
-                label="Pipeline History"
-                active={activeTab === 'history'}
-                onClick={() => onTabChange('history')}
-              />
             </div>
           </div>
 

@@ -197,11 +197,11 @@ const RulesLLM: React.FC<RulesLLMProps> = ({ spec, viewMode }) => {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-2">
-        <h2 className="text-3xl font-bold tracking-tight">{spec.name} ({spec.version})</h2>
-        <p className="text-muted-foreground">{spec.purpose}</p>
+        <h2 className="text-3xl font-bold tracking-tight">{spec.name}{spec.version ? ` (${spec.version})` : ''}</h2>
+        {spec.purpose && <p className="text-muted-foreground">{spec.purpose}</p>}
       </div>
 
-      <Card className="bg-yellow-50 dark:bg-yellow-900/10 border-yellow-200 dark:border-yellow-800">
+      {spec.defaultBehavior && <Card className="bg-yellow-50 dark:bg-yellow-900/10 border-yellow-200 dark:border-yellow-800">
         <CardContent className="p-6">
           <h3 className="font-bold text-yellow-800 dark:text-yellow-500 mb-2">Default Behavior</h3>
           <p className="text-sm text-yellow-700 dark:text-yellow-400 mb-4">
@@ -209,10 +209,10 @@ const RulesLLM: React.FC<RulesLLMProps> = ({ spec, viewMode }) => {
           </p>
           <CodeBlock code={spec.defaultBehavior.output} />
         </CardContent>
-      </Card>
+      </Card>}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
+      {((spec.conditions || []).length > 0 || (spec.patternMapping || []).length > 0) && <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {(spec.conditions || []).length > 0 && <Card>
           <CardHeader>
             <CardTitle>Conditions Supported</CardTitle>
           </CardHeader>
@@ -227,9 +227,9 @@ const RulesLLM: React.FC<RulesLLMProps> = ({ spec, viewMode }) => {
               </div>
             ))}
           </CardContent>
-        </Card>
+        </Card>}
 
-        <Card>
+        {(spec.patternMapping || []).length > 0 && <Card>
           <CardHeader>
             <CardTitle>Pattern Mapping</CardTitle>
           </CardHeader>
@@ -253,8 +253,8 @@ const RulesLLM: React.FC<RulesLLMProps> = ({ spec, viewMode }) => {
               </TableBody>
             </Table>
           </CardContent>
-        </Card>
-      </div>
+        </Card>}
+      </div>}
 
       {/* Evaluation Run Metadata */}
       {evaluationRun && (

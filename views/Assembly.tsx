@@ -10,98 +10,126 @@ interface AssemblyProps {
   viewMode: ViewMode;
 }
 
-// PM-friendly view for Structure LLM output
+// PM-friendly view for Structure LLM output — matches PipelineHistory card style
 const PMStructureView: React.FC<{ data: any }> = ({ data }) => {
-  if (!data) return <div className="text-muted-foreground text-sm">No data</div>;
+  if (!data) return <div className="text-muted-foreground text-sm">No structure output</div>;
 
   const structureType = data.structureType;
   const steps = data.steps || [];
+  const stepLabels = steps.map((s: any) => s.label).filter(Boolean);
+  const collectionHints = steps.flatMap((s: any) => s.collectionHints || []);
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center gap-2">
-        <span className="text-sm font-medium">Type:</span>
-        <span className={cn(
-          "px-2 py-1 rounded text-xs font-medium",
-          structureType === 'SINGLE_STEP' ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300" :
-          structureType === 'MULTI_STEP' ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300" :
-          "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
-        )}>
-          {structureType || 'null (rejected)'}
-        </span>
+    <div className="border rounded-lg bg-card p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <h4 className="font-semibold text-sm">Structure Type</h4>
+        <Badge variant={structureType === 'SINGLE_STEP' ? 'success' : structureType === 'MULTI_STEP' ? 'blue' : 'destructive'}>
+          {structureType || 'null'}
+        </Badge>
       </div>
-      {steps.length > 0 && (
-        <div className="space-y-1">
-          {steps.map((step: any, i: number) => (
-            <div key={i} className="ml-2 p-2 border rounded bg-muted/30 text-sm">
-              <span className="font-medium">Step {i + 1}:</span> {step.label || 'Untitled'}
-              {step.collectionHints?.length > 0 && (
-                <span className="text-xs text-muted-foreground ml-2">
-                  ({step.collectionHints.join(', ')})
-                </span>
-              )}
-            </div>
-          ))}
+
+      {stepLabels.length > 0 && (
+        <div>
+          <p className="text-xs text-muted-foreground mb-2">Step Labels</p>
+          <div className="flex flex-wrap gap-2">
+            {stepLabels.map((label: string, idx: number) => (
+              <Badge key={idx} variant="outline" className="text-xs">
+                Step {idx + 1}: {label}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {collectionHints.length > 0 && (
+        <div>
+          <p className="text-xs text-muted-foreground mb-2">Collection Hints</p>
+          <div className="flex flex-wrap gap-2">
+            {collectionHints.map((hint: string, idx: number) => (
+              <Badge key={idx} variant="secondary" className="text-xs">
+                {hint}
+              </Badge>
+            ))}
+          </div>
         </div>
       )}
     </div>
   );
 };
 
-// PM-friendly view for Discount LLM output
+// PM-friendly view for Discount LLM output — matches PipelineHistory card style
 const PMDiscountView: React.FC<{ data: any }> = ({ data }) => {
-  if (!data) return <div className="text-muted-foreground text-sm">No data</div>;
+  if (!data) return <div className="text-muted-foreground text-sm">No discount output</div>;
 
   const config = data.discountConfiguration || data;
   const discountMode = config.discountMode;
   const rules = config.rules || [];
 
+  const getModeVariant = () => {
+    if (discountMode === 'PERCENTAGE') return 'success' as const;
+    if (discountMode === 'FIXED') return 'blue' as const;
+    if (discountMode === 'FIXED_BUNDLE_PRICE') return 'purple' as const;
+    return 'destructive' as const;
+  };
+
   return (
-    <div className="space-y-2">
-      <div className="flex items-center gap-2">
-        <span className="text-sm font-medium">Mode:</span>
-        <span className={cn(
-          "px-2 py-1 rounded text-xs font-medium",
-          discountMode === 'PERCENTAGE' ? "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300" :
-          discountMode === 'FIXED' ? "bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300" :
-          discountMode === 'FIXED_BUNDLE_PRICE' ? "bg-teal-100 text-teal-700 dark:bg-teal-900 dark:text-teal-300" :
-          "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300"
-        )}>
+    <div className="border rounded-lg bg-card p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <h4 className="font-semibold text-sm">Discount Mode</h4>
+        <Badge variant={getModeVariant()}>
           {discountMode || 'null'}
-        </span>
+        </Badge>
       </div>
+
       {rules.length > 0 && (
-        <div className="text-xs text-muted-foreground">
-          {rules.length} rule(s)
+        <div>
+          <p className="text-xs text-muted-foreground mb-2">Discount Rules</p>
+          <div className="space-y-2">
+            {rules.map((rule: any, idx: number) => (
+              <div key={idx} className="flex items-center justify-between p-2 bg-muted/50 rounded text-sm">
+                <span className="text-muted-foreground">{rule.type}: {rule.value}</span>
+                <Badge variant="outline">{rule.discountValue}</Badge>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
   );
 };
 
-// PM-friendly view for Rules LLM output
+// PM-friendly view for Rules LLM output — matches PipelineHistory card style
 const PMRulesView: React.FC<{ data: any }> = ({ data }) => {
-  if (!data) return <div className="text-muted-foreground text-sm">No data</div>;
+  if (!data) return <div className="text-muted-foreground text-sm">No rules output</div>;
 
-  let rules: any[] = [];
-  if (Array.isArray(data)) {
-    rules = data;
-  } else if (data.conditions?.rules) {
-    rules = data.conditions.rules;
-  } else if (data.rules) {
-    rules = data.rules;
-  }
+  const conditionsObj = data.conditions || {};
+  const conditions = Array.isArray(data) ? data : (conditionsObj.rules || data.rules || []);
+
+  const getConditionLabel = (condition: string) => {
+    if (condition === 'greaterThanOrEqualTo') return 'At least';
+    if (condition === 'lessThanOrEqualTo') return 'At most';
+    if (condition === 'equalTo') return 'Exactly';
+    return condition;
+  };
 
   return (
-    <div className="space-y-1">
-      {rules.length > 0 ? (
-        rules.map((rule: any, i: number) => (
-          <div key={i} className="text-xs p-1 border rounded bg-muted/30">
-            {rule.type}: {rule.condition} {rule.value}
-          </div>
-        ))
+    <div className="border rounded-lg bg-card p-4 space-y-3">
+      <h4 className="font-semibold text-sm">Selection Rules</h4>
+
+      {conditions.length > 0 ? (
+        <div className="space-y-2">
+          {conditions.map((cond: any, idx: number) => (
+            <div key={idx} className="flex items-center gap-2 p-2 bg-muted/50 rounded text-sm">
+              {cond.stepIndex !== undefined && (
+                <Badge variant="outline" className="text-xs">Step {cond.stepIndex + 1}</Badge>
+              )}
+              <span>{getConditionLabel(cond.condition)}</span>
+              <Badge variant="secondary">{cond.value}</Badge>
+            </div>
+          ))}
+        </div>
       ) : (
-        <div className="text-sm text-muted-foreground italic">Default (any qty)</div>
+        <p className="text-sm text-muted-foreground">No specific rules - any quantity allowed</p>
       )}
     </div>
   );
@@ -385,141 +413,132 @@ const Assembly: React.FC<AssemblyProps> = ({ viewMode }) => {
                   </div>
 
                   {expandedCase === result.testCaseId && (
-                    <div className="border-t p-4 bg-muted/30">
-                      {viewMode === 'pm' ? (
-                        /* PM View - Visual summary */
-                        <div className="space-y-4">
-                          <div>
-                            <h4 className="text-xs font-semibold uppercase text-muted-foreground mb-2">Merchant Input</h4>
-                            <div className="p-3 bg-background rounded border text-sm italic">
-                              "{result.text}"
-                            </div>
-                          </div>
-
-                          {/* LLM Outputs Summary */}
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div className={cn(
-                              "p-4 border rounded-lg",
-                              result.structureResult.match
-                                ? "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800"
-                                : "bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800"
-                            )}>
-                              <div className="flex items-center justify-between mb-2">
-                                <h4 className="text-xs font-semibold uppercase">Structure LLM</h4>
-                                <StatusIcon status={result.structureResult.match ? 'PASS' : 'FAIL'} />
-                              </div>
-                              <PMStructureView data={result.structureResult.actual} />
-                            </div>
-
-                            <div className={cn(
-                              "p-4 border rounded-lg",
-                              result.discountResult.match
-                                ? "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800"
-                                : "bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800"
-                            )}>
-                              <div className="flex items-center justify-between mb-2">
-                                <h4 className="text-xs font-semibold uppercase">Discount LLM</h4>
-                                <StatusIcon status={result.discountResult.match ? 'PASS' : 'FAIL'} />
-                              </div>
-                              <PMDiscountView data={result.discountResult.actual} />
-                            </div>
-
-                            <div className={cn(
-                              "p-4 border rounded-lg",
-                              result.rulesResult.match
-                                ? "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800"
-                                : "bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800"
-                            )}>
-                              <div className="flex items-center justify-between mb-2">
-                                <h4 className="text-xs font-semibold uppercase">Rules LLM</h4>
-                                <StatusIcon status={result.rulesResult.match ? 'PASS' : 'FAIL'} />
-                              </div>
-                              <PMRulesView data={result.rulesResult.actual} />
-                            </div>
-                          </div>
-
-                          {/* Mismatch details if any failures */}
-                          {(result.status === 'FAIL' || result.status === 'PARTIAL') && (
-                            <div className="space-y-2">
-                              {!result.structureResult.match && result.structureResult.details && (
-                                <div className="p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded">
-                                  <p className="text-xs font-semibold text-red-700 dark:text-red-400">Structure Mismatch:</p>
-                                  <p className="text-sm text-red-600 dark:text-red-300">{result.structureResult.details}</p>
-                                </div>
-                              )}
-                              {!result.discountResult.match && result.discountResult.details && (
-                                <div className="p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded">
-                                  <p className="text-xs font-semibold text-red-700 dark:text-red-400">Discount Mismatch:</p>
-                                  <p className="text-sm text-red-600 dark:text-red-300">{result.discountResult.details}</p>
-                                </div>
-                              )}
-                              {!result.rulesResult.match && result.rulesResult.details && (
-                                <div className="p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded">
-                                  <p className="text-xs font-semibold text-red-700 dark:text-red-400">Rules Mismatch:</p>
-                                  <p className="text-sm text-red-600 dark:text-red-300">{result.rulesResult.details}</p>
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        /* Dev View - JSON code blocks */
-                        <div className="space-y-6">
-                          <div>
-                            <h4 className="text-xs font-semibold uppercase text-muted-foreground mb-2">Merchant Input</h4>
-                            <div className="p-3 bg-background rounded border text-sm italic">
-                              "{result.text}"
-                            </div>
-                          </div>
-
-                          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                            {/* Structure */}
-                            <div className="space-y-2">
-                              <div className="flex items-center justify-between">
-                                <h4 className="text-xs font-semibold uppercase text-muted-foreground">Structure LLM</h4>
-                                <StatusIcon status={result.structureResult.match ? 'PASS' : 'FAIL'} />
-                              </div>
-                              <CodeBlock label="Expected" code={result.structureResult.expected} />
-                              <CodeBlock label="Actual" code={result.structureResult.actual} />
-                              {!result.structureResult.match && result.structureResult.details && (
-                                <div className="text-xs text-red-600 dark:text-red-400 p-2 bg-red-50 dark:bg-red-950/20 rounded">
-                                  {result.structureResult.details}
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Discount */}
-                            <div className="space-y-2">
-                              <div className="flex items-center justify-between">
-                                <h4 className="text-xs font-semibold uppercase text-muted-foreground">Discount LLM</h4>
-                                <StatusIcon status={result.discountResult.match ? 'PASS' : 'FAIL'} />
-                              </div>
-                              <CodeBlock label="Expected" code={result.discountResult.expected} />
-                              <CodeBlock label="Actual" code={result.discountResult.actual} />
-                              {!result.discountResult.match && result.discountResult.details && (
-                                <div className="text-xs text-red-600 dark:text-red-400 p-2 bg-red-50 dark:bg-red-950/20 rounded">
-                                  {result.discountResult.details}
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Rules */}
-                            <div className="space-y-2">
-                              <div className="flex items-center justify-between">
-                                <h4 className="text-xs font-semibold uppercase text-muted-foreground">Rules LLM</h4>
-                                <StatusIcon status={result.rulesResult.match ? 'PASS' : 'FAIL'} />
-                              </div>
-                              <CodeBlock label="Expected" code={result.rulesResult.expected} />
-                              <CodeBlock label="Actual" code={result.rulesResult.actual} />
-                              {!result.rulesResult.match && result.rulesResult.details && (
-                                <div className="text-xs text-red-600 dark:text-red-400 p-2 bg-red-50 dark:bg-red-950/20 rounded">
-                                  {result.rulesResult.details}
-                                </div>
-                              )}
-                            </div>
+                    <div className="border-t p-6 bg-muted/30 space-y-6">
+                      {/* Input Section */}
+                      <div className="space-y-4">
+                        <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">Input</h3>
+                        <div>
+                          <label className="text-xs text-muted-foreground mb-1 block">Merchant Query</label>
+                          <div className="p-3 bg-background rounded border text-sm italic">
+                            "{result.text}"
                           </div>
                         </div>
-                      )}
+                      </div>
+
+                      {/* Output Section */}
+                      <div className="space-y-4">
+                        <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">Output</h3>
+
+                        {viewMode === 'pm' ? (
+                          /* PM Mode - Visual Cards matching PipelineHistory */
+                          <div className="space-y-6">
+                            {/* Actual LLM Outputs */}
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                              <div>
+                                <label className="text-xs text-muted-foreground mb-2 block font-medium flex items-center gap-2">
+                                  Structure LLM
+                                  <StatusIcon status={result.structureResult.match ? 'PASS' : 'FAIL'} />
+                                </label>
+                                <PMStructureView data={result.structureResult.actual} />
+                              </div>
+                              <div>
+                                <label className="text-xs text-muted-foreground mb-2 block font-medium flex items-center gap-2">
+                                  Discount LLM
+                                  <StatusIcon status={result.discountResult.match ? 'PASS' : 'FAIL'} />
+                                </label>
+                                <PMDiscountView data={result.discountResult.actual} />
+                              </div>
+                              <div>
+                                <label className="text-xs text-muted-foreground mb-2 block font-medium flex items-center gap-2">
+                                  Rules LLM
+                                  <StatusIcon status={result.rulesResult.match ? 'PASS' : 'FAIL'} />
+                                </label>
+                                <PMRulesView data={result.rulesResult.actual} />
+                              </div>
+                            </div>
+
+                            {/* Expected outputs on mismatch */}
+                            {(result.status === 'FAIL' || result.status === 'PARTIAL') && (
+                              <div className="space-y-4">
+                                <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">Expected</h3>
+                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                                  {!result.structureResult.match && (
+                                    <div>
+                                      <label className="text-xs text-muted-foreground mb-2 block font-medium">Structure LLM (Expected)</label>
+                                      <PMStructureView data={result.structureResult.expected} />
+                                      {result.structureResult.details && (
+                                        <div className="mt-2 p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded text-xs text-red-600 dark:text-red-400">
+                                          {result.structureResult.details}
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                                  {!result.discountResult.match && (
+                                    <div>
+                                      <label className="text-xs text-muted-foreground mb-2 block font-medium">Discount LLM (Expected)</label>
+                                      <PMDiscountView data={result.discountResult.expected} />
+                                      {result.discountResult.details && (
+                                        <div className="mt-2 p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded text-xs text-red-600 dark:text-red-400">
+                                          {result.discountResult.details}
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                                  {!result.rulesResult.match && (
+                                    <div>
+                                      <label className="text-xs text-muted-foreground mb-2 block font-medium">Rules LLM (Expected)</label>
+                                      <PMRulesView data={result.rulesResult.expected} />
+                                      {result.rulesResult.details && (
+                                        <div className="mt-2 p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded text-xs text-red-600 dark:text-red-400">
+                                          {result.rulesResult.details}
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          /* Dev Mode - JSON Code Blocks matching PipelineHistory layout */
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {/* Left: Expected LLM Outputs */}
+                            <div className="space-y-4">
+                              <CodeBlock label="Structure LLM (Expected)" code={result.structureResult.expected} />
+                              <CodeBlock label="Discount LLM (Expected)" code={result.discountResult.expected} />
+                              <CodeBlock label="Rules LLM (Expected)" code={result.rulesResult.expected} />
+                            </div>
+
+                            {/* Right: Actual LLM Outputs */}
+                            <div className="space-y-4">
+                              <div>
+                                <CodeBlock label="Structure LLM (Actual)" code={result.structureResult.actual} />
+                                {!result.structureResult.match && result.structureResult.details && (
+                                  <div className="text-xs text-red-600 dark:text-red-400 p-2 mt-1 bg-red-50 dark:bg-red-950/20 rounded border border-red-200 dark:border-red-800">
+                                    {result.structureResult.details}
+                                  </div>
+                                )}
+                              </div>
+                              <div>
+                                <CodeBlock label="Discount LLM (Actual)" code={result.discountResult.actual} />
+                                {!result.discountResult.match && result.discountResult.details && (
+                                  <div className="text-xs text-red-600 dark:text-red-400 p-2 mt-1 bg-red-50 dark:bg-red-950/20 rounded border border-red-200 dark:border-red-800">
+                                    {result.discountResult.details}
+                                  </div>
+                                )}
+                              </div>
+                              <div>
+                                <CodeBlock label="Rules LLM (Actual)" code={result.rulesResult.actual} />
+                                {!result.rulesResult.match && result.rulesResult.details && (
+                                  <div className="text-xs text-red-600 dark:text-red-400 p-2 mt-1 bg-red-50 dark:bg-red-950/20 rounded border border-red-200 dark:border-red-800">
+                                    {result.rulesResult.details}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
                 </Card>

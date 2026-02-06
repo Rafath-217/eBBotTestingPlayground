@@ -192,11 +192,11 @@ const StructureLLM: React.FC<StructureLLMProps> = ({ spec, viewMode }) => {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-2">
-        <h2 className="text-3xl font-bold tracking-tight">{spec.name} ({spec.version})</h2>
-        <p className="text-muted-foreground">{spec.purpose}</p>
+        <h2 className="text-3xl font-bold tracking-tight">{spec.name}{spec.version ? ` (${spec.version})` : ''}</h2>
+        {spec.purpose && <p className="text-muted-foreground">{spec.purpose}</p>}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {(spec.outputTypes || []).length > 0 && <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {spec.outputTypes.map((type, idx) => {
           const colors = getColorClasses(type.color);
           return (
@@ -225,9 +225,9 @@ const StructureLLM: React.FC<StructureLLMProps> = ({ spec, viewMode }) => {
             </Card>
           )
         })}
-      </div>
+      </div>}
 
-      <Card>
+      {(spec.supportedPatterns || []).length > 0 && <Card>
         <CardHeader>
           <CardTitle>Supported Patterns</CardTitle>
         </CardHeader>
@@ -244,7 +244,7 @@ const StructureLLM: React.FC<StructureLLMProps> = ({ spec, viewMode }) => {
             ))}
           </div>
         </CardContent>
-      </Card>
+      </Card>}
 
       {/* Evaluation Run Metadata */}
       {evaluationRun && (
