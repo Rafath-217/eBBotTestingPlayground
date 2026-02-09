@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Clock, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Loader2, AlertCircle, Calendar, Package, Tag } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Clock, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Loader2, AlertCircle, Calendar, Package, Tag, Search, Filter } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent, Button, Badge, CodeBlock, cn } from '../components/ui';
 import { ViewMode } from '../components/Layout';
 import { PMResultView, PMDiscountsPanel, PMRulesPanel, PMStepsPanel } from '../components/PMViews';
@@ -151,6 +151,10 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(10);
 
+  // Client-side filter/search state
+  const [sourceFilter, setSourceFilter] = useState<'ALL' | 'APP' | 'NON-APP'>('ALL');
+  const [shopNameSearch, setShopNameSearch] = useState<string>('');
+
   const fetchHistory = async () => {
     setLoading(true);
     setError(null);
@@ -185,8 +189,18 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
   const handleClearFilter = () => {
     setStartDate('');
     setEndDate('');
+    setSourceFilter('ALL');
+    setShopNameSearch('');
     setCurrentPage(1);
   };
+
+  const filteredLogs = useMemo(() => {
+    return logs.filter((log) => {
+      if (sourceFilter !== 'ALL' && log.source !== sourceFilter) return false;
+      if (shopNameSearch.trim() && !log.shopName?.toLowerCase().includes(shopNameSearch.trim().toLowerCase())) return false;
+      return true;
+    });
+  }, [logs, sourceFilter, shopNameSearch]);
 
   const toggleExpand = (id: string) => {
     setExpandedId(expandedId === id ? null : id);
@@ -216,9 +230,10 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
         <p className="text-muted-foreground">View historical pipeline runs and their results</p>
       </div>
 
-      {/* Date Filter */}
+      {/* Filters */}
       <Card>
-        <CardContent className="pt-6">
+        <CardContent className="pt-6 space-y-4">
+          {/* Date filters row */}
           <div className="flex flex-wrap items-end gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium flex items-center gap-2">
@@ -250,9 +265,48 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
             <Button variant="outline" onClick={handleClearFilter} className="h-10">
               Clear
             </Button>
+          </div>
+
+          {/* Source filter + Shop name search row */}
+          <div className="flex flex-wrap items-end gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium flex items-center gap-2">
+                <Filter className="w-4 h-4" />
+                Source
+              </label>
+              <div className="flex items-center gap-1">
+                {(['ALL', 'APP', 'NON-APP'] as const).map((value) => (
+                  <Button
+                    key={value}
+                    variant={sourceFilter === value ? 'default' : 'outline'}
+                    size="sm"
+                    className="h-10"
+                    onClick={() => setSourceFilter(value)}
+                  >
+                    {value}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2 flex-1 min-w-[200px] max-w-sm">
+              <label className="text-sm font-medium flex items-center gap-2">
+                <Search className="w-4 h-4" />
+                Shop Name
+              </label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  value={shopNameSearch}
+                  onChange={(e) => setShopNameSearch(e.target.value)}
+                  placeholder="Search by shop name..."
+                  className="h-10 w-full pl-9 pr-3 rounded-md border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                />
+              </div>
+            </div>
             {pagination && (
-              <span className="text-sm text-muted-foreground ml-auto">
-                Showing {logs.length} of {pagination.total} runs
+              <span className="text-sm text-muted-foreground ml-auto self-end pb-2">
+                Showing {filteredLogs.length} of {pagination.total} runs
               </span>
             )}
           </div>
@@ -275,14 +329,14 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
       )}
 
       {/* Empty State */}
-      {!loading && !error && logs.length === 0 && (
+      {!loading && !error && filteredLogs.length === 0 && (
         <Card>
           <CardContent className="py-12 text-center">
             <Clock className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">No Pipeline Runs Found</h3>
             <p className="text-muted-foreground">
-              {startDate || endDate
-                ? 'No runs found for the selected date range. Try adjusting your filters.'
+              {startDate || endDate || sourceFilter !== 'ALL' || shopNameSearch
+                ? 'No runs found for the selected filters. Try adjusting your criteria.'
                 : 'No pipeline runs have been recorded yet.'}
             </p>
           </CardContent>
@@ -290,33 +344,49 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
       )}
 
       {/* Pipeline Runs List */}
-      {!loading && !error && logs.length > 0 && (
+      {!loading && !error && filteredLogs.length > 0 && (
         <div className="space-y-3">
-          {logs.map((log) => (
+          {/* Column Headers */}
+          <div className="grid grid-cols-[180px_100px_90px_120px_80px_1fr_40px] items-center px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b">
+            <span>Date</span>
+            <span>Status</span>
+            <span>Source</span>
+            <span>Shop</span>
+            <span>Duration</span>
+            <span>Input</span>
+            <span></span>
+          </div>
+          {filteredLogs.map((log) => (
             <Card key={log.id} className="overflow-hidden">
               {/* Header Row - Always Visible */}
               <div
                 onClick={() => toggleExpand(log.id)}
-                className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/50 transition-colors"
+                className="grid grid-cols-[180px_100px_90px_120px_80px_1fr_40px] items-center p-4 cursor-pointer hover:bg-muted/50 transition-colors"
               >
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Clock className="w-4 h-4" />
-                    {formatDate(log.timestamp)}
-                  </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Clock className="w-4 h-4 flex-shrink-0" />
+                  {formatDate(log.timestamp)}
+                </div>
+                <div>
                   <Badge variant={getStatusBadge(log.status).variant}>
                     {getStatusBadge(log.status).text}
                   </Badge>
-                  {log.durationMs && (
-                    <span className="text-xs text-muted-foreground">
-                      {(log.durationMs / 1000).toFixed(1)}s
-                    </span>
-                  )}
                 </div>
-                <div className="flex items-center gap-4">
-                  <span className="text-sm text-muted-foreground max-w-md truncate">
-                    {log.input.merchantText}
-                  </span>
+                <div>
+                  <Badge variant={log.source === 'APP' ? 'blue' : 'secondary'}>
+                    {log.source}
+                  </Badge>
+                </div>
+                <span className="text-xs font-medium text-muted-foreground truncate">
+                  {log.shopName || '-'}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {log.durationMs ? `${(log.durationMs / 1000).toFixed(1)}s` : '-'}
+                </span>
+                <span className="text-sm text-muted-foreground truncate">
+                  {log.input.merchantText}
+                </span>
+                <div className="flex justify-end">
                   {expandedId === log.id ? (
                     <ChevronUp className="w-5 h-5 text-muted-foreground" />
                   ) : (

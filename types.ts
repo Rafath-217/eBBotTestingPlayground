@@ -240,6 +240,8 @@ export interface PipelineHistoryLog {
   id: string;
   timestamp: string;
   status: 'AUTO' | 'DOWNGRADED_TO_MANUAL' | 'MANUAL';
+  source: 'APP' | 'NON-APP';
+  shopName: string;
   input: PipelineHistoryInput;
   output: PipelineHistoryOutput;
   durationMs?: number;
