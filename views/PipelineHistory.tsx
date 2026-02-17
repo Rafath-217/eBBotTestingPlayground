@@ -153,6 +153,8 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
 
   // Client-side filter/search state
   const [sourceFilter, setSourceFilter] = useState<'ALL' | 'APP' | 'NON-APP'>('ALL');
+  const [feedbackFilter, setFeedbackFilter] = useState<'ALL' | 'CORRECT' | 'INCORRECT' | 'PARTIALLY_CORRECT' | 'NO_FEEDBACK'>('ALL');
+  const [merchantTextFilter, setMerchantTextFilter] = useState<'ALL' | 'EMPTY' | 'NON_EMPTY'>('ALL');
   const [shopNameSearch, setShopNameSearch] = useState<string>('');
 
   // Feedback state
@@ -231,10 +233,16 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
   const filteredLogs = useMemo(() => {
     return logs.filter((log) => {
       if (sourceFilter !== 'ALL' && log.source !== sourceFilter) return false;
+      if (feedbackFilter !== 'ALL') {
+        if (feedbackFilter === 'NO_FEEDBACK' && log.feedback) return false;
+        if (feedbackFilter !== 'NO_FEEDBACK' && log.feedback?.rating !== feedbackFilter) return false;
+      }
+      if (merchantTextFilter === 'EMPTY' && log.input.merchantText?.trim()) return false;
+      if (merchantTextFilter === 'NON_EMPTY' && !log.input.merchantText?.trim()) return false;
       if (shopNameSearch.trim() && !log.shopName?.toLowerCase().includes(shopNameSearch.trim().toLowerCase())) return false;
       return true;
     });
-  }, [logs, sourceFilter, shopNameSearch]);
+  }, [logs, sourceFilter, feedbackFilter, merchantTextFilter, shopNameSearch]);
 
   const toggleExpand = (id: string) => {
     setExpandedId(expandedId === id ? null : id);
@@ -242,7 +250,6 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
 
   const formatDate = (timestamp: string) => {
     return new Date(timestamp).toLocaleString('en-US', {
-      year: 'numeric',
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
@@ -322,6 +329,54 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                 ))}
               </div>
             </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium flex items-center gap-2">
+                <MessageSquare className="w-4 h-4" />
+                Feedback
+              </label>
+              <div className="flex items-center gap-1">
+                {([
+                  { value: 'ALL', label: 'All' },
+                  { value: 'CORRECT', label: 'Correct' },
+                  { value: 'INCORRECT', label: 'Incorrect' },
+                  { value: 'PARTIALLY_CORRECT', label: 'Partial' },
+                  { value: 'NO_FEEDBACK', label: 'None' },
+                ] as const).map(({ value, label }) => (
+                  <Button
+                    key={value}
+                    variant={feedbackFilter === value ? 'default' : 'outline'}
+                    size="sm"
+                    className="h-10"
+                    onClick={() => setFeedbackFilter(value)}
+                  >
+                    {label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium flex items-center gap-2">
+                <Filter className="w-4 h-4" />
+                Merchant Text
+              </label>
+              <div className="flex items-center gap-1">
+                {([
+                  { value: 'ALL', label: 'All' },
+                  { value: 'NON_EMPTY', label: 'Has Text' },
+                  { value: 'EMPTY', label: 'Empty' },
+                ] as const).map(({ value, label }) => (
+                  <Button
+                    key={value}
+                    variant={merchantTextFilter === value ? 'default' : 'outline'}
+                    size="sm"
+                    className="h-10"
+                    onClick={() => setMerchantTextFilter(value)}
+                  >
+                    {label}
+                  </Button>
+                ))}
+              </div>
+            </div>
             <div className="space-y-2 flex-1 min-w-[200px] max-w-sm">
               <label className="text-sm font-medium flex items-center gap-2">
                 <Search className="w-4 h-4" />
@@ -369,7 +424,7 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
             <Clock className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">No Pipeline Runs Found</h3>
             <p className="text-muted-foreground">
-              {startDate || endDate || sourceFilter !== 'ALL' || shopNameSearch
+              {startDate || endDate || sourceFilter !== 'ALL' || feedbackFilter !== 'ALL' || merchantTextFilter !== 'ALL' || shopNameSearch
                 ? 'No runs found for the selected filters. Try adjusting your criteria.'
                 : 'No pipeline runs have been recorded yet.'}
             </p>
@@ -381,9 +436,8 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
       {!loading && !error && filteredLogs.length > 0 && (
         <div className="space-y-3">
           {/* Column Headers */}
-          <div className="grid grid-cols-[180px_100px_90px_120px_80px_100px_1fr_40px] items-center px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b">
+          <div className="grid grid-cols-[150px_90px_120px_80px_100px_1fr_40px] items-center px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b">
             <span>Date</span>
-            <span>Status</span>
             <span>Source</span>
             <span>Shop</span>
             <span>Duration</span>
@@ -396,16 +450,11 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
               {/* Header Row - Always Visible */}
               <div
                 onClick={() => toggleExpand(log.id)}
-                className="grid grid-cols-[180px_100px_90px_120px_80px_100px_1fr_40px] items-center p-4 cursor-pointer hover:bg-muted/50 transition-colors"
+                className="grid grid-cols-[150px_90px_120px_80px_100px_1fr_40px] items-center p-4 cursor-pointer hover:bg-muted/50 transition-colors"
               >
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Clock className="w-4 h-4 flex-shrink-0" />
                   {formatDate(log.timestamp)}
-                </div>
-                <div>
-                  <Badge variant={getStatusBadge(log.status).variant}>
-                    {getStatusBadge(log.status).text}
-                  </Badge>
                 </div>
                 <div>
                   <Badge variant={log.source === 'APP' ? 'blue' : 'secondary'}>
@@ -473,11 +522,9 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                                 <span className="text-green-600 dark:text-green-400 font-medium">
                                   {product.title}
                                 </span>
-                                {product.productType && (
-                                  <Badge variant="outline" className="text-xs">
-                                    {product.productType}
-                                  </Badge>
-                                )}
+                                <Badge variant="outline" className="text-xs">
+                                  {product.productType || 'empty product type'}
+                                </Badge>
                               </div>
                             ))}
                           </div>
@@ -608,10 +655,11 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                                 handleFeedbackSelect(log.id, rating);
                               }}
                               className={cn(
-                                'flex items-center gap-1.5 px-3 py-1.5 rounded border text-sm font-medium transition-all',
+                                'flex items-center gap-1.5 px-3 py-1.5 rounded border text-sm font-medium transition-all cursor-pointer hover:scale-105 hover:shadow-md active:scale-95',
+                                color,
                                 feedbackActiveId === log.id && feedbackRating === rating
-                                  ? color
-                                  : 'bg-muted/50 border-border text-muted-foreground hover:bg-muted'
+                                  ? 'ring-2 ring-offset-1 ring-current opacity-100'
+                                  : 'opacity-70 hover:opacity-100'
                               )}
                             >
                               <Icon className="w-3.5 h-3.5" />
