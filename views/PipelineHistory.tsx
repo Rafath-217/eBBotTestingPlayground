@@ -489,7 +489,7 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                     {log.source}
                   </Badge>
                 </div>
-                <span className="text-xs font-medium text-muted-foreground truncate">
+                <span className="text-xs font-medium text-muted-foreground">
                   {log.shopName || '-'}
                 </span>
                 <span className="text-xs text-muted-foreground">
