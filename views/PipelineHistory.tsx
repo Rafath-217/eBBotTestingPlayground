@@ -464,7 +464,7 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
       {!loading && !error && filteredLogs.length > 0 && (
         <div className="space-y-3">
           {/* Column Headers */}
-          <div className="grid grid-cols-[150px_90px_120px_80px_100px_1fr_40px] items-center px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b">
+          <div className="grid grid-cols-[150px_90px_minmax(120px,auto)_80px_100px_1fr_40px] items-center px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b">
             <span>Date</span>
             <span>Source</span>
             <span>Shop</span>
@@ -478,7 +478,7 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
               {/* Header Row - Always Visible */}
               <div
                 onClick={() => toggleExpand(log.id)}
-                className="grid grid-cols-[150px_90px_120px_80px_100px_1fr_40px] items-center p-4 cursor-pointer hover:bg-muted/50 transition-colors"
+                className="grid grid-cols-[150px_90px_minmax(120px,auto)_80px_100px_1fr_40px] items-center p-4 cursor-pointer hover:bg-muted/50 transition-colors"
               >
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Clock className="w-4 h-4 flex-shrink-0" />
