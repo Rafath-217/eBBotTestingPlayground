@@ -401,17 +401,14 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                 Shop Name
               </label>
               <div className="flex items-center gap-2">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <input
-                    type="text"
-                    value={shopNameSearch}
-                    onChange={(e) => setShopNameSearch(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === 'Enter') handleShopSearch(); }}
-                    placeholder="Search by shop name..."
-                    className="h-10 w-full pl-9 pr-3 rounded-md border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                  />
-                </div>
+                <input
+                  type="text"
+                  value={shopNameSearch}
+                  onChange={(e) => setShopNameSearch(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleShopSearch(); }}
+                  placeholder="Search by shop name..."
+                  className="h-10 flex-1 px-3 rounded-md border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                />
                 <Button onClick={handleShopSearch} className="h-10" disabled={!shopNameSearch.trim()}>
                   Search
                 </Button>
