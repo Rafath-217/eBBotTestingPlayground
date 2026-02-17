@@ -419,12 +419,12 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                 )}
               </div>
             </div>
-            {pagination && (
-              <span className="text-sm text-muted-foreground ml-auto self-end pb-2">
-                Showing {filteredLogs.length} of {pagination.total} runs
-              </span>
-            )}
           </div>
+          {pagination && (
+            <div className="text-sm text-muted-foreground">
+              Showing {filteredLogs.length} of {pagination.total} runs
+            </div>
+          )}
         </CardContent>
       </Card>
 
