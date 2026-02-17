@@ -4,7 +4,7 @@ import { Card, CardHeader, CardTitle, CardContent, Button, Badge, CodeBlock, cn 
 import { ViewMode } from '../components/Layout';
 import { PMResultView, PMDiscountsPanel, PMRulesPanel, PMStepsPanel } from '../components/PMViews';
 import { PipelineHistoryLog, PipelineHistoryPagination, FeedbackRating } from '../types';
-import { getPipelineHistory, submitFeedback } from '../services/pipelineHistoryApi';
+import { getPipelineHistory, searchPipelineHistory, submitFeedback } from '../services/pipelineHistoryApi';
 
 interface PipelineHistoryProps {
   viewMode: ViewMode;
@@ -157,6 +157,9 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
   const [merchantTextFilter, setMerchantTextFilter] = useState<'ALL' | 'EMPTY' | 'NON_EMPTY'>('ALL');
   const [shopNameSearch, setShopNameSearch] = useState<string>('');
 
+  // Shop name search mode (server-side)
+  const [isSearchMode, setIsSearchMode] = useState(false);
+
   // Feedback state
   const [feedbackActiveId, setFeedbackActiveId] = useState<string | null>(null);
   const [feedbackRating, setFeedbackRating] = useState<FeedbackRating | null>(null);
@@ -196,12 +199,21 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
     setError(null);
 
     try {
-      const response = await getPipelineHistory({
-        startDate: startDate || undefined,
-        endDate: endDate || undefined,
-        page: currentPage,
-        limit,
-      });
+      let response;
+      if (isSearchMode && shopNameSearch.trim()) {
+        response = await searchPipelineHistory({
+          shopName: shopNameSearch.trim(),
+          page: currentPage,
+          limit,
+        });
+      } else {
+        response = await getPipelineHistory({
+          startDate: startDate || undefined,
+          endDate: endDate || undefined,
+          page: currentPage,
+          limit,
+        });
+      }
 
       setLogs(response.data.logs);
       setPagination(response.data.pagination);
@@ -215,11 +227,17 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
 
   useEffect(() => {
     fetchHistory();
-  }, [currentPage, startDate, endDate]);
+  }, [currentPage, startDate, endDate, isSearchMode]);
 
   const handleApplyFilter = () => {
     setCurrentPage(1);
     fetchHistory();
+  };
+
+  const handleShopSearch = () => {
+    if (!shopNameSearch.trim()) return;
+    setCurrentPage(1);
+    setIsSearchMode(true);
   };
 
   const handleClearFilter = () => {
@@ -227,6 +245,7 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
     setEndDate('');
     setSourceFilter('ALL');
     setShopNameSearch('');
+    setIsSearchMode(false);
     setCurrentPage(1);
   };
 
@@ -239,10 +258,9 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
       }
       if (merchantTextFilter === 'EMPTY' && log.input.merchantText?.trim()) return false;
       if (merchantTextFilter === 'NON_EMPTY' && !log.input.merchantText?.trim()) return false;
-      if (shopNameSearch.trim() && !log.shopName?.toLowerCase().includes(shopNameSearch.trim().toLowerCase())) return false;
       return true;
     });
-  }, [logs, sourceFilter, feedbackFilter, merchantTextFilter, shopNameSearch]);
+  }, [logs, sourceFilter, feedbackFilter, merchantTextFilter]);
 
   const toggleExpand = (id: string) => {
     setExpandedId(expandedId === id ? null : id);
@@ -382,15 +400,26 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                 <Search className="w-4 h-4" />
                 Shop Name
               </label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <input
-                  type="text"
-                  value={shopNameSearch}
-                  onChange={(e) => setShopNameSearch(e.target.value)}
-                  placeholder="Search by shop name..."
-                  className="h-10 w-full pl-9 pr-3 rounded-md border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                />
+              <div className="flex items-center gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <input
+                    type="text"
+                    value={shopNameSearch}
+                    onChange={(e) => setShopNameSearch(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') handleShopSearch(); }}
+                    placeholder="Search by shop name..."
+                    className="h-10 w-full pl-9 pr-3 rounded-md border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+                <Button onClick={handleShopSearch} className="h-10" disabled={!shopNameSearch.trim()}>
+                  Search
+                </Button>
+                {isSearchMode && (
+                  <Button variant="outline" className="h-10" onClick={() => { setShopNameSearch(''); setIsSearchMode(false); setCurrentPage(1); }}>
+                    Clear
+                  </Button>
+                )}
               </div>
             </div>
             {pagination && (
@@ -424,7 +453,9 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
             <Clock className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">No Pipeline Runs Found</h3>
             <p className="text-muted-foreground">
-              {startDate || endDate || sourceFilter !== 'ALL' || feedbackFilter !== 'ALL' || merchantTextFilter !== 'ALL' || shopNameSearch
+              {isSearchMode
+                ? `No runs found for shop "${shopNameSearch}". Try a different search term.`
+                : startDate || endDate || sourceFilter !== 'ALL' || feedbackFilter !== 'ALL' || merchantTextFilter !== 'ALL'
                 ? 'No runs found for the selected filters. Try adjusting your criteria.'
                 : 'No pipeline runs have been recorded yet.'}
             </p>
