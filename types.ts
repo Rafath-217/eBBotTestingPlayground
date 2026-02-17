@@ -236,6 +236,14 @@ export interface PipelineHistoryOutput {
   assembledResult: any;
 }
 
+export type FeedbackRating = 'CORRECT' | 'INCORRECT' | 'PARTIALLY_CORRECT';
+
+export interface PipelineHistoryFeedback {
+  rating: FeedbackRating;
+  remarks: string;
+  updatedAt: string;
+}
+
 export interface PipelineHistoryLog {
   id: string;
   timestamp: string;
@@ -245,6 +253,7 @@ export interface PipelineHistoryLog {
   input: PipelineHistoryInput;
   output: PipelineHistoryOutput;
   durationMs?: number;
+  feedback?: PipelineHistoryFeedback | null;
 }
 
 export interface PipelineHistoryPagination {

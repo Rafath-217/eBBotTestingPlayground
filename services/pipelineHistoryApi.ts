@@ -1,4 +1,4 @@
-import { PipelineHistoryResponse, PipelineHistoryQuery } from '../types';
+import { PipelineHistoryResponse, PipelineHistoryQuery, FeedbackRating } from '../types';
 
 const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:3001';
 const API_SECRET_KEY = process.env.DASHBOARD_KEY || '';
@@ -27,6 +27,29 @@ export async function getPipelineHistory(query: PipelineHistoryQuery = {}): Prom
 
   const response = await fetch(url, {
     headers: { 'secret-key': API_SECRET_KEY },
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'Network error' }));
+    throw new Error(error.message || `HTTP ${response.status}`);
+  }
+
+  return response.json();
+}
+
+/**
+ * Submit feedback for a pipeline history entry
+ */
+export async function submitFeedback(id: string, rating: FeedbackRating, remarks: string = ''): Promise<{ statusCode: number; message: string; data: any }> {
+  const url = `${API_BASE_URL}/api/bundleSetupLlmPipeline/pipelineHistory/${id}/feedback`;
+
+  const response = await fetch(url, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'secret-key': API_SECRET_KEY,
+    },
+    body: JSON.stringify({ rating, remarks }),
   });
 
   if (!response.ok) {

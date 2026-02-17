@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Clock, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Loader2, AlertCircle, Calendar, Package, Tag, Search, Filter } from 'lucide-react';
+import { Clock, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Loader2, AlertCircle, Calendar, Package, Tag, Search, Filter, MessageSquare, Check, X, AlertTriangle } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent, Button, Badge, CodeBlock, cn } from '../components/ui';
 import { ViewMode } from '../components/Layout';
 import { PMResultView, PMDiscountsPanel, PMRulesPanel, PMStepsPanel } from '../components/PMViews';
-import { PipelineHistoryLog, PipelineHistoryPagination } from '../types';
-import { getPipelineHistory } from '../services/pipelineHistoryApi';
+import { PipelineHistoryLog, PipelineHistoryPagination, FeedbackRating } from '../types';
+import { getPipelineHistory, submitFeedback } from '../services/pipelineHistoryApi';
 
 interface PipelineHistoryProps {
   viewMode: ViewMode;
@@ -154,6 +154,40 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
   // Client-side filter/search state
   const [sourceFilter, setSourceFilter] = useState<'ALL' | 'APP' | 'NON-APP'>('ALL');
   const [shopNameSearch, setShopNameSearch] = useState<string>('');
+
+  // Feedback state
+  const [feedbackActiveId, setFeedbackActiveId] = useState<string | null>(null);
+  const [feedbackRating, setFeedbackRating] = useState<FeedbackRating | null>(null);
+  const [feedbackRemarks, setFeedbackRemarks] = useState('');
+  const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
+
+  const handleFeedbackSelect = (logId: string, rating: FeedbackRating) => {
+    setFeedbackActiveId(logId);
+    setFeedbackRating(rating);
+    setFeedbackRemarks('');
+  };
+
+  const handleFeedbackSubmit = async (logId: string) => {
+    if (!feedbackRating) return;
+    setFeedbackSubmitting(true);
+    try {
+      await submitFeedback(logId, feedbackRating, feedbackRemarks);
+      setLogs((prev) =>
+        prev.map((log) =>
+          log.id === logId
+            ? { ...log, feedback: { rating: feedbackRating, remarks: feedbackRemarks, updatedAt: new Date().toISOString() } }
+            : log
+        )
+      );
+      setFeedbackActiveId(null);
+      setFeedbackRating(null);
+      setFeedbackRemarks('');
+    } catch (err) {
+      console.error('Failed to submit feedback:', err);
+    } finally {
+      setFeedbackSubmitting(false);
+    }
+  };
 
   const fetchHistory = async () => {
     setLoading(true);
@@ -347,12 +381,13 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
       {!loading && !error && filteredLogs.length > 0 && (
         <div className="space-y-3">
           {/* Column Headers */}
-          <div className="grid grid-cols-[180px_100px_90px_120px_80px_1fr_40px] items-center px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b">
+          <div className="grid grid-cols-[180px_100px_90px_120px_80px_100px_1fr_40px] items-center px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b">
             <span>Date</span>
             <span>Status</span>
             <span>Source</span>
             <span>Shop</span>
             <span>Duration</span>
+            <span>Feedback</span>
             <span>Input</span>
             <span></span>
           </div>
@@ -361,7 +396,7 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
               {/* Header Row - Always Visible */}
               <div
                 onClick={() => toggleExpand(log.id)}
-                className="grid grid-cols-[180px_100px_90px_120px_80px_1fr_40px] items-center p-4 cursor-pointer hover:bg-muted/50 transition-colors"
+                className="grid grid-cols-[180px_100px_90px_120px_80px_100px_1fr_40px] items-center p-4 cursor-pointer hover:bg-muted/50 transition-colors"
               >
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Clock className="w-4 h-4 flex-shrink-0" />
@@ -383,6 +418,19 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                 <span className="text-xs text-muted-foreground">
                   {log.durationMs ? `${(log.durationMs / 1000).toFixed(1)}s` : '-'}
                 </span>
+                <div>
+                  {log.feedback ? (
+                    <Badge variant={
+                      log.feedback.rating === 'CORRECT' ? 'success' :
+                      log.feedback.rating === 'INCORRECT' ? 'destructive' : 'warning'
+                    } className="text-xs">
+                      {log.feedback.rating === 'CORRECT' ? 'Correct' :
+                       log.feedback.rating === 'INCORRECT' ? 'Incorrect' : 'Partial'}
+                    </Badge>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">-</span>
+                  )}
+                </div>
                 <span className="text-sm text-muted-foreground truncate">
                   {log.input.merchantText}
                 </span>
@@ -505,6 +553,114 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                         <div>
                           <CodeBlock label="Assembled Result" code={log.output.assembledResult} />
                         </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Feedback Section */}
+                  <div className="space-y-3 border-t pt-4">
+                    <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider flex items-center gap-2">
+                      <MessageSquare className="w-4 h-4" />
+                      Feedback
+                    </h3>
+
+                    {/* Existing feedback display */}
+                    {log.feedback && feedbackActiveId !== log.id && (
+                      <div className="flex items-start gap-3 p-3 bg-background rounded border">
+                        <Badge variant={
+                          log.feedback.rating === 'CORRECT' ? 'success' :
+                          log.feedback.rating === 'INCORRECT' ? 'destructive' : 'warning'
+                        }>
+                          {log.feedback.rating === 'CORRECT' ? 'Correct' :
+                           log.feedback.rating === 'INCORRECT' ? 'Incorrect' : 'Partially Correct'}
+                        </Badge>
+                        {log.feedback.remarks && (
+                          <p className="text-sm text-muted-foreground flex-1">{log.feedback.remarks}</p>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleFeedbackSelect(log.id, log.feedback!.rating);
+                            setFeedbackRemarks(log.feedback!.remarks || '');
+                          }}
+                          className="text-xs"
+                        >
+                          Update
+                        </Button>
+                      </div>
+                    )}
+
+                    {/* Rating buttons */}
+                    {(!log.feedback || feedbackActiveId === log.id) && (
+                      <div className="space-y-3">
+                        <div className="flex gap-2">
+                          {([
+                            { rating: 'CORRECT' as FeedbackRating, label: 'Correct', icon: Check, color: 'bg-green-100 dark:bg-green-950 border-green-300 dark:border-green-700 text-green-700 dark:text-green-300' },
+                            { rating: 'INCORRECT' as FeedbackRating, label: 'Incorrect', icon: X, color: 'bg-red-100 dark:bg-red-950 border-red-300 dark:border-red-700 text-red-700 dark:text-red-300' },
+                            { rating: 'PARTIALLY_CORRECT' as FeedbackRating, label: 'Partially Correct', icon: AlertTriangle, color: 'bg-amber-100 dark:bg-amber-950 border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300' },
+                          ]).map(({ rating, label, icon: Icon, color }) => (
+                            <button
+                              key={rating}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleFeedbackSelect(log.id, rating);
+                              }}
+                              className={cn(
+                                'flex items-center gap-1.5 px-3 py-1.5 rounded border text-sm font-medium transition-all',
+                                feedbackActiveId === log.id && feedbackRating === rating
+                                  ? color
+                                  : 'bg-muted/50 border-border text-muted-foreground hover:bg-muted'
+                              )}
+                            >
+                              <Icon className="w-3.5 h-3.5" />
+                              {label}
+                            </button>
+                          ))}
+                        </div>
+
+                        {/* Remarks + Submit (visible after selecting a rating) */}
+                        {feedbackActiveId === log.id && feedbackRating && (
+                          <div className="space-y-2">
+                            <textarea
+                              value={feedbackRemarks}
+                              onChange={(e) => setFeedbackRemarks(e.target.value)}
+                              onClick={(e) => e.stopPropagation()}
+                              placeholder="Add remarks (optional)..."
+                              className="w-full p-2 text-sm border rounded bg-background resize-none focus:outline-none focus:ring-2 focus:ring-ring"
+                              rows={2}
+                            />
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleFeedbackSubmit(log.id);
+                                }}
+                                disabled={feedbackSubmitting}
+                              >
+                                {feedbackSubmitting ? (
+                                  <><Loader2 className="w-3 h-3 mr-1 animate-spin" /> Submitting...</>
+                                ) : (
+                                  'Submit Feedback'
+                                )}
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setFeedbackActiveId(null);
+                                  setFeedbackRating(null);
+                                  setFeedbackRemarks('');
+                                }}
+                              >
+                                Cancel
+                              </Button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
