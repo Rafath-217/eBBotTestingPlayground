@@ -479,8 +479,8 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                 onClick={() => toggleExpand(log.id)}
                 className="grid grid-cols-[150px_220px_100px_80px_1fr_40px] items-center p-4 cursor-pointer hover:bg-muted/50 transition-colors"
               >
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Clock className="w-4 h-4 flex-shrink-0" />
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Clock className="w-3 h-3 flex-shrink-0" />
                   {formatDate(log.timestamp)}
                 </div>
                 <span className="text-xs font-medium text-muted-foreground">
