@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, FileJson, Tag, ShieldCheck, BarChart3, Moon, Sun, Menu, ChevronRight, Play, Boxes, Code, Users, History, ListChecks, ArrowLeftRight } from 'lucide-react';
+import { LayoutDashboard, FileJson, Tag, ShieldCheck, BarChart3, Moon, Sun, Menu, ChevronRight, Play, Boxes, Code, Users, History, ListChecks, ArrowLeftRight, TrendingDown, FileBarChart } from 'lucide-react';
 import { Button, cn } from './ui';
 
 interface SidebarItemProps {
@@ -119,6 +119,18 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
             <div className="pt-4 pb-2">
               <h4 className="px-2 text-xs font-semibold text-muted-foreground tracking-wider uppercase mb-2">Analysis</h4>
               <div className="space-y-1">
+                <SidebarItem
+                  icon={TrendingDown}
+                  label="Churn Analysis"
+                  active={activeTab === 'churnAnalysis'}
+                  onClick={() => onTabChange('churnAnalysis')}
+                />
+                <SidebarItem
+                  icon={FileBarChart}
+                  label="Churn Report"
+                  active={activeTab === 'churnReport'}
+                  onClick={() => onTabChange('churnReport')}
+                />
                 <SidebarItem
                   icon={BarChart3}
                   label="Test Results"

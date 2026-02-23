@@ -10,6 +10,8 @@ import Playground from './views/Playground';
 import PipelineHistory from './views/PipelineHistory';
 import EvaluationRuns from './views/EvaluationRuns';
 import RunComparison from './views/RunComparison';
+import ChurnAnalysis from './views/ChurnAnalysis';
+import ChurnReport from './views/ChurnReport';
 import { getMetrics, getAllResults, getEnrichedResults, EnrichedResult, getLLMSpecs, getTestCases } from './services/dataService';
 import { getLatestEvaluationRun, getPromptVersionStats } from './services/evaluationApi';
 import { Metrics, LLMSpecs, TestCase, EvaluationRunDetail, PromptVersionStats } from './types';
@@ -142,6 +144,8 @@ function App() {
             onBack={() => { setCompareRuns(null); setActiveTab('evaluationRuns'); }}
           />
         )}
+        {activeTab === 'churnAnalysis' && <ChurnAnalysis viewMode={viewMode} />}
+        {activeTab === 'churnReport' && <ChurnReport viewMode={viewMode} />}
     </Layout>
   );
 }
