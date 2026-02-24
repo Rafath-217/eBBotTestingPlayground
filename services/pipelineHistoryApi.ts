@@ -21,6 +21,15 @@ export async function getPipelineHistory(query: PipelineHistoryQuery = {}): Prom
   if (query.limit !== undefined) {
     params.append('limit', String(query.limit));
   }
+  if (query.source && query.source !== 'ALL') {
+    params.append('source', query.source);
+  }
+  if (query.feedback && query.feedback !== 'ALL') {
+    params.append('feedback', query.feedback);
+  }
+  if (query.merchantText && query.merchantText !== 'ALL') {
+    params.append('merchantText', query.merchantText);
+  }
 
   const queryString = params.toString();
   const url = `${API_BASE_URL}/api/bundleSetupLlmPipeline/pipelineHistory${queryString ? `?${queryString}` : ''}`;

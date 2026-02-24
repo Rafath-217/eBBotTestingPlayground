@@ -250,6 +250,7 @@ export interface PipelineHistoryLog {
   status: 'AUTO' | 'DOWNGRADED_TO_MANUAL' | 'MANUAL';
   source: 'APP' | 'NON-APP';
   shopName: string;
+  bundleLink?: string | null;
   input: PipelineHistoryInput;
   output: PipelineHistoryOutput;
   durationMs?: number;
@@ -277,6 +278,9 @@ export interface PipelineHistoryQuery {
   endDate?: string;
   page?: number;
   limit?: number;
+  source?: 'ALL' | 'APP' | 'NON-APP';
+  feedback?: 'ALL' | 'CORRECT' | 'INCORRECT' | 'PARTIALLY_CORRECT' | 'NO_FEEDBACK';
+  merchantText?: 'ALL' | 'EMPTY' | 'NON_EMPTY';
 }
 
 // --- EVALUATION TYPES ---

@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Clock, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Loader2, AlertCircle, Calendar, Package, Tag, Search, Filter, MessageSquare, Check, X, AlertTriangle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Clock, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Loader2, AlertCircle, Calendar, Package, Tag, Search, Filter, MessageSquare, Check, X, AlertTriangle, ExternalLink } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent, Button, Badge, CodeBlock, cn } from '../components/ui';
 import { ViewMode } from '../components/Layout';
 import { PMResultView, PMDiscountsPanel, PMRulesPanel, PMStepsPanel } from '../components/PMViews';
@@ -159,6 +159,7 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
 
   // Shop name search mode (server-side)
   const [isSearchMode, setIsSearchMode] = useState(false);
+  const [fetchTrigger, setFetchTrigger] = useState(0);
 
   // Feedback state
   const [feedbackActiveId, setFeedbackActiveId] = useState<string | null>(null);
@@ -212,6 +213,9 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
           endDate: endDate || undefined,
           page: currentPage,
           limit,
+          source: sourceFilter,
+          feedback: feedbackFilter,
+          merchantText: merchantTextFilter,
         });
       }
 
@@ -227,11 +231,11 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
 
   useEffect(() => {
     fetchHistory();
-  }, [currentPage, startDate, endDate, isSearchMode]);
+  }, [currentPage, isSearchMode, fetchTrigger]);
 
   const handleApplyFilter = () => {
     setCurrentPage(1);
-    fetchHistory();
+    setFetchTrigger((t) => t + 1);
   };
 
   const handleShopSearch = () => {
@@ -244,23 +248,13 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
     setStartDate('');
     setEndDate('');
     setSourceFilter('ALL');
+    setFeedbackFilter('ALL');
+    setMerchantTextFilter('ALL');
     setShopNameSearch('');
     setIsSearchMode(false);
     setCurrentPage(1);
+    setFetchTrigger((t) => t + 1);
   };
-
-  const filteredLogs = useMemo(() => {
-    return logs.filter((log) => {
-      if (sourceFilter !== 'ALL' && log.source !== sourceFilter) return false;
-      if (feedbackFilter !== 'ALL') {
-        if (feedbackFilter === 'NO_FEEDBACK' && log.feedback) return false;
-        if (feedbackFilter !== 'NO_FEEDBACK' && log.feedback?.rating !== feedbackFilter) return false;
-      }
-      if (merchantTextFilter === 'EMPTY' && log.input.merchantText?.trim()) return false;
-      if (merchantTextFilter === 'NON_EMPTY' && !log.input.merchantText?.trim()) return false;
-      return true;
-    });
-  }, [logs, sourceFilter, feedbackFilter, merchantTextFilter]);
 
   const toggleExpand = (id: string) => {
     setExpandedId(expandedId === id ? null : id);
@@ -318,12 +312,6 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                 className="h-10 px-3 rounded-md border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
               />
             </div>
-            <Button onClick={handleApplyFilter} className="h-10">
-              Apply Filter
-            </Button>
-            <Button variant="outline" onClick={handleClearFilter} className="h-10">
-              Clear
-            </Button>
           </div>
 
           {/* Source filter + Shop name search row */}
@@ -420,11 +408,21 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
               </div>
             </div>
           </div>
-          {pagination && (
-            <div className="text-sm text-muted-foreground">
-              Showing {filteredLogs.length} of {pagination.total} runs
-            </div>
-          )}
+
+          {/* Action buttons + result count */}
+          <div className="flex items-center gap-4">
+            <Button onClick={handleApplyFilter} className="h-10">
+              Apply Filters
+            </Button>
+            <Button variant="outline" onClick={handleClearFilter} className="h-10">
+              Clear
+            </Button>
+            {pagination && (
+              <span className="text-sm text-muted-foreground">
+                Showing {logs.length} of {pagination.total} results
+              </span>
+            )}
+          </div>
         </CardContent>
       </Card>
 
@@ -444,7 +442,7 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
       )}
 
       {/* Empty State */}
-      {!loading && !error && filteredLogs.length === 0 && (
+      {!loading && !error && logs.length === 0 && (
         <Card>
           <CardContent className="py-12 text-center">
             <Clock className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
@@ -461,31 +459,56 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
       )}
 
       {/* Pipeline Runs List */}
-      {!loading && !error && filteredLogs.length > 0 && (
+      {!loading && !error && logs.length > 0 && (
         <div className="space-y-3">
           {/* Column Headers */}
-          <div className="grid grid-cols-[150px_220px_100px_80px_1fr_40px] items-center px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b">
+          <div className="grid grid-cols-[150px_220px_80px_100px_80px_1fr_40px] items-center px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b">
             <span>Date</span>
             <span>Shop</span>
+            <span>Bundle</span>
             <span>Duration</span>
             <span>Feedback</span>
             <span>Input</span>
             <span></span>
           </div>
-          {filteredLogs.map((log) => (
+          {logs.map((log) => (
             <Card key={log.id} className="overflow-hidden">
               {/* Header Row - Always Visible */}
               <div
                 onClick={() => toggleExpand(log.id)}
-                className="grid grid-cols-[150px_220px_100px_80px_1fr_40px] items-center p-4 cursor-pointer hover:bg-muted/50 transition-colors"
+                className="grid grid-cols-[150px_220px_80px_100px_80px_1fr_40px] items-center p-4 cursor-pointer hover:bg-muted/50 transition-colors"
               >
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <Clock className="w-3 h-3 flex-shrink-0" />
                   {formatDate(log.timestamp)}
                 </div>
-                <span className="text-xs font-medium text-muted-foreground">
-                  {log.shopName || '-'}
-                </span>
+                {log.shopName ? (
+                  <a
+                    href={`https://${log.shopName}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline"
+                  >
+                    {log.shopName}
+                  </a>
+                ) : (
+                  <span className="text-xs font-medium text-muted-foreground">-</span>
+                )}
+                {log.bundleLink ? (
+                  <a
+                    href={log.bundleLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="flex items-center gap-1 text-xs font-medium text-green-600 dark:text-green-400 hover:underline"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                    View
+                  </a>
+                ) : (
+                  <span className="text-xs text-muted-foreground">-</span>
+                )}
                 <span className="text-xs text-muted-foreground">
                   {log.durationMs ? `${(log.durationMs / 1000).toFixed(1)}s` : '-'}
                 </span>

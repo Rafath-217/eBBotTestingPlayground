@@ -655,7 +655,17 @@ const ChurnAnalysis: React.FC<ChurnAnalysisProps> = ({ viewMode }) => {
               <React.Fragment key={store.shopName}>
                 {/* Summary Row */}
                 <TableRow onClick={() => handleRowClick(store.shopName)}>
-                  <TableCell className="font-medium text-sm">{store.shopName}</TableCell>
+                  <TableCell className="font-medium text-sm">
+                    <a
+                      href={`https://${store.shopName}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-blue-600 dark:text-blue-400 hover:underline"
+                    >
+                      {store.shopName}
+                    </a>
+                  </TableCell>
                   <TableCell>
                     <Badge variant="outline">{store.pipelineRuns}</Badge>
                   </TableCell>
