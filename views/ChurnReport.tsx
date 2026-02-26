@@ -907,28 +907,17 @@ const ExpandedReportView: React.FC<ExpandedReportViewProps> = ({
         </div>
       )}
 
-      {/* 8. Actionable Insights (merged deterministic + LLM) */}
-      {((report.actionableInsights && report.actionableInsights.length > 0) ||
-        (llm?.insights && llm.insights.length > 0)) && (
+      {/* 8. Actionable Insights (merged deterministic + LLM, already deduped by backend) */}
+      {report.actionableInsights && report.actionableInsights.length > 0 && (
         <div>
           <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-slate-100">Actionable Insights</h3>
           <div className="space-y-3">
-            {/* Deterministic insights */}
-            {report.actionableInsights?.map((insight: any, idx: number) => (
+            {report.actionableInsights.map((insight: any, idx: number) => (
               <InsightCard
-                key={`det-${idx}`}
+                key={idx}
                 insight={insight}
                 index={idx + 1}
-                source="deterministic"
-              />
-            ))}
-            {/* LLM insights */}
-            {llm?.insights?.map((insight: any, idx: number) => (
-              <InsightCard
-                key={`llm-${idx}`}
-                insight={insight}
-                index={(report.actionableInsights?.length || 0) + idx + 1}
-                source="llm"
+                source={insight.source}
               />
             ))}
           </div>
@@ -1216,37 +1205,71 @@ const InsightCard: React.FC<{ insight: any; index: number; source?: string }> = 
   insight,
   index,
   source,
-}) => (
-  <div
-    className={cn(
-      'border-l-4 rounded-lg p-4',
-      SEVERITY_STYLES[insight.severity] || SEVERITY_STYLES.low
-    )}
-  >
-    <div className="flex items-start gap-3">
-      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-xs font-bold text-slate-700 dark:text-slate-300">
-        {index}
-      </div>
-      <div className="flex-1">
-        <div className="flex items-center gap-2 mb-1">
-          <Badge variant={SEVERITY_BADGE[insight.severity] || 'blue'} className="text-xs">
-            {insight.severity}
-          </Badge>
-          {source && (
-            <Badge
-              variant={source === 'llm' ? 'purple' : 'secondary'}
-              className="text-xs"
-            >
-              {source === 'llm' ? 'AI' : 'Data'}
+}) => {
+  const [expanded, setExpanded] = useState(false);
+  const stores = insight.stores || [];
+
+  return (
+    <div
+      className={cn(
+        'border-l-4 rounded-lg p-4',
+        SEVERITY_STYLES[insight.severity] || SEVERITY_STYLES.low
+      )}
+    >
+      <div className="flex items-start gap-3">
+        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-xs font-bold text-slate-700 dark:text-slate-300">
+          {index}
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <Badge variant={SEVERITY_BADGE[insight.severity] || 'blue'} className="text-xs">
+              {insight.severity}
             </Badge>
+            {source && (
+              <Badge
+                variant={source === 'llm' ? 'purple' : 'secondary'}
+                className="text-xs"
+              >
+                {source === 'llm' ? 'AI' : 'Data'}
+              </Badge>
+            )}
+          </div>
+          <p className="text-sm text-slate-700 dark:text-slate-300">
+            {insight.insight || insight.description || JSON.stringify(insight)}
+          </p>
+          {stores.length > 0 && (
+            <button
+              onClick={() => setExpanded(!expanded)}
+              className="mt-2 flex items-center gap-1 text-xs text-muted-foreground hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
+            >
+              {expanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+              {stores.length} store{stores.length !== 1 ? 's' : ''} affected
+            </button>
+          )}
+          {expanded && stores.length > 0 && (
+            <div className="mt-2 space-y-1.5">
+              {stores.map((store: any, idx: number) => (
+                <div
+                  key={store.shopName || idx}
+                  className="bg-white/50 dark:bg-slate-800/50 rounded-lg px-3 py-2 text-xs"
+                >
+                  <div className="flex items-center gap-2">
+                    <Store className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                    <span className="font-mono font-medium text-slate-900 dark:text-slate-100">
+                      {store.shopName}
+                    </span>
+                  </div>
+                  {store.detail && (
+                    <p className="text-muted-foreground ml-5 mt-0.5 line-clamp-2">{store.detail}</p>
+                  )}
+                </div>
+              ))}
+            </div>
           )}
         </div>
-        <p className="text-sm text-slate-700 dark:text-slate-300">
-          {insight.insight || insight.description || JSON.stringify(insight)}
-        </p>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default ChurnReportView;

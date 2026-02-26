@@ -642,9 +642,8 @@ const ChurnAnalysis: React.FC<ChurnAnalysisProps> = ({ viewMode }) => {
             <TableRow>
               <TableHead>Shop Name</TableHead>
               <TableHead>Pipeline Runs</TableHead>
-              <TableHead>Last Run</TableHead>
-              <TableHead>Uninstalled At</TableHead>
               <TableHead>App Lifetime</TableHead>
+              <TableHead>Last Run to Uninstall</TableHead>
               <TableHead>Errors</TableHead>
               <TableHead>Churn Reasons</TableHead>
               <TableHead className="w-10">{' '}</TableHead>
@@ -669,13 +668,8 @@ const ChurnAnalysis: React.FC<ChurnAnalysisProps> = ({ viewMode }) => {
                   <TableCell>
                     <Badge variant="outline">{store.pipelineRuns}</Badge>
                   </TableCell>
-                  <TableCell className="text-xs text-muted-foreground">
-                    {formatDate(store.lastRunDate)}
-                  </TableCell>
-                  <TableCell className="text-xs text-muted-foreground">
-                    {formatDate(store.uninstalledAt)}
-                  </TableCell>
                   <TableCell className="text-xs">{store.timeToUninstall}</TableCell>
+                  <TableCell className="text-xs">{store.timeSinceLastRun || 'N/A'}</TableCell>
                   <TableCell>
                     <Badge variant={store.hadGeminiErrors ? 'destructive' : 'success'}>
                       {store.hadGeminiErrors ? 'Yes' : 'No'}

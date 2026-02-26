@@ -15,6 +15,8 @@ export interface ChurnedStore {
   uninstalledAt: string;
   timeToUninstall: string;
   timeToUninstallMs: number;
+  timeSinceLastRun: string;
+  timeSinceLastRunMs: number;
   hadGeminiErrors: boolean;
   churnReasons: ChurnReason[];
 }
