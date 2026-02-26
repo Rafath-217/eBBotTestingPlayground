@@ -692,6 +692,14 @@ const ExpandedReportView: React.FC<ExpandedReportViewProps> = ({
 
   return (
     <div className="p-6 space-y-8">
+      {/* Disclaimer */}
+      <div className="flex items-start gap-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+        <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+        <p className="text-sm text-amber-800 dark:text-amber-300">
+          This analysis is generated using LLM-based pattern detection and deterministic heuristics. Findings are directional indicators, not definitive conclusions — please verify with actual merchant context before making product decisions.
+        </p>
+      </div>
+
       {/* 1. Executive Summary */}
       {executiveSummary && (
         <div>
