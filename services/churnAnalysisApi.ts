@@ -153,10 +153,39 @@ export async function analyseStore(shopName: string): Promise<{
 
 // ── Churn Report Types ──
 
+export interface ReasonStoreEntry {
+  shopName: string;
+  merchantText?: string;
+  runs?: number;
+}
+
+export interface IntentGapStoreEntry {
+  shopName: string;
+  gaps: string[];
+  gapSeverity: 'low' | 'medium' | 'high';
+  gapSummary: string;
+}
+
 export interface ChurnReportReasonDetail {
   reason: string;
   storeCount: number;
   percentage: number;
+  stores?: (ReasonStoreEntry | IntentGapStoreEntry)[];
+}
+
+// ── Gap Analysis Types ──
+
+export interface GapAnalysisDetail {
+  hasGap: boolean;
+  gaps: string[];
+  severity: 'low' | 'medium' | 'high';
+  summary: string;
+}
+
+export interface GapAnalysis {
+  storesAnalyzed: number;
+  storesWithGaps: number;
+  details: Record<string, GapAnalysisDetail>;
 }
 
 export interface ChurnReportCategory {
@@ -255,6 +284,7 @@ export interface StoredReport {
     patterns: any[];
     recommendations: any[];
   };
+  gapAnalysis?: GapAnalysis;
   summary: string;
   actionableInsights: any[];
   storesAnalyzed: number;

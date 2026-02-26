@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Loader2, Download, RefreshCw, ChevronDown, ChevronUp, AlertTriangle,
-  Info, Zap, Trash2, Eye, Plus, Clock, Database, ArrowUp,
+  Info, Zap, Trash2, Eye, Plus, Clock, Database, ArrowUp, Store, Search,
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent, Button, Badge, cn } from '../components/ui';
 import { ViewMode } from '../components/Layout';
@@ -16,6 +16,9 @@ import {
   ChurnReportCategory,
   ChurnReportInsight,
   ChurnPagination,
+  GapAnalysis,
+  GapAnalysisDetail,
+  IntentGapStoreEntry,
 } from '../services/churnAnalysisApi';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -35,6 +38,13 @@ interface ChurnReportProps {
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
+  'safe_default_used': '#f59e0b',
+  'default_rule_applied': '#3b82f6',
+  'multi_step_missing_steps': '#ef4444',
+  'no_bundle_created': '#dc2626',
+  'negative_feedback': '#8b5cf6',
+  'intent_gap': '#e11d48',
+  // Legacy categories (for older reports)
   'Unsupported Features': '#ef4444',
   'Pipeline Quality Issues': '#f59e0b',
   'Input Quality Issues': '#3b82f6',
@@ -690,12 +700,17 @@ const ExpandedReportView: React.FC<ExpandedReportViewProps> = ({
             <MetricCard label="Churned Stores" value={executiveSummary.totalChurnedStores} />
             <MetricCard label="Total Pipeline Runs" value={executiveSummary.totalPipelineRuns} />
             <MetricCard label="Avg Runs / Store" value={executiveSummary.avgPipelineRunsPerStore} />
-            <MetricCard label="Avg Time to Uninstall" value={executiveSummary.avgTimeToUninstall} />
             <MetricCard
               label="Error Rate"
               value={`${executiveSummary.errorRate}%`}
               highlight={executiveSummary.errorRate > 20}
             />
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+            <MetricCard label="Avg Install → Uninstall" value={executiveSummary.avgTimeToUninstall} />
+            <MetricCard label="Median Install → Uninstall" value={executiveSummary.medianTimeToUninstall} />
+            <MetricCard label="Avg Last Run → Uninstall" value={executiveSummary.avgTimeSinceLastRun || "N/A"} />
+            <MetricCard label="Median Last Run → Uninstall" value={executiveSummary.medianTimeSinceLastRun || "N/A"} />
           </div>
         </div>
       )}
@@ -811,7 +826,7 @@ const ExpandedReportView: React.FC<ExpandedReportViewProps> = ({
       {/* 5. Time Distribution */}
       {timeDistribution.length > 0 && (
         <div>
-          <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-slate-100">Time-to-Uninstall Distribution</h3>
+          <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-slate-100">App Lifetime Distribution</h3>
           <Card>
             <CardContent className="pt-6">
               <div className="h-64">
@@ -842,7 +857,12 @@ const ExpandedReportView: React.FC<ExpandedReportViewProps> = ({
         </div>
       )}
 
-      {/* 6. LLM Recommendations */}
+      {/* 6. Gap Analysis */}
+      {report.gapAnalysis && report.gapAnalysis.storesWithGaps > 0 && (
+        <GapAnalysisSection gapAnalysis={report.gapAnalysis} />
+      )}
+
+      {/* 7. LLM Recommendations */}
       {llm?.recommendations && llm.recommendations.length > 0 && (
         <div>
           <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-slate-100">Recommendations</h3>
@@ -887,7 +907,7 @@ const ExpandedReportView: React.FC<ExpandedReportViewProps> = ({
         </div>
       )}
 
-      {/* 7. Actionable Insights (merged deterministic + LLM) */}
+      {/* 8. Actionable Insights (merged deterministic + LLM) */}
       {((report.actionableInsights && report.actionableInsights.length > 0) ||
         (llm?.insights && llm.insights.length > 0)) && (
         <div>
@@ -915,7 +935,7 @@ const ExpandedReportView: React.FC<ExpandedReportViewProps> = ({
         </div>
       )}
 
-      {/* 8. Download full report */}
+      {/* 9. Download full report */}
       <div className="flex justify-end pt-4">
         <Button onClick={onDownload}>
           <Download className="w-4 h-4 mr-2" />
@@ -955,53 +975,241 @@ const CategoryCard: React.FC<{
   totalStores: number;
   expanded: boolean;
   onToggle: () => void;
-}> = ({ category, totalStores, expanded, onToggle }) => (
-  <Card>
-    <button
-      onClick={onToggle}
-      className="w-full flex items-center justify-between p-4 text-left hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors rounded-xl"
-    >
-      <div className="flex items-center gap-3">
-        <div
-          className="w-3 h-3 rounded-full flex-shrink-0"
-          style={{ backgroundColor: CATEGORY_COLORS[category.category] || '#6b7280' }}
-        />
-        <div>
-          <span className="font-medium text-sm text-slate-900 dark:text-slate-100">
-            {category.category}
-          </span>
-          <span className="text-xs text-muted-foreground ml-2">
-            {category.storesAffected} stores ({category.percentage}%)
-          </span>
+}> = ({ category, totalStores, expanded, onToggle }) => {
+  const [expandedReasons, setExpandedReasons] = useState<Set<string>>(new Set());
+
+  const toggleReason = (reason: string) => {
+    setExpandedReasons((prev) => {
+      const next = new Set(prev);
+      if (next.has(reason)) next.delete(reason);
+      else next.add(reason);
+      return next;
+    });
+  };
+
+  const isIntentGapStore = (store: any): store is IntentGapStoreEntry =>
+    Array.isArray(store.gaps);
+
+  return (
+    <Card>
+      <button
+        onClick={onToggle}
+        className="w-full flex items-center justify-between p-4 text-left hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors rounded-xl"
+      >
+        <div className="flex items-center gap-3">
+          <div
+            className="w-3 h-3 rounded-full flex-shrink-0"
+            style={{ backgroundColor: CATEGORY_COLORS[category.category] || '#6b7280' }}
+          />
+          <div>
+            <span className="font-medium text-sm text-slate-900 dark:text-slate-100">
+              {category.category.replace(/_/g, ' ')}
+            </span>
+            <span className="text-xs text-muted-foreground ml-2">
+              {category.storesAffected} stores ({category.percentage}%)
+            </span>
+          </div>
         </div>
-      </div>
-      {expanded ? (
-        <ChevronUp className="w-4 h-4 text-muted-foreground" />
-      ) : (
-        <ChevronDown className="w-4 h-4 text-muted-foreground" />
+        {expanded ? (
+          <ChevronUp className="w-4 h-4 text-muted-foreground" />
+        ) : (
+          <ChevronDown className="w-4 h-4 text-muted-foreground" />
+        )}
+      </button>
+      {expanded && category.topReasons && category.topReasons.length > 0 && (
+        <div className="px-4 pb-4 pt-0">
+          <div className="border-t pt-3 space-y-2">
+            {category.topReasons.map((r: any) => (
+              <div key={r.reason}>
+                <div
+                  className={cn(
+                    'flex items-center justify-between text-sm',
+                    r.stores && r.stores.length > 0 && 'cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg px-2 py-1.5 -mx-2'
+                  )}
+                  onClick={() => r.stores && r.stores.length > 0 && toggleReason(r.reason)}
+                >
+                  <div className="flex items-center gap-2">
+                    {r.stores && r.stores.length > 0 && (
+                      expandedReasons.has(r.reason) ? (
+                        <ChevronUp className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+                      ) : (
+                        <ChevronDown className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+                      )
+                    )}
+                    <span className="text-slate-700 dark:text-slate-300">
+                      {r.reason.replace(/_/g, ' ')}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground text-xs">{r.storeCount} stores</span>
+                    <Badge variant="secondary" className="text-xs">
+                      {r.percentage}%
+                    </Badge>
+                  </div>
+                </div>
+
+                {/* Stores drill-down */}
+                {expandedReasons.has(r.reason) && r.stores && r.stores.length > 0 && (
+                  <div className="ml-6 mt-2 mb-3 space-y-1.5">
+                    {r.stores.map((store: any, idx: number) => (
+                      <div
+                        key={store.shopName || idx}
+                        className="bg-slate-50 dark:bg-slate-800/50 rounded-lg px-3 py-2 text-xs"
+                      >
+                        <div className="flex items-center gap-2 mb-1">
+                          <Store className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                          <span className="font-mono font-medium text-slate-900 dark:text-slate-100">
+                            {store.shopName}
+                          </span>
+                          {!isIntentGapStore(store) && store.runs !== undefined && (
+                            <Badge variant="secondary" className="text-[10px]">
+                              {store.runs} run{store.runs !== 1 ? 's' : ''}
+                            </Badge>
+                          )}
+                          {isIntentGapStore(store) && store.gapSeverity && (
+                            <Badge
+                              variant={SEVERITY_BADGE[store.gapSeverity] || 'secondary'}
+                              className="text-[10px]"
+                            >
+                              {store.gapSeverity}
+                            </Badge>
+                          )}
+                        </div>
+                        {/* Regular store: show merchantText */}
+                        {!isIntentGapStore(store) && store.merchantText && (
+                          <p className="text-muted-foreground ml-5 line-clamp-2">
+                            {store.merchantText}
+                          </p>
+                        )}
+                        {/* Intent gap store: show gaps and summary */}
+                        {isIntentGapStore(store) && (
+                          <div className="ml-5 space-y-1">
+                            {store.gaps.length > 0 && (
+                              <div className="flex flex-wrap gap-1">
+                                {store.gaps.map((gap: string, gIdx: number) => (
+                                  <Badge key={gIdx} variant="warning" className="text-[10px]">
+                                    {gap}
+                                  </Badge>
+                                ))}
+                              </div>
+                            )}
+                            {store.gapSummary && (
+                              <p className="text-muted-foreground">{store.gapSummary}</p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
       )}
-    </button>
-    {expanded && category.topReasons && category.topReasons.length > 0 && (
-      <div className="px-4 pb-4 pt-0">
-        <div className="border-t pt-3 space-y-2">
-          {category.topReasons.map((r: any) => (
-            <div key={r.reason} className="flex items-center justify-between text-sm">
-              <span className="text-slate-700 dark:text-slate-300">
-                {r.reason.replace(/_/g, ' ')}
-              </span>
-              <div className="flex items-center gap-2">
-                <span className="text-muted-foreground text-xs">{r.storeCount} stores</span>
-                <Badge variant="secondary" className="text-xs">
-                  {r.percentage}%
-                </Badge>
+    </Card>
+  );
+};
+
+// ── Gap Analysis Section ──
+const GapAnalysisSection: React.FC<{ gapAnalysis: GapAnalysis }> = ({ gapAnalysis }) => {
+  const [expanded, setExpanded] = useState(false);
+  const [search, setSearch] = useState('');
+
+  const entries = Object.entries(gapAnalysis.details || {})
+    .filter(([, detail]) => detail.hasGap)
+    .filter(([shop]) => !search || shop.toLowerCase().includes(search.toLowerCase()));
+
+  const gapRate = gapAnalysis.storesAnalyzed > 0
+    ? ((gapAnalysis.storesWithGaps / gapAnalysis.storesAnalyzed) * 100).toFixed(1)
+    : '0';
+
+  return (
+    <div>
+      <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-slate-100">Gap Analysis</h3>
+      <div className="grid grid-cols-3 gap-4 mb-4">
+        <MetricCard label="Stores Analyzed" value={gapAnalysis.storesAnalyzed} />
+        <MetricCard label="Stores with Gaps" value={gapAnalysis.storesWithGaps} highlight={gapAnalysis.storesWithGaps > 0} />
+        <MetricCard label="Gap Rate" value={`${gapRate}%`} highlight={Number(gapRate) > 30} />
+      </div>
+
+      {entries.length > 0 && (
+        <Card>
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className="w-full flex items-center justify-between p-4 text-left hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors rounded-xl"
+          >
+            <span className="font-medium text-sm text-slate-900 dark:text-slate-100">
+              Store-level gap details ({gapAnalysis.storesWithGaps} stores)
+            </span>
+            {expanded ? (
+              <ChevronUp className="w-4 h-4 text-muted-foreground" />
+            ) : (
+              <ChevronDown className="w-4 h-4 text-muted-foreground" />
+            )}
+          </button>
+          {expanded && (
+            <div className="px-4 pb-4">
+              <div className="border-t pt-3">
+                {/* Search */}
+                <div className="relative mb-3">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                  <input
+                    type="text"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Filter by shop name..."
+                    className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
+                  />
+                </div>
+                <div className="space-y-2 max-h-96 overflow-y-auto">
+                  {entries.map(([shopName, detail]) => (
+                    <div
+                      key={shopName}
+                      className={cn(
+                        'rounded-lg px-3 py-2 text-xs border-l-4',
+                        detail.severity === 'high'
+                          ? 'border-l-red-500 bg-red-50 dark:bg-red-950/20'
+                          : detail.severity === 'medium'
+                          ? 'border-l-amber-500 bg-amber-50 dark:bg-amber-950/20'
+                          : 'border-l-blue-500 bg-blue-50 dark:bg-blue-950/20'
+                      )}
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <Store className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                        <span className="font-mono font-medium text-slate-900 dark:text-slate-100">
+                          {shopName}
+                        </span>
+                        <Badge
+                          variant={SEVERITY_BADGE[detail.severity] || 'secondary'}
+                          className="text-[10px]"
+                        >
+                          {detail.severity}
+                        </Badge>
+                      </div>
+                      {detail.gaps.length > 0 && (
+                        <div className="flex flex-wrap gap-1 ml-5 mb-1">
+                          {detail.gaps.map((gap, idx) => (
+                            <Badge key={idx} variant="warning" className="text-[10px]">
+                              {gap}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                      {detail.summary && (
+                        <p className="text-muted-foreground ml-5">{detail.summary}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
-          ))}
-        </div>
-      </div>
-    )}
-  </Card>
-);
+          )}
+        </Card>
+      )}
+    </div>
+  );
+};
 
 // ── Insight Card ──
 const InsightCard: React.FC<{ insight: any; index: number; source?: string }> = ({

@@ -644,7 +644,7 @@ const ChurnAnalysis: React.FC<ChurnAnalysisProps> = ({ viewMode }) => {
               <TableHead>Pipeline Runs</TableHead>
               <TableHead>Last Run</TableHead>
               <TableHead>Uninstalled At</TableHead>
-              <TableHead>Time to Uninstall</TableHead>
+              <TableHead>App Lifetime</TableHead>
               <TableHead>Errors</TableHead>
               <TableHead>Churn Reasons</TableHead>
               <TableHead className="w-10">{' '}</TableHead>
