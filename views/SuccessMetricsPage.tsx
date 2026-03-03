@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import {
   Store,
   Search,
@@ -12,6 +13,7 @@ import {
   AlertCircle,
   X,
   CheckCircle2,
+  Info,
 } from 'lucide-react'
 import {
   Card,
@@ -443,14 +445,26 @@ export default function SuccessMetricsPage() {
           <Card className="p-4">
             <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Tier Breakdown</p>
             <div className="flex items-center gap-1.5 mt-2">
-              <Badge variant="success" className="text-[10px]">{stats.tierBreakdown?.strong ?? 0} strong</Badge>
-              <Badge variant="warning" className="text-[10px]">{stats.tierBreakdown?.moderate ?? 0} mod</Badge>
-              <Badge variant="destructive" className="text-[10px]">{stats.tierBreakdown?.weak ?? 0} weak</Badge>
+              <TipBadge variant="success" className="text-[10px]" tooltip="Stores with high bundle performance — bundle revenue contribution ≥12%, attach rate ≥5%, stability ≥60%, and minimum bundle revenue of $50K. These are the most successful bundle stores.">{stats.tierBreakdown?.strong ?? 0} strong</TipBadge>
+              <TipBadge variant="warning" className="text-[10px]" tooltip="Stores with meaningful but not top-tier bundle performance. They meet some but not all of the strong tier thresholds. Bundles are working but have room to grow.">{stats.tierBreakdown?.moderate ?? 0} mod</TipBadge>
+              <TipBadge variant="destructive" className="text-[10px]" tooltip="Stores with low bundle adoption or performance. Either bundles are new, underperforming, or not a significant part of the store's revenue yet.">{stats.tierBreakdown?.weak ?? 0} weak</TipBadge>
             </div>
           </Card>
-          <StatCard label="Avg AOV" value={'$' + (stats.avgAov ?? 0).toFixed(2)} />
-          <StatCard label="Avg Attach Rate" value={fmtPct(stats.avgAttachRate ?? 0)} />
-          <StatCard label="Avg Bundle Contribution" value={fmtPct(stats.avgBundleRevenueContribution ?? 0)} />
+          <StatCard
+            label="Avg AOV"
+            value={'$' + (stats.avgAov ?? 0).toFixed(2)}
+            tooltip="The average amount customers spend per order across all profiled stores, calculated over a rolling 60-day window. This is computed by dividing each store's total revenue by total orders in the last 60 days, then averaging across all stores."
+          />
+          <StatCard
+            label="Avg Attach Rate"
+            value={fmtPct(stats.avgAttachRate ?? 0)}
+            tooltip="The average percentage of orders that contain at least one bundle across all profiled stores over the last 60 days. For example, 0.15 means 15% of orders include a bundle on average. Measures how frequently customers engage with bundles."
+          />
+          <StatCard
+            label="Avg Bundle Contribution"
+            value={fmtPct(stats.avgBundleRevenueContribution ?? 0)}
+            tooltip="The average percentage of total revenue that comes from bundle sales across all profiled stores over the last 60 days. For example, 0.25 means bundles drive 25% of revenue on average. Higher values indicate bundles are a significant revenue driver."
+          />
         </div>
       )}
 
@@ -764,11 +778,79 @@ export default function SuccessMetricsPage() {
 
 // ─── Stat Card ───────────────────────────────────────────────────────────────
 
-function StatCard({ label, value }: { label: string; value: string }) {
+function StatCard({ label, value, tooltip }: { label: string; value: string; tooltip?: string }) {
+  const [tipPos, setTipPos] = useState<{ top: number; left: number } | null>(null)
+  const iconRef = useRef<SVGSVGElement>(null)
+
+  const showTip = useCallback(() => {
+    if (!iconRef.current) return
+    const rect = iconRef.current.getBoundingClientRect()
+    setTipPos({
+      top: rect.top - 8,
+      left: Math.min(rect.left + rect.width / 2, window.innerWidth - 140),
+    })
+  }, [])
+
+  const hideTip = useCallback(() => setTipPos(null), [])
+
   return (
     <Card className="p-4">
-      <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{label}</p>
+      <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider flex items-center gap-1">
+        {label}
+        {tooltip && (
+          <span className="inline-flex">
+            <Info
+              ref={iconRef}
+              className="w-3 h-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-help"
+              onMouseEnter={showTip}
+              onMouseLeave={hideTip}
+            />
+            {tipPos && createPortal(
+              <span
+                className="fixed z-[9999] w-64 px-3 py-2 text-[11px] leading-relaxed text-white bg-slate-800 dark:bg-slate-700 rounded-lg shadow-lg pointer-events-none -translate-x-1/2"
+                style={{ top: tipPos.top, left: tipPos.left, transform: 'translate(-50%, -100%)' }}
+              >
+                {tooltip}
+              </span>,
+              document.body,
+            )}
+          </span>
+        )}
+      </p>
       <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-1">{value}</p>
     </Card>
+  )
+}
+
+// ─── Badge with portal tooltip ──────────────────────────────────────────────
+
+function TipBadge({ variant, children, tooltip, className }: { variant: 'success' | 'warning' | 'destructive'; children: React.ReactNode; tooltip: string; className?: string }) {
+  const [tipPos, setTipPos] = useState<{ top: number; left: number } | null>(null)
+  const ref = useRef<HTMLDivElement>(null)
+
+  const show = useCallback(() => {
+    if (!ref.current) return
+    const rect = ref.current.getBoundingClientRect()
+    setTipPos({
+      top: rect.top - 8,
+      left: Math.min(rect.left + rect.width / 2, window.innerWidth - 140),
+    })
+  }, [])
+
+  const hide = useCallback(() => setTipPos(null), [])
+
+  return (
+    <span ref={ref} onMouseEnter={show} onMouseLeave={hide} className="cursor-help">
+      <Badge variant={variant} className={className}>{children}</Badge>
+      {tipPos && createPortal(
+        <span
+          className="fixed z-[9999] w-64 px-3 py-2 text-[11px] leading-relaxed text-white bg-slate-800 dark:bg-slate-700 rounded-lg shadow-lg pointer-events-none"
+          style={{ top: tipPos.top, left: tipPos.left, transform: 'translate(-50%, -100%)' }}
+        >
+          {tooltip}
+        </span>,
+        document.body,
+      )}
+    </span>
   )
 }
