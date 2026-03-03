@@ -7,8 +7,8 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 // --- CARD ---
-export const Card = ({ className, children }: { className?: string; children: React.ReactNode }) => (
-  <div className={cn("rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-card-foreground shadow-sm", className)}>
+export const Card = ({ className, children, onClick }: { className?: string; children: React.ReactNode; onClick?: () => void }) => (
+  <div onClick={onClick} className={cn("rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-card-foreground shadow-sm", onClick && "cursor-pointer", className)}>
     {children}
   </div>
 );
@@ -28,7 +28,7 @@ export const CardContent = ({ className, children }: { className?: string; child
 // --- BADGE ---
 type BadgeVariant = "default" | "secondary" | "destructive" | "outline" | "success" | "warning" | "blue" | "purple" | "teal" | "orange" | "pink" | "indigo" | "cyan" | "emerald" | "rose" | "amber" | "violet" | "lime";
 
-export const Badge = ({ className, variant = "default", children }: { className?: string; variant?: BadgeVariant; children: React.ReactNode }) => {
+export const Badge = ({ className, variant = "default", children, title }: { className?: string; variant?: BadgeVariant; children: React.ReactNode; title?: string }) => {
   const variants: Record<BadgeVariant, string> = {
     // Core
     default: "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border-slate-800 dark:border-slate-200",
@@ -55,7 +55,7 @@ export const Badge = ({ className, variant = "default", children }: { className?
     lime: "bg-lime-500 text-slate-900 border-lime-600",
   };
   return (
-    <div className={cn("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2", variants[variant], className)}>
+    <div title={title} className={cn("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2", variants[variant], className)}>
       {children}
     </div>
   );
@@ -192,13 +192,14 @@ export const TrendIndicator = ({ value, inverted = false }: { value: number; inv
 };
 
 // --- BUTTON ---
-export const Button = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "default" | "ghost" | "outline" | "secondary", size?: "default" | "sm" | "lg" | "icon" }>(
+export const Button = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "default" | "ghost" | "outline" | "secondary" | "destructive", size?: "default" | "sm" | "lg" | "icon" }>(
   ({ className, variant = "default", size = "default", ...props }, ref) => {
     const variants = {
       default: "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-200",
       secondary: "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-700",
       ghost: "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300",
       outline: "border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300",
+      destructive: "bg-red-500 text-white hover:bg-red-600",
     };
     const sizes = {
       default: "h-10 px-4 py-2",
@@ -249,10 +250,35 @@ export const TableRow = ({ className, children, onClick }: { className?: string;
   <tr className={cn("border-b border-slate-200 dark:border-slate-700 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800 odd:bg-white even:bg-slate-50/50 dark:odd:bg-slate-900 dark:even:bg-slate-800/50", className, onClick && "cursor-pointer")} onClick={onClick}>{children}</tr>
 );
 
-export const TableHead = ({ className, children }: { className?: string; children: React.ReactNode }) => (
-  <th className={cn("h-11 px-4 text-left align-middle font-semibold text-slate-600 dark:text-slate-300 text-xs uppercase tracking-wider [&:has([role=checkbox])]:pr-0", className)}>{children}</th>
+export const TableHead = ({ className, children, onClick }: { className?: string; children: React.ReactNode; onClick?: () => void }) => (
+  <th onClick={onClick} className={cn("h-11 px-4 text-left align-middle font-semibold text-slate-600 dark:text-slate-300 text-xs uppercase tracking-wider [&:has([role=checkbox])]:pr-0", className)}>{children}</th>
 );
 
 export const TableCell = ({ className, children, ...props }: React.TdHTMLAttributes<HTMLTableCellElement>) => (
   <td className={cn("p-4 align-middle text-slate-700 dark:text-slate-300 [&:has([role=checkbox])]:pr-0", className)} {...props}>{children}</td>
 );
+
+// --- TABLE WRAPPER (standalone scroll container) ---
+export const TableWrapper = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn(
+      "overflow-auto rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900",
+      className
+    )}
+    {...props}
+  />
+);
+
+// --- CHECKBOX ---
+export function Checkbox({ className, ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
+  return (
+    <input
+      type="checkbox"
+      className={cn(
+        'h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-primary focus:ring-primary/50 cursor-pointer accent-blue-600',
+        className
+      )}
+      {...props}
+    />
+  );
+}

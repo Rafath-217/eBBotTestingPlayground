@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import { Layout, ViewMode } from './components/Layout';
 import Overview from './views/Overview';
 import StructureLLM from './views/StructureLLM';
@@ -12,15 +13,51 @@ import EvaluationRuns from './views/EvaluationRuns';
 import RunComparison from './views/RunComparison';
 import ChurnAnalysis from './views/ChurnAnalysis';
 import ChurnReport from './views/ChurnReport';
+import SuccessMetricsPage from './views/SuccessMetricsPage';
+import OnboardingDiagnosisPage from './views/OnboardingDiagnosisPage';
+import OnboardingHistoryPage from './views/OnboardingHistoryPage';
+import StoreProfilingPage from './views/StoreProfilingPage';
+import OnboardingFlowPage from './views/OnboardingFlowPage';
+import StoreProfilingFAQPage from './views/StoreProfilingFAQPage';
+import OnboardingFAQPage from './views/OnboardingFAQPage';
 import { getMetrics, getAllResults, getEnrichedResults, EnrichedResult, getLLMSpecs, getTestCases } from './services/dataService';
 import { getLatestEvaluationRun, getPromptVersionStats } from './services/evaluationApi';
 import { Metrics, LLMSpecs, TestCase, EvaluationRunDetail, PromptVersionStats } from './types';
 
 function App() {
-  const [activeTab, setActiveTab] = useState('overview');
+  const navigate = useNavigate();
   const [isDark, setIsDark] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('pm');
-  
+  const [authenticated, setAuthenticated] = useState(() => sessionStorage.getItem('eb_authenticated') === 'true');
+  const [apiKey, setApiKey] = useState('');
+  const [authError, setAuthError] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
+
+  const handleKeySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!apiKey.trim()) return;
+    setAuthLoading(true);
+    setAuthError('');
+    try {
+      const res = await fetch('/api/bundleSetupLlmPipeline/validateKey', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: apiKey.trim() }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        sessionStorage.setItem('eb_authenticated', 'true');
+        setAuthenticated(true);
+      } else {
+        setAuthError(data.message || 'Invalid key');
+      }
+    } catch {
+      setAuthError('Failed to validate key');
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
   // Data State
   const [metrics, setMetrics] = useState<Metrics | null>(null);
   const [specs, setSpecs] = useState<LLMSpecs | null>(null);
@@ -80,6 +117,33 @@ function App() {
 
   const toggleDark = () => setIsDark(!isDark);
 
+  if (!authenticated) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center bg-background text-foreground">
+        <form onSubmit={handleKeySubmit} className="flex flex-col items-center gap-4 w-80">
+          <div className="w-10 h-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center text-white dark:text-slate-900 font-bold text-xl">e</div>
+          <h1 className="text-lg font-semibold">eBBot Dashboard</h1>
+          <input
+            type="password"
+            value={apiKey}
+            onChange={(e) => setApiKey(e.target.value)}
+            placeholder="Enter API key"
+            autoFocus
+            className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-400"
+          />
+          {authError && <p className="text-sm text-red-500">{authError}</p>}
+          <button
+            type="submit"
+            disabled={authLoading || !apiKey.trim()}
+            className="w-full px-4 py-2 text-sm font-medium rounded-lg bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-200 disabled:opacity-50"
+          >
+            {authLoading ? 'Validating...' : 'Continue'}
+          </button>
+        </form>
+      </div>
+    );
+  }
+
   if (loading) {
       return (
           <div className="h-screen w-screen flex items-center justify-center bg-background text-foreground">
@@ -111,41 +175,54 @@ function App() {
 
   return (
     <Layout
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
         isDark={isDark}
         toggleDark={toggleDark}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
         compareRuns={compareRuns}
     >
-        {activeTab === 'overview' && metrics && (
-          <Overview
-            metrics={metrics}
-            viewMode={viewMode}
-            latestRun={latestRun}
-            promptVersions={promptVersions}
-            onViewAllRuns={() => setActiveTab('evaluationRuns')}
-          />
-        )}
-        {activeTab === 'structure' && specs && <StructureLLM spec={specs.structureLLM} viewMode={viewMode} />}
-        {activeTab === 'discount' && specs && <DiscountLLM spec={specs.discountLLM} viewMode={viewMode} />}
-        {activeTab === 'rules' && specs && <RulesLLM spec={specs.rulesLLM} viewMode={viewMode} />}
-        {activeTab === 'assembly' && <Assembly viewMode={viewMode} />}
-        {activeTab === 'results' && <TestResults structure={structureResults} discount={discountResults} rules={rulesResults} viewMode={viewMode} />}
-        {activeTab === 'playground' && <Playground viewMode={viewMode} />}
-        {activeTab === 'history' && <PipelineHistory viewMode={viewMode} />}
-        {activeTab === 'evaluationRuns' && <EvaluationRuns viewMode={viewMode} onCompare={(runs) => { setCompareRuns(runs); setActiveTab('runComparison'); }} />}
-        {activeTab === 'runComparison' && compareRuns && (
-          <RunComparison
-            runId1={compareRuns[0]}
-            runId2={compareRuns[1]}
-            viewMode={viewMode}
-            onBack={() => { setCompareRuns(null); setActiveTab('evaluationRuns'); }}
-          />
-        )}
-        {activeTab === 'churnAnalysis' && <ChurnAnalysis viewMode={viewMode} />}
-        {activeTab === 'churnReport' && <ChurnReport viewMode={viewMode} />}
+        <Routes>
+          <Route path="/" element={
+            metrics ? (
+              <Overview
+                metrics={metrics}
+                viewMode={viewMode}
+                latestRun={latestRun}
+                promptVersions={promptVersions}
+                onViewAllRuns={() => navigate('/evaluation-runs')}
+              />
+            ) : null
+          } />
+          <Route path="/playground" element={<Playground viewMode={viewMode} />} />
+          <Route path="/history" element={<PipelineHistory viewMode={viewMode} />} />
+          <Route path="/churn-analysis" element={<ChurnAnalysis viewMode={viewMode} />} />
+          <Route path="/churn-report" element={<ChurnReport viewMode={viewMode} />} />
+          <Route path="/results" element={<TestResults structure={structureResults} discount={discountResults} rules={rulesResults} viewMode={viewMode} />} />
+          <Route path="/evaluation-runs" element={
+            <EvaluationRuns viewMode={viewMode} onCompare={(runs) => { setCompareRuns(runs); navigate('/run-comparison'); }} />
+          } />
+          <Route path="/run-comparison" element={
+            compareRuns ? (
+              <RunComparison
+                runId1={compareRuns[0]}
+                runId2={compareRuns[1]}
+                viewMode={viewMode}
+                onBack={() => { setCompareRuns(null); navigate('/evaluation-runs'); }}
+              />
+            ) : <Navigate to="/evaluation-runs" replace />
+          } />
+          <Route path="/structure" element={specs ? <StructureLLM spec={specs.structureLLM} viewMode={viewMode} /> : null} />
+          <Route path="/discount" element={specs ? <DiscountLLM spec={specs.discountLLM} viewMode={viewMode} /> : null} />
+          <Route path="/rules" element={specs ? <RulesLLM spec={specs.rulesLLM} viewMode={viewMode} /> : null} />
+          <Route path="/assembly" element={<Assembly viewMode={viewMode} />} />
+          <Route path="/success-metrics" element={<SuccessMetricsPage />} />
+          <Route path="/onboarding-diagnosis" element={<OnboardingDiagnosisPage />} />
+          <Route path="/onboarding-history" element={<OnboardingHistoryPage />} />
+          <Route path="/store-profiling" element={<StoreProfilingPage />} />
+          <Route path="/onboarding-flow" element={<OnboardingFlowPage />} />
+          <Route path="/store-profiling-faq" element={<StoreProfilingFAQPage />} />
+          <Route path="/onboarding-faq" element={<OnboardingFAQPage />} />
+        </Routes>
     </Layout>
   );
 }

@@ -8,6 +8,17 @@ export default defineConfig(({ mode }) => {
       server: {
         port: 3000,
         host: '0.0.0.0',
+        proxy: {
+          '/api': {
+            target: env.API_BASE_URL || 'http://localhost:3001',
+            changeOrigin: true,
+            configure: (proxy) => {
+              proxy.on('proxyReq', (proxyReq) => {
+                proxyReq.setHeader('Accept', 'text/event-stream')
+              })
+            },
+          },
+        },
       },
       plugins: [react()],
       define: {
