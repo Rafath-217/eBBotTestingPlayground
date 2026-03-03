@@ -28,35 +28,35 @@ function App() {
   const navigate = useNavigate();
   const [isDark, setIsDark] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('pm');
-  // const [authenticated, setAuthenticated] = useState(() => sessionStorage.getItem('eb_authenticated') === 'true');
-  // const [apiKey, setApiKey] = useState('');
-  // const [authError, setAuthError] = useState('');
-  // const [authLoading, setAuthLoading] = useState(false);
+  const [authenticated, setAuthenticated] = useState(() => sessionStorage.getItem('eb_authenticated') === 'true');
+  const [apiKey, setApiKey] = useState('');
+  const [authError, setAuthError] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
 
-  // const handleKeySubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   if (!apiKey.trim()) return;
-  //   setAuthLoading(true);
-  //   setAuthError('');
-  //   try {
-  //     const res = await fetch('/api/bundleSetupLlmPipeline/validateKey', {
-  //       method: 'POST',
-  //       headers: { 'Content-Type': 'application/json' },
-  //       body: JSON.stringify({ key: apiKey.trim() }),
-  //     });
-  //     const data = await res.json();
-  //     if (data.success) {
-  //       sessionStorage.setItem('eb_authenticated', 'true');
-  //       setAuthenticated(true);
-  //     } else {
-  //       setAuthError(data.message || 'Invalid key');
-  //     }
-  //   } catch {
-  //     setAuthError('Failed to validate key');
-  //   } finally {
-  //     setAuthLoading(false);
-  //   }
-  // };
+  const handleKeySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!apiKey.trim()) return;
+    setAuthLoading(true);
+    setAuthError('');
+    try {
+      const res = await fetch('/api/bundleSetupLlmPipeline/validateKey', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: apiKey.trim() }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        sessionStorage.setItem('eb_authenticated', 'true');
+        setAuthenticated(true);
+      } else {
+        setAuthError(data.message || 'Invalid key');
+      }
+    } catch {
+      setAuthError('Failed to validate key');
+    } finally {
+      setAuthLoading(false);
+    }
+  };
 
   // Data State
   const [metrics, setMetrics] = useState<Metrics | null>(null);
@@ -117,32 +117,32 @@ function App() {
 
   const toggleDark = () => setIsDark(!isDark);
 
-  // if (!authenticated) {
-  //   return (
-  //     <div className="h-screen w-screen flex items-center justify-center bg-background text-foreground">
-  //       <form onSubmit={handleKeySubmit} className="flex flex-col items-center gap-4 w-80">
-  //         <div className="w-10 h-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center text-white dark:text-slate-900 font-bold text-xl">e</div>
-  //         <h1 className="text-lg font-semibold">eBBot Dashboard</h1>
-  //         <input
-  //           type="password"
-  //           value={apiKey}
-  //           onChange={(e) => setApiKey(e.target.value)}
-  //           placeholder="Enter API key"
-  //           autoFocus
-  //           className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-400"
-  //         />
-  //         {authError && <p className="text-sm text-red-500">{authError}</p>}
-  //         <button
-  //           type="submit"
-  //           disabled={authLoading || !apiKey.trim()}
-  //           className="w-full px-4 py-2 text-sm font-medium rounded-lg bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-200 disabled:opacity-50"
-  //         >
-  //           {authLoading ? 'Validating...' : 'Continue'}
-  //         </button>
-  //       </form>
-  //     </div>
-  //   );
-  // }
+  if (!authenticated) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center bg-background text-foreground">
+        <form onSubmit={handleKeySubmit} className="flex flex-col items-center gap-4 w-80">
+          <div className="w-10 h-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center text-white dark:text-slate-900 font-bold text-xl">e</div>
+          <h1 className="text-lg font-semibold">eBBot Dashboard</h1>
+          <input
+            type="password"
+            value={apiKey}
+            onChange={(e) => setApiKey(e.target.value)}
+            placeholder="Enter API key"
+            autoFocus
+            className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-400"
+          />
+          {authError && <p className="text-sm text-red-500">{authError}</p>}
+          <button
+            type="submit"
+            disabled={authLoading || !apiKey.trim()}
+            className="w-full px-4 py-2 text-sm font-medium rounded-lg bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-200 disabled:opacity-50"
+          >
+            {authLoading ? 'Validating...' : 'Continue'}
+          </button>
+        </form>
+      </div>
+    );
+  }
 
   if (loading) {
       return (
