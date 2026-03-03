@@ -25,6 +25,7 @@ import { getLatestEvaluationRun, getPromptVersionStats } from './services/evalua
 import { Metrics, LLMSpecs, TestCase, EvaluationRunDetail, PromptVersionStats } from './types';
 
 const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:3001';
+const API_SECRET_KEY = process.env.DASHBOARD_KEY || '';
 
 function App() {
   const navigate = useNavigate();
@@ -43,7 +44,7 @@ function App() {
     try {
       const res = await fetch(`${API_BASE_URL}/api/bundleSetupLlmPipeline/validateKey`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'secret-key': API_SECRET_KEY },
         body: JSON.stringify({ key: apiKey.trim() }),
       });
       const data = await res.json();
