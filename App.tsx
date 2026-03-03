@@ -20,6 +20,8 @@ import StoreProfilingPage from './views/StoreProfilingPage';
 import OnboardingFlowPage from './views/OnboardingFlowPage';
 import StoreProfilingFAQPage from './views/StoreProfilingFAQPage';
 import OnboardingFAQPage from './views/OnboardingFAQPage';
+import BaasOverview from './views/BaasOverview';
+import StrategyView from './views/StrategyView';
 import { getMetrics, getAllResults, getEnrichedResults, EnrichedResult, getLLMSpecs, getTestCases } from './services/dataService';
 import { getLatestEvaluationRun, getPromptVersionStats } from './services/evaluationApi';
 import { Metrics, LLMSpecs, TestCase, EvaluationRunDetail, PromptVersionStats } from './types';
@@ -225,6 +227,8 @@ function App() {
           <Route path="/onboarding-flow" element={<OnboardingFlowPage />} />
           <Route path="/store-profiling-faq" element={<StoreProfilingFAQPage />} />
           <Route path="/onboarding-faq" element={<OnboardingFAQPage />} />
+          <Route path="/baas-overview" element={<BaasOverview />} />
+          <Route path="/run-strategy" element={<StrategyView />} />
         </Routes>
     </Layout>
   );

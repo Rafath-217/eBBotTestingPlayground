@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FileJson, Tag, ShieldCheck, BarChart3, Moon, Sun, Menu, ChevronRight, Play, Boxes, Code, Users, History, ListChecks, ArrowLeftRight, TrendingDown, FileBarChart, Store, Stethoscope, BookOpen, Rocket, HelpCircle, MessageCircleQuestion } from 'lucide-react';
+import { LayoutDashboard, FileJson, Tag, ShieldCheck, BarChart3, Moon, Sun, Menu, ChevronRight, Play, Boxes, Code, Users, History, ListChecks, ArrowLeftRight, TrendingDown, FileBarChart, Store, Stethoscope, BookOpen, Rocket, HelpCircle, MessageCircleQuestion, ShoppingCart, Target } from 'lucide-react';
 import { Button, cn } from './ui';
 
 interface SidebarItemProps {
@@ -152,6 +152,18 @@ export const Layout: React.FC<LayoutProps> = ({ children, isDark, toggleDark, vi
                   label="Onboarding History"
                   active={pathname === '/onboarding-history'}
                   onClick={() => navigate('/onboarding-history')}
+                />
+                <SidebarItem
+                  icon={ShoppingCart}
+                  label="BaaS Overview"
+                  active={pathname === '/baas-overview'}
+                  onClick={() => navigate('/baas-overview')}
+                />
+                <SidebarItem
+                  icon={Target}
+                  label="Run Full Strategy"
+                  active={pathname === '/run-strategy'}
+                  onClick={() => navigate('/run-strategy')}
                 />
               </div>
             </div>

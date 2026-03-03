@@ -371,3 +371,709 @@ export interface TestCaseDefinition {
     rules?: any;
   };
 }
+
+// ─── BaaS Pipeline Types ─────────────────────────────────────────────────────
+
+export interface ShippingData {
+  hasFreeShipping: boolean
+  threshold: number | null
+  notes: string
+}
+
+export interface MerchandisingData {
+  hasBundles: boolean
+  hasKits: boolean
+  hasGiftSets: boolean
+  navItems: string[]
+}
+
+export interface AuditData {
+  title: string
+  description: string
+  shipping: ShippingData
+  merchandising: MerchandisingData
+  score: number
+  summary: string
+}
+
+export interface BaasPipelineResult {
+  audit: AuditData
+  salesAnalysis: Record<string, unknown> | null
+  strategy: string | null
+}
+
+export interface BaasPipelineRun {
+  _id: string
+  url?: string
+  shopName: string
+  pipelineType: 'audit' | 'full-analysis'
+  status: 'running' | 'completed' | 'failed'
+  result: BaasPipelineResult
+  error: string | null
+  durationMs: number
+  currency?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface BaasHistoryResponse {
+  data: BaasPipelineRun[]
+  history?: BaasPipelineRun[]
+  totalPages?: number
+  pagination?: { totalPages: number }
+}
+
+// ─── Enriched Pipeline Run (new agent-level data) ─────────────────────────────
+
+export type BaasAgentName =
+  | 'Website Auditor'
+  | 'Data Analyst'
+  | 'Industry Classifier'
+  | 'Strategy Architect'
+  | 'Report Compiler'
+
+export type AgentName = BaasAgentName
+export type BaasAgentStatus = 'completed' | 'running' | 'failed' | 'pending' | 'skipped'
+
+export interface AgentExecution {
+  name: BaasAgentName
+  status: BaasAgentStatus
+  durationMs?: number
+  startedAt?: string
+  completedAt?: string
+}
+
+// ─── Auditor Results ──────────────────────────────────────────────────────────
+
+export interface ShippingAnalysis {
+  threshold: number | null
+  deadZoneGap: number | null
+  entryPriceGap: number | null
+  coreProductPrice: number | null
+  hasFreeShipping: boolean
+  confidence?: string
+  notes?: string
+}
+
+export interface NavigationAudit {
+  bundleTermsFound: string[]
+  hasGiftSection: boolean
+  navItems: string[]
+}
+
+export interface PdpAudit {
+  score: number
+  maxScore: number
+  widgetsPresent: string[]
+  widgetsMissing: string[]
+}
+
+export interface PriceAnalysis {
+  min: number
+  max: number
+  median: number
+  currency?: string
+}
+
+export interface ScoreCriterion {
+  label: string
+  points: number
+  met: boolean
+  detail?: string
+}
+
+export interface ScoreCategory {
+  name: string
+  earned: number
+  max: number
+  criteria: ScoreCriterion[]
+}
+
+export interface ScoreBreakdown {
+  total: number
+  categories: ScoreCategory[]
+}
+
+export interface BundlePageEvidence {
+  url: string
+  label: string
+  source: string
+}
+
+export interface BundleImageEvidence {
+  alt?: string
+  src?: string
+  matchedTerm: string
+  source: string
+}
+
+export interface AppDetectedEvidence {
+  name: string
+  type: string
+}
+
+export interface PriceDistributionBand {
+  band: string
+  count: number
+  percentage: number
+  score?: number | null
+}
+
+export interface ShippingEvidence {
+  threshold: number | null
+  currency: string | null
+  medianProductPrice: number | null
+  deadZoneGap: number | null
+  hasUnconditionalFreeShipping: boolean
+  anchorPrice: number | null
+  anchorPriceRange?: { low: number | null; high: number | null } | null
+  anchorBand?: string | null
+  anchorConfidence?: string | null
+  anchorDominance?: number | null
+  dominanceStrength?: string | null
+  storeShape?: string | null
+  accessoriesSuppressed?: number
+  priceDistribution?: PriceDistributionBand[]
+  entryPriceGap?: number | null
+  entryPriceGapRange?: { low: number | null; high: number | null } | null
+  thresholdAlignment?: {
+    multiple: number
+    classification: string
+  } | null
+  behavioral?: {
+    aov: number | null
+    behavioralGap: number | null
+    anchorVsAovDelta: number | null
+    gapReductionPotential: number | null
+  } | null
+  pricingConfidence?: string
+}
+
+export interface PdpWidgetEvidence {
+  present: string[]
+  missing: string[]
+  productAudited: string | null
+}
+
+export interface BaasBundleProduct {
+  title: string
+  handle: string
+  price: number
+  matchedTerm: string
+}
+
+export interface CatalogAnalysis {
+  totalProducts: number
+  bundleCount: number
+  bundlePercentage: number
+  bundleProducts: BaasBundleProduct[]
+  categories?: Record<string, number>
+  bundlePriceRange?: { min: number | null; max: number | null; median: number | null } | null
+  nonBundlePriceRange?: { min: number | null; max: number | null; median: number | null } | null
+}
+
+export interface AuditorEvidence {
+  scoreBreakdown?: ScoreBreakdown
+  bundlePages?: BundlePageEvidence[]
+  byobPages?: BundlePageEvidence[]
+  bundleImages?: BundleImageEvidence[]
+  appsDetected?: AppDetectedEvidence[]
+  shipping?: ShippingEvidence
+  pdpWidgets?: PdpWidgetEvidence
+  catalogAnalysis?: CatalogAnalysis
+  dataCompleteness?: 'structural_only' | 'revenue_validated'
+  catalogProducts?: CatalogProduct[]
+}
+
+export interface BundleDetectionSignal {
+  type: string
+  value: string
+  weight: string
+}
+
+export interface BundleDetection {
+  confidence: string
+  signals: BundleDetectionSignal[]
+  appsDetected: string[]
+  hasDedicatedNavigation: boolean
+  hasGiftSection: boolean
+  hasCustomization: boolean
+  keywordsFound: string[]
+  criticalGap: boolean
+}
+
+export interface AuditorResults {
+  siteOverview?: {
+    title?: string
+    description?: string
+  }
+  shippingAnalysis: ShippingAnalysis
+  navigationAudit: NavigationAudit
+  pdpAudit: PdpAudit
+  priceAnalysis: PriceAnalysis
+  criticalFindings: string[]
+  overallScore: number
+  summary: string
+  evidence?: AuditorEvidence
+  bundleDetection?: BundleDetection
+}
+
+// ─── Analyst Results ──────────────────────────────────────────────────────────
+
+export interface DataOverview {
+  orderCount: number
+  productCount: number
+  totalRevenue: number
+}
+
+export interface HistogramBucket {
+  label: string
+  count: number
+  percentage: number
+}
+
+export interface AbcAnalysis {
+  gradeAProducts: string[]
+  gradeCProducts: string[]
+  deadstockCount: number
+}
+
+export interface ReturnRateAnalysis {
+  singleItemReturnRate: number
+  multiItemReturnRate: number
+}
+
+export interface RetentionEconomics {
+  newCustomerAov: number
+  repeatCustomerAov: number
+  aovGap: number
+}
+
+export interface AffinityPair {
+  productA: string
+  productB: string
+  coPurchaseRate: number
+  liftScore?: number
+}
+
+export interface AnalystResults {
+  dataOverview: DataOverview
+  aovHistogram: HistogramBucket[]
+  abcAnalysis: AbcAnalysis
+  returnRateAnalysis: ReturnRateAnalysis | null
+  retentionEconomics: RetentionEconomics | null
+  affinityAnalysis: AffinityPair[] | null
+  moneyLeftOnTable: number
+  recommendedActions: string[]
+}
+
+// ─── Classifier Results ───────────────────────────────────────────────────────
+
+export interface BaasVerticalContext {
+  focus: string
+  keyBundleTypes: string[]
+}
+
+export interface BaasRecommendedPillars {
+  primary: string[]
+  secondary: string[]
+  avoid: string[]
+}
+
+export interface VerticalScoreEntry {
+  name: string
+  score: number
+  matchedKeywords: string[]
+  totalKeywords: number
+  confidence: string
+}
+
+export interface ClassifierResults {
+  primaryVertical: string
+  confidence: number
+  classificationEvidence: string[]
+  verticalContext: BaasVerticalContext
+  recommendedPillars: BaasRecommendedPillars
+  psychologicalTriggers: string[]
+  deterministicScoreBreakdown?: Record<string, VerticalScoreEntry>
+}
+
+// ─── Strategy Results ─────────────────────────────────────────────────────────
+
+export interface OfferProduct {
+  name: string
+  price: number
+}
+
+export interface BaasOfferMathematics {
+  products: OfferProduct[]
+  originalTotal: number
+  bundlePrice: number
+  discount: number
+  savingsAmount: number
+}
+
+export interface BundleStrategy {
+  pillarName: string
+  bundleName: string
+  problemSolved: string
+  concept: string
+  offerMathematics: BaasOfferMathematics
+  psychologicalTrigger: string
+  executionTool: string
+  expectedImpact: string
+}
+
+export interface StrategyResults {
+  strategies: BundleStrategy[]
+  implementationPriority: string[]
+}
+
+// ─── Report Results ───────────────────────────────────────────────────────────
+
+export interface ReportResults {
+  markdownContent: string
+  generatedAt?: string
+}
+
+// ─── Agent Timing ────────────────────────────────────────────────────────────
+
+export interface AgentTiming {
+  durationMs: number
+  inputTokens?: number
+  outputTokens?: number
+}
+
+// ─── Planner Decisions ───────────────────────────────────────────────────────
+
+export interface PlannerDecisions {
+  parallelizable: boolean
+  runAuditor: boolean
+  runAnalyst: boolean
+  requiredQueries: string[]
+  reasoningDepth?: string
+  decisionLog: string[]
+}
+
+// ─── Metrics Engine Results ──────────────────────────────────────────────────
+
+export interface RawMetrics {
+  aov: number | null
+  totalRevenue: number | null
+  orderCount: number | null
+  returnRate: { single: number; multi: number } | null
+  gradeACount: number | null
+  gradeBCount?: number | null
+  gradeCCount: number | null
+  gradeCRevenue: number | null
+  repeatAovGap: number | null
+  repeatRate?: number | null
+  freeShippingThreshold: number | null
+  medianProductPrice: number | null
+}
+
+export interface DerivedMetrics {
+  freeShippingOpportunity?: number | null
+  deadZoneGap?: number | null
+  behavioralGap?: number | null
+  entryPriceGap?: number | null
+  anchorVsAovDelta?: number | null
+  gapReductionPotential?: number | null
+  inventoryRiskScore: number | null
+  retentionRiskScore: number | null
+  revenueConcentrationIndex: number | null
+  aovBridgeAmount: number | null
+  gradeCRevenuePercent: number | null
+  potentialBundleUplift: number | null
+}
+
+export interface Opportunities {
+  topPainPoint: string | null
+  freeShippingGap: boolean
+  hasLiquidationOpportunity: boolean
+  hasRetentionProblem: boolean
+  hasAovBridgeOpportunity: boolean
+  recommendedPillars: string[]
+}
+
+export interface MetricsResult {
+  rawMetrics: RawMetrics
+  derivedMetrics: DerivedMetrics
+  opportunities: Opportunities
+  currency: string | null
+}
+
+// ─── Reflection Results ──────────────────────────────────────────────────────
+
+export interface StrategyValidation {
+  strategyIndex: number
+  checks: {
+    exceedsFreeShipping: boolean
+    improvesAov: boolean
+    avoidsMarginDestruction: boolean
+    alignsWithPainPoint: boolean
+  }
+  issues: string[]
+  suggestedConstraints: string[]
+}
+
+export interface ReflectionResult {
+  passed: boolean
+  validationResults?: StrategyValidation[]
+  overallIssues?: string[]
+  reflectionLog: string[]
+  constraintsForRetry: string[]
+  tokenUsage?: { inputTokens: number; outputTokens: number }
+}
+
+// ─── Cross Validation ───────────────────────────────────────────────────────
+
+export interface AnchorReconciliation {
+  protocolA_anchorPrice: number | null
+  revenueAnchorPrice: number | null
+  finalAnchorPrice: number | null
+  source: string
+  override: boolean
+  divergence: number | null
+  joinRate: number | null
+  reason: string
+}
+
+export interface ArchetypeReconciliation {
+  protocolA_archetype: string | null
+  finalArchetype: string
+  override: boolean
+  revenueShape: string | null
+  reason: string
+  evidence: {
+    top1Share: number | null
+    top3Share: number | null
+    top5Share: number | null
+    hhi: number | null
+  }
+}
+
+export interface HiddenRevenueDriver {
+  title: string
+  revenue: number
+  revenueShare: number
+}
+
+export interface HiddenRevenueDrivers {
+  hasHiddenDrivers: boolean
+  totalHiddenRevenueShare: number
+  drivers: HiddenRevenueDriver[]
+}
+
+export interface CrossValidationHeroProduct {
+  title: string
+  revenue: number
+  revenueShare: number
+  isHiddenDriver: boolean
+  heroOverride: boolean
+}
+
+export interface CrossValidationMismatch {
+  field: string
+  protocolA: unknown
+  protocolB: unknown
+  final: unknown
+  divergence?: number | null
+  action: string
+  reason: string
+}
+
+export interface CrossValidation {
+  anchorReconciliation: AnchorReconciliation
+  archetypeReconciliation: ArchetypeReconciliation
+  hiddenRevenueDrivers: HiddenRevenueDrivers
+  heroProduct: CrossValidationHeroProduct
+  confidence: string
+  protocolASnapshot: Record<string, unknown>
+  protocolBSnapshot: Record<string, unknown>
+  reconciled: Record<string, unknown>
+  mismatches: CrossValidationMismatch[]
+}
+
+// ─── Strategy Report ────────────────────────────────────────────────────────
+
+export interface BaasStrategyReport {
+  [key: string]: unknown
+}
+
+// ─── Catalog Product ────────────────────────────────────────────────────────
+
+export interface CatalogProduct {
+  title: string
+  handle: string
+  price: number
+  variants?: { price: number }[]
+}
+
+// ─── Behavioral Profile ─────────────────────────────────────────────────────
+
+export type AovTier = 'low' | 'mid' | 'high'
+export type RepeatGap = 'declining' | 'growing' | 'stable'
+export type BasketBehavior = 'single_item_heavy' | 'multi_item_heavy'
+export type RevenueConcentration = 'top_heavy' | 'long_tail' | 'balanced'
+
+export interface BehavioralProfile {
+  aovTier: AovTier | null
+  repeatGap: RepeatGap | null
+  basketBehavior: BasketBehavior | null
+  revenueConcentration: RevenueConcentration | null
+}
+
+// ─── Strategic Diagnosis ────────────────────────────────────────────────────
+
+export interface StrategicDiagnosis {
+  growthLever: string | null
+  primaryConstraint: string | null
+  secondaryFocus?: string | null
+  opportunitySummary: string | null
+}
+
+// ─── Execution Blueprint ────────────────────────────────────────────────────
+
+export interface ExecutionBlueprint {
+  bundleFormats: string[]
+  priceTargetRange: { low: number | null; high: number | null }
+  placementPriority: string[]
+  kpiToTrack: string[]
+  secondaryFocus: string | null
+}
+
+// ─── Impact Projection ─────────────────────────────────────────────────────
+
+export interface ImpactRange {
+  low: number | null
+  high: number | null
+}
+
+export interface ImpactProjection {
+  aovLiftRange: ImpactRange
+  incrementalRevenueRange: ImpactRange
+  marginDeltaEstimate: ImpactRange
+  inventoryClearanceEstimate: ImpactRange
+  confidence: 'high' | 'medium' | 'low'
+  strategies?: StrategyImpactBreakdown[]
+  totalRevenueLiftLow?: number | null
+  totalRevenueLiftHigh?: number | null
+  blendedAOVLift?: ImpactRange | null
+}
+
+// ─── Impact Simulation ──────────────────────────────────────────────────────
+
+export interface ImpactModifier {
+  name: string
+  applied: boolean
+  value: number | null
+  reason: string
+}
+
+export interface ImpactSimulation {
+  currentAOV: number | null
+  projectedBundlePrice: number | null
+  bundleMultiple: number | null
+  baseConversionRange: ImpactRange
+  modifiers: ImpactModifier[]
+  effectiveConversionRange: ImpactRange
+  singleItemShareEstimate: number | null
+  math?: {
+    delta: number | null
+    lowAOV: number | null
+    highAOV: number | null
+    aovLiftPctLow: number | null
+    aovLiftPctHigh: number | null
+  }
+  revenueLift: ImpactRange
+  inventoryClearance: ImpactRange
+}
+
+// ─── Sales Summary ──────────────────────────────────────────────────────────
+
+export interface SalesSummaryPriorityMove {
+  format: string
+  revenueRange: string
+  confidence: string
+}
+
+export interface SalesSummary90DayImpact {
+  projectedRevenue: string
+  projectedAOVLift: string
+  inventoryImpact: string
+}
+
+export interface SalesSummaryCredibility {
+  ordersAnalyzed: string
+  revenueAnalyzed: string
+  confidence: string
+}
+
+export interface SalesSummary {
+  headlineRevenueOpportunity: string
+  urgencyStatement: string
+  rootCauses: string[]
+  priorityMove: SalesSummaryPriorityMove
+  '90DayImpact': SalesSummary90DayImpact
+  credibility: SalesSummaryCredibility
+}
+
+// ─── Strategy Impact Breakdown ──────────────────────────────────────────────
+
+export interface StrategyImpactBreakdown {
+  format: string
+  cohortSize: number | null
+  adoptionRange: ImpactRange
+  priceDelta: number | null
+  aovLift: ImpactRange
+  revenueLift: ImpactRange
+  marginImpact: ImpactRange
+  inventoryImpact: ImpactRange | null
+  confidence: string
+}
+
+// ─── Guardrails ─────────────────────────────────────────────────────────────
+
+export interface Guardrail {
+  name: string
+  triggered: boolean
+  reason: string
+}
+
+export interface GuardrailsResult {
+  behavioral: Guardrail
+  threshold: Guardrail
+  inventory: Guardrail
+}
+
+// ─── Full Enriched Run (superset of BaasPipelineRun) ──────────────────────────
+
+export interface EnrichedPipelineRun extends BaasPipelineRun {
+  appName?: string
+  agentsExecuted: AgentExecution[]
+  auditorResults?: AuditorResults
+  analystResults?: AnalystResults
+  classifierResults?: ClassifierResults
+  strategyResults?: StrategyResults
+  reportResults?: ReportResults
+  plannerDecisions?: PlannerDecisions
+  metricsResult?: MetricsResult
+  reflectionResult?: ReflectionResult
+  reflectionAttempts?: number
+  decisionLog?: string[]
+  agentTimings?: Record<string, AgentTiming>
+  behavioralProfile?: BehavioralProfile | null
+  strategicDiagnosis?: StrategicDiagnosis | null
+  executionBlueprint?: ExecutionBlueprint | null
+  impactProjection?: ImpactProjection | null
+  impactSimulation?: ImpactSimulation | null
+  guardrails?: GuardrailsResult | null
+  archetype?: string | null
+  orderCount?: number | null
+  salesSummary?: SalesSummary | null
+  crossValidation?: CrossValidation | null
+  strategyReport?: BaasStrategyReport | null
+  rawQueryData?: Record<string, unknown> | null
+  queriesExecuted?: string[]
+}
