@@ -1,296 +1,179 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Sparkles, Loader2, AlertCircle, ChevronDown } from 'lucide-react'
 import {
-  BarChart3,
-  Brain,
-  Clock,
-  FileText,
-  Grid3x3,
-  Layers,
-  ListChecks,
-  Sparkles,
-} from 'lucide-react'
-import { cn } from '../components/ui'
-import IndustryClassificationCard from '../components/strategy/IndustryClassificationCard'
-import StrategyCard from '../components/strategy/StrategyCard'
-import PillarFramework from '../components/strategy/PillarFramework'
-import ImplementationRoadmap from '../components/strategy/ImplementationRoadmap'
-import FullReportView from '../components/strategy/FullReportView'
-import ActionItems from '../components/strategy/ActionItems'
-import { mockStrategyReport } from '../data/strategyMockData'
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  Button,
+  Badge,
+  cn,
+} from '../components/ui'
+import { runFullAnalysis } from '../services/baasDataService'
 
-type SectionId =
-  | 'overview'
-  | 'strategies'
-  | 'pillars'
-  | 'roadmap'
-  | 'report'
-  | 'actions'
+const APP_OPTIONS = [
+  { value: '', label: 'None (skip order analysis)' },
+  { value: 'kite', label: 'Kite' },
+  { value: 'giftkart', label: 'Giftkart' },
+  { value: 'fly', label: 'Fly' },
+] as const
 
-interface NavSection {
-  id: SectionId
-  label: string
-  icon: React.ReactNode
-}
-
-const sections: NavSection[] = [
-  { id: 'overview', label: 'Overview', icon: <BarChart3 className="w-4 h-4" /> },
-  { id: 'strategies', label: 'Strategies', icon: <Layers className="w-4 h-4" /> },
-  { id: 'pillars', label: '8 Pillars', icon: <Grid3x3 className="w-4 h-4" /> },
-  { id: 'roadmap', label: 'Roadmap', icon: <Clock className="w-4 h-4" /> },
-  { id: 'report', label: 'Full Report', icon: <FileText className="w-4 h-4" /> },
-  { id: 'actions', label: 'Next Steps', icon: <ListChecks className="w-4 h-4" /> },
+const AGENT_LABELS = [
+  'Website Audit',
+  'Data Analyst',
+  'Industry Classifier',
+  'Strategy Architect',
+  'Report Compiler',
 ]
 
-const { industryClassification, strategies, implementationPriority, roadmapPhases, fullReportMarkdown } =
-  mockStrategyReport
-
 export default function StrategyView() {
-  const [activeSection, setActiveSection] = useState<SectionId>('overview')
+  const navigate = useNavigate()
+
+  const [shopName, setShopName] = useState('')
+  const [appName, setAppName] = useState<string>('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const canSubmit = shopName.trim().length > 0
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!canSubmit) return
+
+    setLoading(true)
+    setError(null)
+
+    const payload: { shopName?: string; appName?: string } = {
+      shopName: shopName.trim(),
+    }
+    if (appName) payload.appName = appName
+
+    try {
+      await runFullAnalysis(payload)
+      navigate('/baas-overview')
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { message?: string } }; message?: string }
+      setError(axiosErr.response?.data?.message || axiosErr.message || 'Pipeline failed')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-2xl mx-auto space-y-6">
       {/* Page header */}
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-white" />
-            </div>
-            <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
-              Strategy &amp; Report
-            </h2>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            AI-generated bundle strategy tailored to your store's vertical and sales data.
-          </p>
-        </div>
-
-        {/* Store indicator */}
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
-          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-xs text-muted-foreground">example-store.myshopify.com</span>
-        </div>
-      </div>
-
-      {/* Section tab nav */}
-      <div className="flex gap-1 overflow-x-auto pb-1 -mx-1 px-1">
-        {sections.map((section) => (
-          <button
-            key={section.id}
-            onClick={() => setActiveSection(section.id)}
-            className={cn(
-              'flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all shrink-0',
-              activeSection === section.id
-                ? 'bg-primary text-primary-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground hover:bg-slate-100 dark:hover:bg-slate-800'
-            )}
-          >
-            {section.icon}
-            {section.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Section content */}
       <div>
-        {/* Overview — classification + strategies summary */}
-        {activeSection === 'overview' && (
-          <div className="space-y-6">
-            <IndustryClassificationCard data={industryClassification} />
-
-            {/* Quick summary stats */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <StatCard
-                label="Strategies"
-                value={strategies.length.toString()}
-                sub="recommended"
-                icon="💡"
-              />
-              <StatCard
-                label="Max AOV Lift"
-                value={strategies.reduce((max, s) => {
-                  const n = parseInt(s.expectedImpact.aovLift)
-                  return n > max ? n : max
-                }, 0) + '%'}
-                sub="expected range"
-                icon="📈"
-              />
-              <StatCard
-                label="Timeline"
-                value="90"
-                sub="days to full rollout"
-                icon="🗓️"
-              />
-              <StatCard
-                label="Confidence"
-                value={industryClassification.confidence}
-                sub="classification score"
-                icon="✅"
-              />
-            </div>
-
-            {/* Strategies preview */}
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <Brain className="w-4 h-4 text-muted-foreground" />
-                <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-200">
-                  Recommended Strategies
-                </h3>
-                <span className="text-xs text-muted-foreground">(click Strategies tab for full detail)</span>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {strategies.map((strategy) => {
-                  const priority = implementationPriority.find(
-                    (p) => p.strategyNumber === strategy.number
-                  )
-                  const priorityIndex = priority
-                    ? implementationPriority.indexOf(priority) + 1
-                    : undefined
-
-                  return (
-                    <StrategyMiniCard
-                      key={strategy.number}
-                      strategy={strategy}
-                      priorityIndex={priorityIndex}
-                      onClick={() => setActiveSection('strategies')}
-                    />
-                  )
-                })}
-              </div>
-            </div>
+        <div className="flex items-center gap-2 mb-1">
+          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center">
+            <Sparkles className="w-4 h-4 text-white" />
           </div>
-        )}
-
-        {/* Strategies — full cards */}
-        {activeSection === 'strategies' && (
-          <div className="space-y-5">
-            <div className="flex items-center gap-2 mb-2">
-              <p className="text-sm text-muted-foreground">
-                Strategies are ordered by{' '}
-                <span className="font-medium text-foreground">recommended implementation priority.</span>
-              </p>
-            </div>
-
-            {/* Render in priority order */}
-            {[...strategies]
-              .sort((a, b) => {
-                const pa = implementationPriority.find((p) => p.strategyNumber === a.number)
-                const pb = implementationPriority.find((p) => p.strategyNumber === b.number)
-                return (
-                  (pa ? implementationPriority.indexOf(pa) : 99) -
-                  (pb ? implementationPriority.indexOf(pb) : 99)
-                )
-              })
-              .map((strategy, i) => (
-                <StrategyCard
-                  key={strategy.number}
-                  strategy={strategy}
-                  priority={i + 1}
-                  isPrimary={i === 0}
-                />
-              ))}
-          </div>
-        )}
-
-        {/* Pillar framework */}
-        {activeSection === 'pillars' && (
-          <PillarFramework recommendedPillars={industryClassification.recommendedPillars} />
-        )}
-
-        {/* Roadmap */}
-        {activeSection === 'roadmap' && (
-          <ImplementationRoadmap phases={roadmapPhases} />
-        )}
-
-        {/* Full report */}
-        {activeSection === 'report' && (
-          <FullReportView markdown={fullReportMarkdown} />
-        )}
-
-        {/* Action items */}
-        {activeSection === 'actions' && (
-          <ActionItems
-            priorities={implementationPriority}
-            strategies={strategies}
-          />
-        )}
-      </div>
-    </div>
-  )
-}
-
-// ─── Mini components ──────────────────────────────────────────────────────────
-
-function StatCard({
-  label,
-  value,
-  sub,
-  icon,
-}: {
-  label: string
-  value: string
-  sub: string
-  icon: string
-}) {
-  return (
-    <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 shadow-sm">
-      <div className="flex items-start justify-between mb-2">
-        <p className="text-xs font-medium text-muted-foreground">{label}</p>
-        <span className="text-lg">{icon}</span>
-      </div>
-      <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 tabular-nums">
-        {value}
-      </p>
-      <p className="text-xs text-muted-foreground mt-0.5">{sub}</p>
-    </div>
-  )
-}
-
-function StrategyMiniCard({
-  strategy,
-  priorityIndex,
-  onClick,
-}: {
-  strategy: { number: number; bundleName: string; pillarName: string; expectedImpact: { aovLift: string } }
-  priorityIndex?: number
-  onClick: () => void
-}) {
-  const colors = [
-    'from-indigo-500 to-violet-500',
-    'from-emerald-500 to-teal-500',
-    'from-amber-500 to-orange-500',
-  ]
-  const gradient = colors[(strategy.number - 1) % colors.length]
-  const aovColors = [
-    'text-indigo-700 dark:text-indigo-300',
-    'text-emerald-700 dark:text-emerald-300',
-    'text-amber-700 dark:text-amber-300',
-  ]
-  const aovColor = aovColors[(strategy.number - 1) % aovColors.length]
-
-  return (
-    <button
-      onClick={onClick}
-      className="text-left rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all group"
-    >
-      <div className={`h-1 w-full bg-gradient-to-r ${gradient}`} />
-      <div className="p-4">
-        {priorityIndex && (
-          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-            Priority {priorityIndex}
-          </p>
-        )}
-        <p className="font-semibold text-sm text-slate-900 dark:text-slate-100 mb-0.5">
-          {strategy.bundleName}
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+            Create Full Strategy
+          </h1>
+        </div>
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          Run all 5 agents — Website Audit, Data Analyst, Industry Classifier, Strategy Architect, Report Compiler
         </p>
-        <p className="text-xs text-muted-foreground mb-3">{strategy.pillarName}</p>
-        <div className="flex items-baseline gap-1">
-          <span className={`text-xl font-bold tabular-nums ${aovColor}`}>
-            {strategy.expectedImpact.aovLift}
-          </span>
-          <span className="text-xs text-muted-foreground">AOV lift</span>
+        <div className="flex flex-wrap gap-1.5 mt-3">
+          {AGENT_LABELS.map((label) => (
+            <Badge key={label} variant="purple" className="text-[10px]">
+              {label}
+            </Badge>
+          ))}
         </div>
       </div>
-    </button>
+
+      {/* Form card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Pipeline Configuration</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Shop Name */}
+            <div className="space-y-2">
+              <label
+                htmlFor="shopName"
+                className="block text-sm font-medium text-slate-700 dark:text-slate-300"
+              >
+                Shop Name
+              </label>
+              <input
+                id="shopName"
+                type="text"
+                value={shopName}
+                onChange={(e) => setShopName(e.target.value)}
+                placeholder="mystore.myshopify.com"
+                className={cn(
+                  'w-full rounded-lg border border-slate-200 dark:border-slate-700',
+                  'bg-white dark:bg-slate-900 px-4 py-2.5 text-sm',
+                  'text-slate-900 dark:text-slate-100 placeholder:text-slate-400',
+                  'focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent',
+                  'transition-colors'
+                )}
+              />
+            </div>
+
+            {/* App Name */}
+            <div className="space-y-2">
+              <label
+                htmlFor="appName"
+                className="block text-sm font-medium text-slate-700 dark:text-slate-300"
+              >
+                App Name
+                <span className="ml-1.5 text-xs font-normal text-slate-400">(optional — needed for order analysis)</span>
+              </label>
+              <div className="relative">
+                <select
+                  id="appName"
+                  value={appName}
+                  onChange={(e) => setAppName(e.target.value)}
+                  className={cn(
+                    'w-full appearance-none rounded-lg border border-slate-200 dark:border-slate-700',
+                    'bg-white dark:bg-slate-900 px-4 py-2.5 pr-10 text-sm',
+                    'text-slate-900 dark:text-slate-100',
+                    'focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent',
+                    'transition-colors'
+                  )}
+                >
+                  {APP_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+              </div>
+            </div>
+
+            {/* Validation hint */}
+            {!canSubmit && (
+              <p className="text-xs text-amber-600 dark:text-amber-400">
+                Please enter a shop name to run the pipeline.
+              </p>
+            )}
+
+            {/* Error */}
+            {error && (
+              <div className="flex items-center gap-3 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 px-4 py-3 text-sm text-red-700 dark:text-red-400">
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
+
+            {/* Submit */}
+            <Button
+              type="submit"
+              disabled={!canSubmit || loading}
+              className="w-full gap-2"
+            >
+              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+              {loading ? 'Running Full Pipeline...' : 'Run Full Pipeline'}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   )
 }
