@@ -161,8 +161,9 @@ function useOnboardSSE() {
     setIsLoading(true)
 
     try {
+      const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:3001';
       const res = await fetch(
-        `/api/ebCalculateSuccessMetrics/onboardStoreSSE?shopName=${encodeURIComponent(shopName)}`,
+        `${API_BASE_URL}/api/ebCalculateSuccessMetrics/onboardStoreSSE?shopName=${encodeURIComponent(shopName)}`,
         {
           headers: { Accept: 'text/event-stream' },
           signal: controller.signal,

@@ -10,8 +10,10 @@ import type {
   MatchedStoresResponse,
 } from '../types/successMetrics'
 
+const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:3001';
+
 const api = axios.create({
-  baseURL: '/api/ebCalculateSuccessMetrics',
+  baseURL: `${API_BASE_URL}/api/ebCalculateSuccessMetrics`,
   timeout: 120000,
 })
 
