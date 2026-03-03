@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: '/api/analytics',
+  baseURL: 'https://staging.backend.gwm.giftkart.app/api/analytics',
   timeout: 120000, // 2 min — pipelines can take 15-40s
 })
 

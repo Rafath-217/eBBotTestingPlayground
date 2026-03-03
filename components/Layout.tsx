@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FileJson, Tag, ShieldCheck, BarChart3, Moon, Sun, Menu, ChevronRight, Play, Boxes, Code, Users, History, ListChecks, ArrowLeftRight, TrendingDown, FileBarChart, Store, Stethoscope, BookOpen, Rocket, HelpCircle, MessageCircleQuestion, ShoppingCart, Target } from 'lucide-react';
+import { LayoutDashboard, FileJson, Tag, ShieldCheck, BarChart3, Moon, Sun, Menu, ChevronRight, ChevronDown, Play, Boxes, Code, Users, History, ListChecks, ArrowLeftRight, TrendingDown, FileBarChart, Store, Stethoscope, BookOpen, Rocket, HelpCircle, MessageCircleQuestion, ShoppingCart, Target, Package } from 'lucide-react';
 import { Button, cn } from './ui';
 
 interface SidebarItemProps {
@@ -8,13 +8,15 @@ interface SidebarItemProps {
   label: string;
   active: boolean;
   onClick: () => void;
+  indent?: boolean;
 }
 
-const SidebarItem: React.FC<SidebarItemProps> = ({ icon: Icon, label, active, onClick }) => (
+const SidebarItem: React.FC<SidebarItemProps> = ({ icon: Icon, label, active, onClick, indent }) => (
   <button
     onClick={onClick}
     className={cn(
       "w-full flex items-center space-x-3 px-3 py-2 rounded-md transition-colors text-sm font-medium",
+      indent && "pl-9",
       active
         ? "bg-primary text-primary-foreground"
         : "text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -24,6 +26,45 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ icon: Icon, label, active, on
     <span>{label}</span>
   </button>
 );
+
+interface SidebarGroupProps {
+  icon: React.ElementType;
+  label: string;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+  isActive?: boolean;
+}
+
+const SidebarGroup: React.FC<SidebarGroupProps> = ({ icon: Icon, label, children, defaultOpen = false, isActive = false }) => {
+  const [open, setOpen] = React.useState(defaultOpen || isActive);
+
+  React.useEffect(() => {
+    if (isActive) setOpen(true);
+  }, [isActive]);
+
+  return (
+    <div>
+      <button
+        onClick={() => setOpen(!open)}
+        className={cn(
+          "w-full flex items-center space-x-3 px-3 py-2 rounded-md transition-colors text-sm font-medium",
+          isActive
+            ? "text-foreground"
+            : "text-muted-foreground hover:bg-muted hover:text-foreground"
+        )}
+      >
+        <Icon className="w-4 h-4" />
+        <span className="flex-1 text-left">{label}</span>
+        {open ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+      </button>
+      {open && (
+        <div className="mt-1 space-y-0.5">
+          {children}
+        </div>
+      )}
+    </div>
+  );
+};
 
 export type ViewMode = 'dev' | 'pm';
 
@@ -65,136 +106,60 @@ export const Layout: React.FC<LayoutProps> = ({ children, isDark, toggleDark, vi
           </div>
 
           <div className="flex-1 py-6 px-4 space-y-1 overflow-y-auto">
+            {/* 1. EB Bundle Setup */}
+            <SidebarGroup
+              icon={Package}
+              label="EB Bundle Setup"
+              isActive={['/', '/playground', '/history', '/churn-analysis', '/churn-report', '/results', '/evaluation-runs', '/run-comparison'].includes(pathname)}
+            >
+              <SidebarItem icon={LayoutDashboard} label="Overview" active={pathname === '/'} onClick={() => navigate('/')} indent />
+              <SidebarItem icon={Play} label="Playground" active={pathname === '/playground'} onClick={() => navigate('/playground')} indent />
+              <SidebarItem icon={History} label="Pipeline History" active={pathname === '/history'} onClick={() => navigate('/history')} indent />
+              <SidebarItem icon={TrendingDown} label="Churn Analysis" active={pathname === '/churn-analysis'} onClick={() => navigate('/churn-analysis')} indent />
+              <SidebarItem icon={FileBarChart} label="Churn Report" active={pathname === '/churn-report'} onClick={() => navigate('/churn-report')} indent />
+              <SidebarItem icon={BarChart3} label="Test Results" active={pathname === '/results'} onClick={() => navigate('/results')} indent />
+              <SidebarItem icon={ListChecks} label="Evaluation Runs" active={pathname === '/evaluation-runs'} onClick={() => navigate('/evaluation-runs')} indent />
+              {compareRuns && (
+                <SidebarItem icon={ArrowLeftRight} label="Run Comparison" active={pathname === '/run-comparison'} onClick={() => navigate('/run-comparison')} indent />
+              )}
+            </SidebarGroup>
+
+            {/* 2. Successful Store Profiles */}
             <SidebarItem
-              icon={LayoutDashboard}
-              label="Overview"
-              active={pathname === '/'}
-              onClick={() => navigate('/')}
+              icon={Store}
+              label="Store Profiles"
+              active={pathname === '/success-metrics'}
+              onClick={() => navigate('/success-metrics')}
             />
 
-            <div className="pt-4 pb-2">
-              <h4 className="px-2 text-xs font-semibold text-muted-foreground tracking-wider uppercase mb-2">Live Testing</h4>
-              <SidebarItem
-                icon={Play}
-                label="Playground"
-                active={pathname === '/playground'}
-                onClick={() => navigate('/playground')}
-              />
-              <SidebarItem
-                icon={History}
-                label="Pipeline History"
-                active={pathname === '/history'}
-                onClick={() => navigate('/history')}
-              />
-            </div>
+            {/* 3. Magic Bundles Onboarding */}
+            <SidebarGroup
+              icon={Stethoscope}
+              label="MB Onboarding"
+              isActive={['/onboarding-diagnosis', '/onboarding-history'].includes(pathname)}
+            >
+              <SidebarItem icon={Stethoscope} label="Diagnosis" active={pathname === '/onboarding-diagnosis'} onClick={() => navigate('/onboarding-diagnosis')} indent />
+              <SidebarItem icon={History} label="History" active={pathname === '/onboarding-history'} onClick={() => navigate('/onboarding-history')} indent />
+            </SidebarGroup>
 
-            <div className="pt-4 pb-2">
-              <h4 className="px-2 text-xs font-semibold text-muted-foreground tracking-wider uppercase mb-2">Analysis</h4>
-              <div className="space-y-1">
-                <SidebarItem
-                  icon={TrendingDown}
-                  label="Churn Analysis"
-                  active={pathname === '/churn-analysis'}
-                  onClick={() => navigate('/churn-analysis')}
-                />
-                <SidebarItem
-                  icon={FileBarChart}
-                  label="Churn Report"
-                  active={pathname === '/churn-report'}
-                  onClick={() => navigate('/churn-report')}
-                />
-                <SidebarItem
-                  icon={BarChart3}
-                  label="Test Results"
-                  active={pathname === '/results'}
-                  onClick={() => navigate('/results')}
-                />
-                <SidebarItem
-                  icon={ListChecks}
-                  label="Evaluation Runs"
-                  active={pathname === '/evaluation-runs'}
-                  onClick={() => navigate('/evaluation-runs')}
-                />
-                {compareRuns && (
-                  <SidebarItem
-                    icon={ArrowLeftRight}
-                    label="Run Comparison"
-                    active={pathname === '/run-comparison'}
-                    onClick={() => navigate('/run-comparison')}
-                  />
-                )}
-              </div>
-            </div>
+            {/* 4. BaaS */}
+            <SidebarGroup
+              icon={ShoppingCart}
+              label="BaaS"
+              isActive={['/baas-overview', '/run-strategy'].includes(pathname)}
+            >
+              <SidebarItem icon={ShoppingCart} label="BaaS Overview" active={pathname === '/baas-overview'} onClick={() => navigate('/baas-overview')} indent />
+              <SidebarItem icon={Target} label="Run Full Strategy" active={pathname === '/run-strategy'} onClick={() => navigate('/run-strategy')} indent />
+            </SidebarGroup>
 
-            <div className="pt-4 pb-2">
-              <h4 className="px-2 text-xs font-semibold text-muted-foreground tracking-wider uppercase mb-2">Success Metrics</h4>
-              <div className="space-y-1">
-                <SidebarItem
-                  icon={Store}
-                  label="Store Profiles"
-                  active={pathname === '/success-metrics'}
-                  onClick={() => navigate('/success-metrics')}
-                />
-              </div>
-            </div>
-
-            <div className="pt-4 pb-2">
-              <h4 className="px-2 text-xs font-semibold text-muted-foreground tracking-wider uppercase mb-2">Sales Tools</h4>
-              <div className="space-y-1">
-                <SidebarItem
-                  icon={Stethoscope}
-                  label="Onboarding Diagnosis"
-                  active={pathname === '/onboarding-diagnosis'}
-                  onClick={() => navigate('/onboarding-diagnosis')}
-                />
-                <SidebarItem
-                  icon={History}
-                  label="Onboarding History"
-                  active={pathname === '/onboarding-history'}
-                  onClick={() => navigate('/onboarding-history')}
-                />
-                <SidebarItem
-                  icon={ShoppingCart}
-                  label="BaaS Overview"
-                  active={pathname === '/baas-overview'}
-                  onClick={() => navigate('/baas-overview')}
-                />
-                <SidebarItem
-                  icon={Target}
-                  label="Run Full Strategy"
-                  active={pathname === '/run-strategy'}
-                  onClick={() => navigate('/run-strategy')}
-                />
-              </div>
-            </div>
-
+            {/* 5. Learn */}
             <div className="pt-4 pb-2">
               <h4 className="px-2 text-xs font-semibold text-muted-foreground tracking-wider uppercase mb-2">Learn</h4>
               <div className="space-y-1">
-                <SidebarItem
-                  icon={BookOpen}
-                  label="Store Profiling"
-                  active={pathname === '/store-profiling'}
-                  onClick={() => navigate('/store-profiling')}
-                />
-                <SidebarItem
-                  icon={Rocket}
-                  label="Onboarding Flow"
-                  active={pathname === '/onboarding-flow'}
-                  onClick={() => navigate('/onboarding-flow')}
-                />
-                <SidebarItem
-                  icon={HelpCircle}
-                  label="Store Profiling FAQ"
-                  active={pathname === '/store-profiling-faq'}
-                  onClick={() => navigate('/store-profiling-faq')}
-                />
-                <SidebarItem
-                  icon={MessageCircleQuestion}
-                  label="Onboarding FAQ"
-                  active={pathname === '/onboarding-faq'}
-                  onClick={() => navigate('/onboarding-faq')}
-                />
+                <SidebarItem icon={BookOpen} label="Store Profiling" active={pathname === '/store-profiling'} onClick={() => navigate('/store-profiling')} />
+                <SidebarItem icon={Rocket} label="Onboarding Flow" active={pathname === '/onboarding-flow'} onClick={() => navigate('/onboarding-flow')} />
+                <SidebarItem icon={HelpCircle} label="Store Profiling FAQ" active={pathname === '/store-profiling-faq'} onClick={() => navigate('/store-profiling-faq')} />
+                <SidebarItem icon={MessageCircleQuestion} label="Onboarding FAQ" active={pathname === '/onboarding-faq'} onClick={() => navigate('/onboarding-faq')} />
               </div>
             </div>
           </div>
