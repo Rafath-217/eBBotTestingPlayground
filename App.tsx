@@ -24,6 +24,8 @@ import { getMetrics, getAllResults, getEnrichedResults, EnrichedResult, getLLMSp
 import { getLatestEvaluationRun, getPromptVersionStats } from './services/evaluationApi';
 import { Metrics, LLMSpecs, TestCase, EvaluationRunDetail, PromptVersionStats } from './types';
 
+const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:3001';
+
 function App() {
   const navigate = useNavigate();
   const [isDark, setIsDark] = useState(false);
@@ -39,7 +41,7 @@ function App() {
     setAuthLoading(true);
     setAuthError('');
     try {
-      const res = await fetch('/api/bundleSetupLlmPipeline/validateKey', {
+      const res = await fetch(`${API_BASE_URL}/api/bundleSetupLlmPipeline/validateKey`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ key: apiKey.trim() }),
