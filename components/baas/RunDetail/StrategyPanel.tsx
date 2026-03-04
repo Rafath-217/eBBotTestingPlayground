@@ -61,7 +61,13 @@ export default function StrategyPanel({ run }: StrategyPanelProps) {
     return <EmptyPanel message="No strategy data available for this run." />
   }
 
-  const { strategies, implementationPriority } = data
+  const { strategies } = data
+
+  // implementationPriority can be string[] OR {strategyNumber, reason}[] from backend
+  const rawPriority: any[] = data.implementationPriority || []
+  const implementationPriority: string[] = rawPriority.map((p: any) =>
+    typeof p === 'string' ? p : (strategies.find((s: any) => s.number === p.strategyNumber)?.bundleName ?? `Strategy ${p.strategyNumber}`)
+  )
 
   // Sort strategies by implementation priority order if provided
   const sorted = implementationPriority.length > 0
