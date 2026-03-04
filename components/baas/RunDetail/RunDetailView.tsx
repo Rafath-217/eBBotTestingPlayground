@@ -126,47 +126,63 @@ export default function RunDetailView({ run, onClose }: RunDetailViewProps) {
 // individual agent result fields) still render gracefully.
 
 function toEnriched(run: BaasPipelineRun | EnrichedPipelineRun): EnrichedPipelineRun {
-  // Already enriched
-  if ('agentsExecuted' in run && Array.isArray(run.agentsExecuted)) {
-    return run as EnrichedPipelineRun
-  }
+  const isDone = run.status === 'completed'
+  const isFailed = run.status === 'failed'
+  const isFullAnalysis = run.pipelineType === 'full-analysis' || (run as any).pipelineType === 'fullAnalysis'
 
-  const plain = run as BaasPipelineRun
-
-  // Infer which agents ran from the legacy pipelineType + status
-  const isFullAnalysis = plain.pipelineType === 'full-analysis'
-  const isDone = plain.status === 'completed'
-  const isFailed = plain.status === 'failed'
-
-  const makeAgent = (name: AgentName, include: boolean) => ({
-    name,
-    status: !include
-      ? 'skipped' as const
-      : isFailed
-      ? 'failed' as const
-      : isDone
-      ? 'completed' as const
-      : 'running' as const,
-  })
-
-  const agentsExecuted = [
-    makeAgent('Website Auditor',     true),
-    makeAgent('Data Analyst',        isFullAnalysis),
-    makeAgent('Industry Classifier', isFullAnalysis),
-    makeAgent('Strategy Architect',  isFullAnalysis),
-    makeAgent('Report Compiler',     isFullAnalysis && !!plain.result?.strategy),
+  // Backend returns agentsExecuted as string[], frontend needs AgentExecution[]
+  const agentNames: AgentName[] = [
+    'Website Auditor', 'Data Analyst', 'Industry Classifier', 'Strategy Architect', 'Report Compiler',
   ]
 
+  let agentsExecuted: { name: AgentName; status: 'completed' | 'running' | 'failed' | 'skipped' | 'pending' }[]
+
+  if ('agentsExecuted' in run && Array.isArray(run.agentsExecuted) && run.agentsExecuted.length > 0) {
+    // Could be string[] from backend or AgentExecution[] if already enriched
+    const first = run.agentsExecuted[0]
+    if (typeof first === 'string') {
+      // Backend sends string[] — normalize to AgentExecution[]
+      const executedNames: string[] = run.agentsExecuted as unknown as string[]
+      agentsExecuted = agentNames.map((name) => ({
+        name,
+        status: executedNames.includes(name)
+          ? (isFailed ? 'failed' as const : isDone ? 'completed' as const : 'running' as const)
+          : (isFullAnalysis ? 'pending' as const : 'skipped' as const),
+      }))
+    } else {
+      // Already AgentExecution[]
+      agentsExecuted = run.agentsExecuted as typeof agentsExecuted
+    }
+  } else {
+    // No agentsExecuted — infer from legacy fields
+    const makeAgent = (name: AgentName, include: boolean) => ({
+      name,
+      status: !include
+        ? 'skipped' as const
+        : isFailed
+        ? 'failed' as const
+        : isDone
+        ? 'completed' as const
+        : 'running' as const,
+    })
+
+    agentsExecuted = [
+      makeAgent('Website Auditor',     true),
+      makeAgent('Data Analyst',        isFullAnalysis),
+      makeAgent('Industry Classifier', isFullAnalysis),
+      makeAgent('Strategy Architect',  isFullAnalysis),
+      makeAgent('Report Compiler',     isFullAnalysis && !!(run as any).result?.strategy),
+    ]
+  }
+
   return {
-    ...plain,
+    ...(run as any),
     agentsExecuted,
-    // Map legacy audit data — individual agent panels handle their own fallbacks
-    auditorResults: undefined,
-    analystResults: undefined,
-    classifierResults: undefined,
-    strategyResults: undefined,
-    reportResults: plain.result?.strategy
-      ? { markdownContent: plain.result.strategy }
-      : undefined,
+    auditorResults: (run as any).auditorResults ?? undefined,
+    analystResults: (run as any).analystResults ?? undefined,
+    classifierResults: (run as any).classifierResults ?? undefined,
+    strategyResults: (run as any).strategyResults ?? undefined,
+    reportResults: (run as any).reportResults
+      ?? ((run as any).result?.strategy ? { markdownContent: (run as any).result.strategy } : undefined),
   }
 }
