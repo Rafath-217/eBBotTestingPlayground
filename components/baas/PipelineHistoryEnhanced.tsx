@@ -227,6 +227,16 @@ export default function PipelineHistoryEnhanced({ refreshKey, showStats = false,
   const isEmpty = items.length === 0
   const noResults = !isEmpty && sorted.length === 0
 
+  // When a run is selected, show the detail view instead of the list
+  if (selectedItem) {
+    return (
+      <RunDetailView
+        run={selectedItem}
+        onClose={() => setSelectedItem(null)}
+      />
+    )
+  }
+
   return (
     <div className="space-y-4">
       {showStats && (
@@ -348,12 +358,6 @@ export default function PipelineHistoryEnhanced({ refreshKey, showStats = false,
         )}
       </Card>
 
-      {selectedItem && (
-        <RunDetailView
-          run={selectedItem}
-          onClose={() => setSelectedItem(null)}
-        />
-      )}
     </div>
   )
 }
