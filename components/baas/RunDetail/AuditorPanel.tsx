@@ -355,7 +355,7 @@ export default function AuditorPanel({ run }: AuditorPanelProps) {
                 className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/20"
               >
                 <TrendingDown className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-                <p className="text-sm text-slate-700 dark:text-slate-300">{f}</p>
+                <p className="text-sm text-slate-700 dark:text-slate-300">{typeof f === 'string' ? f : (f as Record<string, string>).finding ?? JSON.stringify(f)}</p>
               </div>
             ))}
           </CardContent>

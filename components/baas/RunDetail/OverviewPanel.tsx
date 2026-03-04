@@ -246,22 +246,24 @@ function StatCard({ label, value, icon, valueClass = '', description, onClick }:
   )
 }
 
-function FindingRow({ text }: { text: string }) {
+function FindingRow({ text }: { text: string | { finding?: string; impact?: string; recommendation?: string } }) {
+  const label = typeof text === 'string' ? text : text.finding ?? JSON.stringify(text)
   return (
     <div className="flex items-start gap-2 p-2 rounded-lg bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/20">
       <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
-      <span className="text-sm text-slate-700 dark:text-slate-300">{text}</span>
+      <span className="text-sm text-slate-700 dark:text-slate-300">{label}</span>
     </div>
   )
 }
 
-function ActionRow({ index, text }: { index: number; text: string }) {
+function ActionRow({ index, text }: { index: number; text: string | Record<string, unknown> }) {
+  const label = typeof text === 'string' ? text : (text as Record<string, string>).action ?? (text as Record<string, string>).recommendation ?? JSON.stringify(text)
   return (
     <div className="flex items-start gap-2">
       <Badge variant="outline" className="text-[10px] px-1.5 py-0 shrink-0 mt-0.5">
         {index}
       </Badge>
-      <span className="text-sm text-slate-700 dark:text-slate-300">{text}</span>
+      <span className="text-sm text-slate-700 dark:text-slate-300">{label}</span>
     </div>
   )
 }
