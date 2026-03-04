@@ -66,21 +66,110 @@ const PMDiscountView: React.FC<{ output: any }> = ({ output }) => {
   const config = output.discountConfiguration || output;
   const discountMode = config.discountMode;
   const rules = config.rules || [];
+  const isEnabled = config.isDiscountEnabled;
 
-  const getModeVariant = () => {
+  const getModeVariant = (): string => {
     if (discountMode === 'PERCENTAGE') return 'success';
     if (discountMode === 'FIXED') return 'blue';
     if (discountMode === 'FIXED_BUNDLE_PRICE') return 'purple';
+    if (discountMode === 'BXGY') return 'warning';
     return 'destructive';
   };
 
+  const getModeLabel = () => {
+    if (discountMode === 'BXGY') return 'Buy X Get Y';
+    return discountMode || 'null';
+  };
+
+  // BXGY-specific rendering
+  if (discountMode === 'BXGY' && rules.length > 0) {
+    return (
+      <div className="border rounded-lg bg-card p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <h4 className="font-semibold text-sm">Discount Mode</h4>
+          <div className="flex items-center gap-2">
+            {isEnabled !== undefined && (
+              <Badge variant={isEnabled ? 'success' : 'outline'}>
+                {isEnabled ? 'Enabled' : 'Disabled'}
+              </Badge>
+            )}
+            <Badge variant={getModeVariant() as any}>{getModeLabel()}</Badge>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          {rules.map((rule: any, idx: number) => (
+            <div key={idx} className="border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-900 p-3 space-y-3">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Rule #{idx + 1}</p>
+                {rule.discountCodePrefix && (
+                  <Badge variant="outline" className="text-[10px] font-mono">{rule.discountCodePrefix}</Badge>
+                )}
+              </div>
+
+              {/* Customer Buys */}
+              <div className="space-y-1.5">
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Customer Buys</p>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 flex items-center justify-between px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md">
+                    <span className="text-xs text-muted-foreground">Min {rule.type || 'quantity'} of items</span>
+                    <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">{rule.buyQty || rule.value}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Customer Gets */}
+              <div className="space-y-1.5">
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Customer Gets</p>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 flex items-center justify-between px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md">
+                    <span className="text-xs text-muted-foreground">Quantity</span>
+                    <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">{rule.getQty}</span>
+                  </div>
+                </div>
+                <p className="text-[11px] text-muted-foreground italic">Customer must add the quantity of items specified above to their cart.</p>
+              </div>
+
+              {/* Discount Details */}
+              <div className="space-y-1.5">
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Discount Details</p>
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md">
+                    <p className="text-[10px] text-muted-foreground mb-0.5">Value</p>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{rule.discountValue}</p>
+                  </div>
+                  <div className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md">
+                    <p className="text-[10px] text-muted-foreground mb-0.5">Type</p>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{Number(rule.discountValue) === 100 ? '% off' : '% off'}</p>
+                  </div>
+                  <div className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md">
+                    <p className="text-[10px] text-muted-foreground mb-0.5">Apply to</p>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 text-[11px]">Lowest priced</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Default rendering for PERCENTAGE / FIXED / FIXED_BUNDLE_PRICE
   return (
     <div className="border rounded-lg bg-card p-4 space-y-3">
       <div className="flex items-center justify-between">
         <h4 className="font-semibold text-sm">Discount Mode</h4>
-        <Badge variant={getModeVariant()}>
-          {discountMode || 'null'}
-        </Badge>
+        <div className="flex items-center gap-2">
+          {isEnabled !== undefined && (
+            <Badge variant={isEnabled ? 'success' : 'outline'}>
+              {isEnabled ? 'Enabled' : 'Disabled'}
+            </Badge>
+          )}
+          <Badge variant={getModeVariant() as any}>
+            {getModeLabel()}
+          </Badge>
+        </div>
       </div>
 
       {rules.length > 0 && (

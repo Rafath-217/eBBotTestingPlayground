@@ -16,6 +16,7 @@ const TraceTimeline: React.FC<{ trace: TraceEntry[] }> = ({ trace }) => {
       if (entry.output?.discountMode === 'PERCENTAGE') return 'default';
       if (entry.output?.discountMode === 'FIXED') return 'warning';
       if (entry.output?.discountMode === 'FIXED_BUNDLE_PRICE') return 'secondary';
+      if (entry.output?.discountMode === 'BXGY') return 'warning';
       if (entry.output?.discountMode === null) return 'destructive';
       return 'outline';
     }
@@ -33,7 +34,8 @@ const TraceTimeline: React.FC<{ trace: TraceEntry[] }> = ({ trace }) => {
     if (entry.output !== undefined) {
       if (typeof entry.output === 'object') {
         if (entry.output.structureType !== undefined) return entry.output.structureType || 'null';
-        if (entry.output.discountMode !== undefined) return entry.output.discountMode || 'null';
+        if (entry.output.discountMode !== undefined) return entry.output.discountMode === 'BXGY' ? 'Buy X Get Y' : (entry.output.discountMode || 'null');
+        if (entry.output.discountConfiguration?.discountMode !== undefined) return entry.output.discountConfiguration.discountMode === 'BXGY' ? 'Buy X Get Y' : (entry.output.discountConfiguration.discountMode || 'null');
         return JSON.stringify(entry.output);
       }
       return String(entry.output);

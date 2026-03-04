@@ -185,8 +185,8 @@ export interface PipelineDebug {
     collectionHints?: string[];
   };
   discountOutput: {
-    discountMode: 'PERCENTAGE' | 'FIXED' | 'FIXED_BUNDLE_PRICE' | null;
-    rules?: { type: string; value: string; discountValue: string }[];
+    discountMode: 'PERCENTAGE' | 'FIXED' | 'FIXED_BUNDLE_PRICE' | 'BXGY' | null;
+    rules?: { type: string; value: string; discountValue: string; buyQty?: string; getQty?: string; discountCodePrefix?: string }[];
   };
   rulesOutput: {
     conditions: {

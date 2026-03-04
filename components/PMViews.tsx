@@ -21,6 +21,100 @@ export const PMDiscountsPanel: React.FC<{ config: any }> = ({ config }) => {
     return rule.type || 'Unknown';
   };
 
+  const getModeLabel = () => {
+    if (discountMode === 'PERCENTAGE') return 'Percentage Off';
+    if (discountMode === 'FIXED') return 'Fixed Amount Off';
+    if (discountMode === 'FIXED_BUNDLE_PRICE') return 'Fixed Bundle Price';
+    if (discountMode === 'BXGY') return 'Buy X Get Y';
+    return 'None';
+  };
+
+  // BXGY-specific layout
+  if (discountMode === 'BXGY') {
+    return (
+      <div className="border rounded-lg bg-card">
+        <div className="p-4 border-b">
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold">Discounts</h3>
+            <div className={cn(
+              "w-10 h-6 rounded-full relative transition-colors",
+              isEnabled ? "bg-primary" : "bg-muted"
+            )}>
+              <div className={cn(
+                "absolute top-1 w-4 h-4 rounded-full bg-white transition-transform",
+                isEnabled ? "translate-x-5" : "translate-x-1"
+              )} />
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">Buy X Get Y discount configuration</p>
+        </div>
+        <div className="p-4 space-y-4">
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground">Discount Type</label>
+            <div className="w-full px-3 py-2 rounded-md border bg-muted/50 text-sm">{getModeLabel()}</div>
+          </div>
+          {rules.length > 0 ? (
+            <div className="space-y-3">
+              {rules.map((rule: any, idx: number) => (
+                <div key={idx} className="border rounded-md p-3 bg-background space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Rule #{idx + 1}</span>
+                    {rule.discountCodePrefix && (
+                      <span className="text-[10px] font-mono text-muted-foreground border rounded px-1.5 py-0.5">{rule.discountCodePrefix}</span>
+                    )}
+                  </div>
+                  {/* Customer Buys */}
+                  <div className="space-y-1">
+                    <label className="text-xs text-muted-foreground">Customer Buys</label>
+                    <div className="w-full px-3 py-2 rounded-md border bg-muted/50 text-sm flex items-center justify-between">
+                      <span className="text-muted-foreground">Min {rule.type || 'quantity'} of items</span>
+                      <span className="font-semibold">{rule.buyQty || rule.value}</span>
+                    </div>
+                  </div>
+                  {/* Customer Gets */}
+                  <div className="space-y-1">
+                    <label className="text-xs text-muted-foreground">Customer Gets</label>
+                    <div className="w-full px-3 py-2 rounded-md border bg-muted/50 text-sm flex items-center justify-between">
+                      <span className="text-muted-foreground">Quantity</span>
+                      <span className="font-semibold">{rule.getQty}</span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground italic">Customer must add the quantity of items specified above to their cart.</p>
+                  </div>
+                  {/* Discount Details */}
+                  <div className="space-y-1">
+                    <label className="text-xs text-muted-foreground">Discount Details</label>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="px-3 py-2 rounded-md border bg-muted/50">
+                        <p className="text-[10px] text-muted-foreground">Value</p>
+                        <p className="text-sm font-semibold">{rule.discountValue}</p>
+                      </div>
+                      <div className="px-3 py-2 rounded-md border bg-muted/50">
+                        <p className="text-[10px] text-muted-foreground">Type</p>
+                        <p className="text-sm font-semibold">% off</p>
+                      </div>
+                      <div className="px-3 py-2 rounded-md border bg-muted/50">
+                        <p className="text-[10px] text-muted-foreground">Apply to</p>
+                        <p className="text-sm font-semibold text-[11px]">Lowest priced</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="border-2 border-dashed rounded-md p-6 text-center text-muted-foreground text-sm">
+              No discount rules configured
+            </div>
+          )}
+          <button className="w-full py-2 border-2 border-dashed rounded-md text-sm text-muted-foreground hover:border-primary hover:text-primary transition-colors flex items-center justify-center gap-2 cursor-default">
+            <Plus className="w-4 h-4" />
+            Add Rule
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="border rounded-lg bg-card">
       {/* Header */}
@@ -45,12 +139,7 @@ export const PMDiscountsPanel: React.FC<{ config: any }> = ({ config }) => {
         {/* Discount Type */}
         <div className="space-y-1">
           <label className="text-xs font-medium text-muted-foreground">Discount Type</label>
-          <div className="w-full px-3 py-2 rounded-md border bg-muted/50 text-sm">
-            {discountMode === 'PERCENTAGE' && 'Percentage Off'}
-            {discountMode === 'FIXED' && 'Fixed Amount Off'}
-            {discountMode === 'FIXED_BUNDLE_PRICE' && 'Fixed Bundle Price'}
-            {!discountMode && 'None'}
-          </div>
+          <div className="w-full px-3 py-2 rounded-md border bg-muted/50 text-sm">{getModeLabel()}</div>
         </div>
 
         {/* Rules */}
