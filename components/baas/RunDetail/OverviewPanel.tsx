@@ -170,23 +170,26 @@ export default function OverviewPanel({ run, onNavigate }: OverviewPanelProps) {
           </CardHeader>
           <CardContent className="pt-0">
             <ol className="flex flex-col sm:flex-row flex-wrap gap-2">
-              {strategy.implementationPriority.map((name, i) => (
-                <li key={i} className="flex items-center gap-2">
-                  <span
-                    className={cn(
-                      'w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0',
-                      i === 0
-                        ? 'bg-primary text-primary-foreground'
-                        : i === 1
-                        ? 'bg-slate-700 dark:bg-slate-300 text-white dark:text-slate-900'
-                        : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
-                    )}
-                  >
-                    {i + 1}
-                  </span>
-                  <span className="text-sm text-slate-700 dark:text-slate-300">{name}</span>
-                </li>
-              ))}
+              {strategy.implementationPriority.map((item: any, i: number) => {
+                const label = typeof item === 'string' ? item : `Strategy ${item.strategyNumber}`
+                return (
+                  <li key={i} className="flex items-center gap-2">
+                    <span
+                      className={cn(
+                        'w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0',
+                        i === 0
+                          ? 'bg-primary text-primary-foreground'
+                          : i === 1
+                          ? 'bg-slate-700 dark:bg-slate-300 text-white dark:text-slate-900'
+                          : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                      )}
+                    >
+                      {i + 1}
+                    </span>
+                    <span className="text-sm text-slate-700 dark:text-slate-300">{label}</span>
+                  </li>
+                )
+              })}
             </ol>
           </CardContent>
         </Card>
