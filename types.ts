@@ -175,7 +175,7 @@ export interface LLMSpecs {
 export interface PipelineRequest {
   merchantText: string;
   collections: { id: string; title: string }[];
-  products: { id: string; productType: string }[];
+  products: { id: string; productType: string; title?: string }[];
 }
 
 export interface PipelineDebug {

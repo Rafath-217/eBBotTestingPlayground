@@ -16,15 +16,19 @@ export function parseCollections(input: string): { id: string; title: string }[]
 }
 
 /**
- * Parse comma-separated product types into API format
+ * Parse comma-separated product types (and optional titles) into API format
  */
-export function parseProducts(input: string): { id: string; productType: string }[] {
+export function parseProducts(input: string, titlesInput?: string): { id: string; productType: string; title?: string }[] {
   if (!input.trim()) return [];
-  return input
-    .split(',')
-    .map(type => type.trim())
-    .filter(Boolean)
-    .map((productType, i) => ({ id: `p_${i + 1}`, productType }));
+  const types = input.split(',').map(t => t.trim()).filter(Boolean);
+  const titles = titlesInput?.trim()
+    ? titlesInput.split(',').map(t => t.trim()).filter(Boolean)
+    : [];
+  return types.map((productType, i) => ({
+    id: `p_${i + 1}`,
+    productType,
+    ...(titles[i] ? { title: titles[i] } : {}),
+  }));
 }
 
 /**

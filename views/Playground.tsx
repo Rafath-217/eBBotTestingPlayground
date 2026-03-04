@@ -117,6 +117,7 @@ interface PlaygroundProps {
 const Playground: React.FC<PlaygroundProps> = ({ viewMode }) => {
   const [merchantText, setMerchantText] = useState('');
   const [collectionsInput, setCollectionsInput] = useState('');
+  const [productTitlesInput, setProductTitlesInput] = useState('');
   const [productsInput, setProductsInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -137,7 +138,7 @@ const Playground: React.FC<PlaygroundProps> = ({ viewMode }) => {
       const response = await runPipeline({
         merchantText: merchantText.trim(),
         collections: parseCollections(collectionsInput),
-        products: parseProducts(productsInput),
+        products: parseProducts(productsInput, productTitlesInput),
       });
       setResult(response.data);
     } catch (err) {
@@ -207,16 +208,35 @@ const Playground: React.FC<PlaygroundProps> = ({ viewMode }) => {
               />
               <p className="text-xs text-muted-foreground">Comma-separated collection titles</p>
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Products (Optional)</label>
-              <input
-                type="text"
-                value={productsInput}
-                onChange={(e) => setProductsInput(e.target.value)}
-                placeholder="T-Shirt, Jeans, Cap"
-                className="w-full px-3 py-2 rounded-md border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-              <p className="text-xs text-muted-foreground">Comma-separated product types</p>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Product Titles (Optional)</label>
+                <input
+                  type="text"
+                  value={productTitlesInput}
+                  onChange={(e) => setProductTitlesInput(e.target.value)}
+                  placeholder="Classic Tee, Slim Fit Jeans, Baseball Cap"
+                  className="w-full px-3 py-2 rounded-md border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                />
+                <p className="text-xs text-muted-foreground">Comma-separated product titles</p>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Product Types (Optional)</label>
+                <input
+                  type="text"
+                  value={productsInput}
+                  onChange={(e) => setProductsInput(e.target.value)}
+                  placeholder="T-Shirt, Jeans, Cap"
+                  className="w-full px-3 py-2 rounded-md border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                />
+                <p className="text-xs text-muted-foreground">Comma-separated product types</p>
+              </div>
+              {productTitlesInput.trim() && productsInput.trim() &&
+                productTitlesInput.split(',').filter(Boolean).length !== productsInput.split(',').filter(Boolean).length && (
+                <p className="text-xs text-amber-600 dark:text-amber-400">
+                  Mismatch: {productTitlesInput.split(',').filter(Boolean).length} title(s) vs {productsInput.split(',').filter(Boolean).length} type(s) — counts should match.
+                </p>
+              )}
             </div>
           </div>
 
