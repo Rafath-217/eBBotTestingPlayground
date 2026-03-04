@@ -40,12 +40,18 @@ export default function MetricsPanel({ run }: MetricsPanelProps) {
   }
 
   const cs = currencySymbol(data.currency ?? run.currency)
-  const { rawMetrics, derivedMetrics, opportunities } = data
+  const rawMetrics = data.rawMetrics
+  const derivedMetrics = data.derivedMetrics
+  const opportunities = data.opportunities
+
+  if (!rawMetrics && !derivedMetrics && !opportunities) {
+    return <EmptyPanel message="No metrics data available for this run." />
+  }
 
   return (
     <div className="space-y-4 p-6">
       {/* ── Top Pain Point Banner ──────────────────────────────── */}
-      {opportunities.topPainPoint && (
+      {opportunities?.topPainPoint && (
         <Card className="border-l-4 border-l-amber-500 bg-gradient-to-r from-amber-50 to-transparent dark:from-amber-900/10">
           <CardContent className="flex items-center gap-3 py-4">
             <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0" />
@@ -57,65 +63,71 @@ export default function MetricsPanel({ run }: MetricsPanelProps) {
       )}
 
       {/* ── Opportunity Flags ──────────────────────────────────── */}
+      {opportunities && (
       <div className="flex flex-wrap gap-2">
-        <OpportunityFlag label="Free Shipping Gap" active={opportunities.freeShippingGap} />
-        <OpportunityFlag label="Liquidation" active={opportunities.hasLiquidationOpportunity} />
-        <OpportunityFlag label="Retention Problem" active={opportunities.hasRetentionProblem} />
-        <OpportunityFlag label="AOV Bridge" active={opportunities.hasAovBridgeOpportunity} />
+        <OpportunityFlag label="Free Shipping Gap" active={opportunities.freeShippingGap ?? false} />
+        <OpportunityFlag label="Liquidation" active={opportunities.hasLiquidationOpportunity ?? false} />
+        <OpportunityFlag label="Retention Problem" active={opportunities.hasRetentionProblem ?? false} />
+        <OpportunityFlag label="AOV Bridge" active={opportunities.hasAovBridgeOpportunity ?? false} />
       </div>
+      )}
 
       {/* ── Key Metrics Grid ───────────────────────────────────── */}
+      {(rawMetrics || derivedMetrics) && (
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
         <MetricCard
           icon={<DollarSign className="w-3.5 h-3.5 text-slate-400" />}
           label="AOV"
-          value={rawMetrics.aov}
+          value={rawMetrics?.aov ?? null}
           unit={cs}
           isCurrency
         />
         <MetricCard
           icon={<Package className="w-3.5 h-3.5 text-slate-400" />}
           label="Free Shipping Threshold"
-          value={rawMetrics.freeShippingThreshold}
+          value={rawMetrics?.freeShippingThreshold ?? null}
           unit={cs}
           isCurrency
         />
         <MetricCard
           icon={<TrendingUp className="w-3.5 h-3.5 text-slate-400" />}
           label="AOV Bridge Amount"
-          value={derivedMetrics.aovBridgeAmount}
+          value={derivedMetrics?.aovBridgeAmount ?? null}
           unit={cs}
           isCurrency
         />
         <MetricCard
           icon={<Target className="w-3.5 h-3.5 text-slate-400" />}
           label="Revenue Concentration"
-          value={derivedMetrics.revenueConcentrationIndex}
+          value={derivedMetrics?.revenueConcentrationIndex ?? null}
         />
         <MetricCard
           icon={<TrendingUp className="w-3.5 h-3.5 text-slate-400" />}
           label="Potential Bundle Uplift"
-          value={derivedMetrics.potentialBundleUplift != null ? derivedMetrics.potentialBundleUplift * 100 : null}
+          value={derivedMetrics?.potentialBundleUplift != null ? derivedMetrics.potentialBundleUplift * 100 : null}
           unit="%"
           isPercentage
         />
         <MetricCard
           icon={<Activity className="w-3.5 h-3.5 text-slate-400" />}
           label="Grade C Revenue %"
-          value={derivedMetrics.gradeCRevenuePercent}
+          value={derivedMetrics?.gradeCRevenuePercent ?? null}
           unit="%"
           isPercentage
         />
       </div>
+      )}
 
       {/* ── Risk Gauges ────────────────────────────────────────── */}
+      {derivedMetrics && (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <RiskGauge label="Inventory Risk Score" score={derivedMetrics.inventoryRiskScore} />
-        <RiskGauge label="Retention Risk Score" score={derivedMetrics.retentionRiskScore} />
+        <RiskGauge label="Inventory Risk Score" score={derivedMetrics.inventoryRiskScore ?? null} />
+        <RiskGauge label="Retention Risk Score" score={derivedMetrics.retentionRiskScore ?? null} />
       </div>
+      )}
 
       {/* ── Recommended Pillars ────────────────────────────────── */}
-      {opportunities.recommendedPillars && opportunities.recommendedPillars.length > 0 && (
+      {Array.isArray(opportunities?.recommendedPillars) && opportunities.recommendedPillars.length > 0 && (
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm">

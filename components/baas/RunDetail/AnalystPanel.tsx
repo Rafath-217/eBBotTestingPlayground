@@ -45,12 +45,19 @@ export default function AnalystPanel({ run }: AnalystPanelProps) {
     return <EmptyPanel message="No analyst data available for this run." />
   }
 
-  const { dataOverview, aovHistogram, abcAnalysis, returnRateAnalysis, retentionEconomics, affinityAnalysis, moneyLeftOnTable, recommendedActions } = data
+  const dataOverview = data.dataOverview
+  const aovHistogram = data.aovHistogram
+  const abcAnalysis = data.abcAnalysis
+  const returnRateAnalysis = data.returnRateAnalysis
+  const retentionEconomics = data.retentionEconomics
+  const affinityAnalysis = data.affinityAnalysis
+  const moneyLeftOnTable = data.moneyLeftOnTable
+  const recommendedActions = data.recommendedActions
 
   return (
     <div className="space-y-4 p-6">
       {/* ── Money Left on Table banner ─────────────────────────── */}
-      {moneyLeftOnTable > 0 && (
+      {moneyLeftOnTable != null && moneyLeftOnTable > 0 && (
         <div className="rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 p-5 flex items-center justify-between text-white">
           <div>
             <p className="text-sm font-medium opacity-80">Estimated Revenue Opportunity</p>
@@ -62,30 +69,32 @@ export default function AnalystPanel({ run }: AnalystPanelProps) {
       )}
 
       {/* ── Overview stat strip ────────────────────────────────── */}
+      {dataOverview && (
       <div className="grid grid-cols-3 gap-4">
         <MiniStat
           icon={<ShoppingCart className="w-4 h-4" />}
           label="Orders"
-          value={dataOverview.orderCount.toLocaleString()}
+          value={(dataOverview.orderCount ?? 0).toLocaleString()}
         />
         <MiniStat
           icon={<Package className="w-4 h-4" />}
           label="Products"
-          value={dataOverview.productCount.toLocaleString()}
+          value={(dataOverview.productCount ?? 0).toLocaleString()}
         />
         <MiniStat
           icon={<DollarSign className="w-4 h-4" />}
           label="Revenue"
-          value={`${cs}${dataOverview.totalRevenue.toLocaleString()}`}
+          value={`${cs}${(dataOverview.totalRevenue ?? 0).toLocaleString()}`}
           valueClass="text-emerald-700 dark:text-emerald-400"
         />
       </div>
+      )}
 
       {/* ── 2-col row: AOV Histogram + Return Rate ─────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
         {/* AOV Histogram — show top 15 buckets, collapse the rest */}
-        {aovHistogram.length > 0 && (
+        {Array.isArray(aovHistogram) && aovHistogram.length > 0 && (
           <AovHistogramCard aovHistogram={aovHistogram} />
         )}
 
@@ -140,7 +149,7 @@ export default function AnalystPanel({ run }: AnalystPanelProps) {
                 <TrendingUp className="w-4 h-4 text-primary shrink-0" />
                 <div>
                   <p className="text-xs font-semibold text-slate-900 dark:text-slate-100">
-                    AOV Gap: {cs}{retentionEconomics.aovGap.toLocaleString()}
+                    AOV Gap: {cs}{(retentionEconomics.aovGap ?? 0).toLocaleString()}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     Opportunity to close with retention bundles
@@ -154,6 +163,7 @@ export default function AnalystPanel({ run }: AnalystPanelProps) {
         )}
 
         {/* ABC Analysis */}
+        {abcAnalysis ? (
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm">
@@ -165,23 +175,26 @@ export default function AnalystPanel({ run }: AnalystPanelProps) {
             <ProductGrade
               grade="A"
               label="Top performers"
-              products={abcAnalysis.gradeAProducts}
+              products={abcAnalysis.gradeAProducts ?? []}
               colorClass="text-emerald-700 dark:text-emerald-400"
               bgClass="bg-emerald-100 dark:bg-emerald-900/20"
             />
             <ProductGrade
               grade="C"
               label="Underperformers"
-              products={abcAnalysis.gradeCProducts}
+              products={abcAnalysis.gradeCProducts ?? []}
               colorClass="text-amber-700 dark:text-amber-400"
               bgClass="bg-amber-100 dark:bg-amber-900/20"
             />
             <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50">
               <span className="text-xs text-muted-foreground">Deadstock items</span>
-              <Badge variant="warning">{abcAnalysis.deadstockCount}</Badge>
+              <Badge variant="warning">{abcAnalysis.deadstockCount ?? 0}</Badge>
             </div>
           </CardContent>
         </Card>
+        ) : (
+          <NotCollected title="ABC Product Analysis" />
+        )}
       </div>
 
       {/* ── Affinity Pairs ─────────────────────────────────────── */}
@@ -213,7 +226,7 @@ export default function AnalystPanel({ run }: AnalystPanelProps) {
       )}
 
       {/* ── Recommended Actions ────────────────────────────────── */}
-      {recommendedActions.length > 0 && (
+      {Array.isArray(recommendedActions) && recommendedActions.length > 0 && (
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm">
@@ -223,14 +236,17 @@ export default function AnalystPanel({ run }: AnalystPanelProps) {
           </CardHeader>
           <CardContent className="pt-0">
             <ol className="space-y-2">
-              {recommendedActions.map((action, i) => (
+              {recommendedActions.map((action, i) => {
+                const label = typeof action === 'string' ? action : (action as Record<string, string>).action ?? (action as Record<string, string>).recommendation ?? JSON.stringify(action)
+                return (
                 <li key={i} className="flex items-start gap-3">
                   <span className="w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
                     {i + 1}
                   </span>
-                  <span className="text-sm text-slate-700 dark:text-slate-300">{action}</span>
+                  <span className="text-sm text-slate-700 dark:text-slate-300">{label}</span>
                 </li>
-              ))}
+                )
+              })}
             </ol>
           </CardContent>
         </Card>
@@ -397,7 +413,7 @@ function AovBox({ label, value, symbol = '$', highlight = false }: {
     )}>
       <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1">{label}</p>
       <p className={cn('text-lg font-bold', highlight ? 'text-primary' : 'text-slate-900 dark:text-slate-100')}>
-        {symbol}{value.toLocaleString()}
+        {symbol}{(value ?? 0).toLocaleString()}
       </p>
     </div>
   )

@@ -49,7 +49,11 @@ export default function ClassifierPanel({ run }: ClassifierPanelProps) {
     return <EmptyPanel message="No classifier data available for this run." />
   }
 
-  const confidencePct = Math.round(data.confidence * 100)
+  // confidence can be a number (0-1) or a string like "High"/"Medium"/"Low"
+  const rawConf = data.confidence
+  const numericConf = typeof rawConf === 'number' ? rawConf
+    : rawConf === 'High' ? 0.9 : rawConf === 'Medium' ? 0.7 : rawConf === 'Low' ? 0.4 : 0
+  const confidencePct = Math.round(numericConf * 100)
 
   return (
     <div className="space-y-4 p-6">
@@ -98,7 +102,7 @@ export default function ClassifierPanel({ run }: ClassifierPanelProps) {
       </Card>
 
       {/* ── Classification Evidence ────────────────────────────── */}
-      {data.classificationEvidence.length > 0 && (
+      {Array.isArray(data.classificationEvidence) && data.classificationEvidence.length > 0 && (
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm">
@@ -132,19 +136,19 @@ export default function ClassifierPanel({ run }: ClassifierPanelProps) {
             <PillarGroup
               icon={<CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />}
               label="Primary"
-              pillars={data.recommendedPillars.primary}
+              pillars={data.recommendedPillars?.primary ?? []}
               badgeClass="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-300"
             />
             <PillarGroup
               icon={<Minus className="w-3.5 h-3.5 text-amber-500" />}
               label="Secondary"
-              pillars={data.recommendedPillars.secondary}
+              pillars={data.recommendedPillars?.secondary ?? []}
               badgeClass="bg-amber-100 text-amber-800 dark:bg-amber-900/20 dark:text-amber-300"
             />
             <PillarGroup
               icon={<XCircle className="w-3.5 h-3.5 text-red-400" />}
               label="Avoid"
-              pillars={data.recommendedPillars.avoid}
+              pillars={data.recommendedPillars?.avoid ?? []}
               badgeClass="bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300"
             />
           </CardContent>
@@ -159,6 +163,7 @@ export default function ClassifierPanel({ run }: ClassifierPanelProps) {
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0 space-y-4">
+            {data.verticalContext?.focus && (
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1.5">
                 Strategic Focus
@@ -167,8 +172,9 @@ export default function ClassifierPanel({ run }: ClassifierPanelProps) {
                 {data.verticalContext.focus}
               </p>
             </div>
+            )}
 
-            {data.verticalContext.keyBundleTypes.length > 0 && (
+            {Array.isArray(data.verticalContext?.keyBundleTypes) && data.verticalContext.keyBundleTypes.length > 0 && (
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1.5">
                   Key Bundle Types
@@ -179,6 +185,9 @@ export default function ClassifierPanel({ run }: ClassifierPanelProps) {
                   ))}
                 </div>
               </div>
+            )}
+            {!data.verticalContext?.focus && !Array.isArray(data.verticalContext?.keyBundleTypes) && (
+              <p className="text-sm text-muted-foreground py-2">No vertical context available</p>
             )}
           </CardContent>
         </Card>
@@ -210,7 +219,7 @@ export default function ClassifierPanel({ run }: ClassifierPanelProps) {
       )}
 
       {/* ── Psychological Triggers ─────────────────────────────── */}
-      {data.psychologicalTriggers.length > 0 && (
+      {Array.isArray(data.psychologicalTriggers) && data.psychologicalTriggers.length > 0 && (
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm">

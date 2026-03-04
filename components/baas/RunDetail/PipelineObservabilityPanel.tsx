@@ -162,7 +162,7 @@ export default function PipelineObservabilityPanel({ run }: PipelineObservabilit
                 </Badge>
               </div>
 
-              {plannerDecisions.decisionLog.length > 0 && (
+              {Array.isArray(plannerDecisions.decisionLog) && plannerDecisions.decisionLog.length > 0 && (
                 <div className="space-y-1">
                   {plannerDecisions.decisionLog.map((entry, i) => (
                     <div key={i} className="flex items-start gap-2">
@@ -202,11 +202,11 @@ export default function PipelineObservabilityPanel({ run }: PipelineObservabilit
 
               {reflectionResult.tokenUsage && (
                 <p className="text-xs text-muted-foreground">
-                  Tokens: {reflectionResult.tokenUsage.inputTokens.toLocaleString()} in / {reflectionResult.tokenUsage.outputTokens.toLocaleString()} out
+                  Tokens: {(reflectionResult.tokenUsage.inputTokens ?? 0).toLocaleString()} in / {(reflectionResult.tokenUsage.outputTokens ?? 0).toLocaleString()} out
                 </p>
               )}
 
-              {reflectionResult.reflectionLog.length > 0 && (
+              {Array.isArray(reflectionResult.reflectionLog) && reflectionResult.reflectionLog.length > 0 && (
                 <div className="space-y-1">
                   {reflectionResult.reflectionLog.map((entry, i) => (
                     <div key={i} className="flex items-start gap-2">
@@ -217,7 +217,7 @@ export default function PipelineObservabilityPanel({ run }: PipelineObservabilit
                 </div>
               )}
 
-              {reflectionResult.constraintsForRetry.length > 0 && (
+              {Array.isArray(reflectionResult.constraintsForRetry) && reflectionResult.constraintsForRetry.length > 0 && (
                 <div className="space-y-1.5">
                   {reflectionResult.constraintsForRetry.map((constraint, i) => (
                     <div
@@ -335,7 +335,7 @@ function StrategyValidationRow({ validation }: { validation: StrategyValidation 
           </div>
         ))}
       </div>
-      {validation.issues.length > 0 && (
+      {Array.isArray(validation.issues) && validation.issues.length > 0 && (
         <div className="space-y-1 pt-1 border-t border-slate-100 dark:border-slate-800">
           {validation.issues.map((issue, i) => (
             <p key={i} className="text-[11px] text-red-600 dark:text-red-400">{issue}</p>

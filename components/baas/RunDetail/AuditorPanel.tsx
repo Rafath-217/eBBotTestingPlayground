@@ -54,7 +54,7 @@ export default function AuditorPanel({ run }: AuditorPanelProps) {
   }
 
   const cs = currencySymbol(run.currency)
-  const score = data.overallScore
+  const score = data.overallScore ?? 0
   const shipping = data.shippingAnalysis
   const nav = data.navigationAudit
   const pdp = data.pdpAudit
@@ -93,6 +93,7 @@ export default function AuditorPanel({ run }: AuditorPanelProps) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
         {/* Shipping Analysis */}
+        {shipping && (
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm">
@@ -141,8 +142,10 @@ export default function AuditorPanel({ run }: AuditorPanelProps) {
             )}
           </CardContent>
         </Card>
+        )}
 
         {/* PDP Widget Audit */}
+        {pdp && (
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center justify-between text-sm">
@@ -150,7 +153,7 @@ export default function AuditorPanel({ run }: AuditorPanelProps) {
                 <ShoppingBag className="w-4 h-4 text-slate-500" />
                 PDP Audit
               </span>
-              <Badge variant="outline" className={getScoreColor(pdp.score / pdp.maxScore * 10)}>
+              <Badge variant="outline" className={getScoreColor((pdp.maxScore ? pdp.score / pdp.maxScore : 0) * 10)}>
                 {pdp.score}/{pdp.maxScore}
               </Badge>
             </CardTitle>
@@ -162,27 +165,29 @@ export default function AuditorPanel({ run }: AuditorPanelProps) {
                 <div
                   className={cn(
                     'h-full rounded-full transition-all',
-                    pdp.score / pdp.maxScore >= 0.7 ? 'bg-emerald-500' :
-                    pdp.score / pdp.maxScore >= 0.4 ? 'bg-amber-500' :
+                    (pdp.maxScore ? pdp.score / pdp.maxScore : 0) >= 0.7 ? 'bg-emerald-500' :
+                    (pdp.maxScore ? pdp.score / pdp.maxScore : 0) >= 0.4 ? 'bg-amber-500' :
                     'bg-red-500'
                   )}
-                  style={{ width: `${(pdp.score / pdp.maxScore) * 100}%` }}
+                  style={{ width: `${(pdp.maxScore ? (pdp.score / pdp.maxScore) : 0) * 100}%` }}
                 />
               </div>
             </div>
 
             <div className="space-y-1.5">
-              {pdp.widgetsPresent.map((w, i) => (
+              {(pdp.widgetsPresent ?? []).map((w, i) => (
                 <WidgetRow key={i} label={w} present={true} />
               ))}
-              {pdp.widgetsMissing.map((w, i) => (
+              {(pdp.widgetsMissing ?? []).map((w, i) => (
                 <WidgetRow key={i} label={w} present={false} />
               ))}
             </div>
           </CardContent>
         </Card>
+        )}
 
         {/* Navigation Audit */}
+        {nav && (
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm">
@@ -197,7 +202,7 @@ export default function AuditorPanel({ run }: AuditorPanelProps) {
               </Badge>
             </MetaRow>
 
-            {nav.bundleTermsFound.length > 0 && (
+            {Array.isArray(nav.bundleTermsFound) && nav.bundleTermsFound.length > 0 && (
               <div>
                 <p className="text-xs font-medium text-muted-foreground mb-2">Bundle Terms Found</p>
                 <div className="flex flex-wrap gap-1.5">
@@ -208,7 +213,7 @@ export default function AuditorPanel({ run }: AuditorPanelProps) {
               </div>
             )}
 
-            {nav.navItems.length > 0 && (
+            {Array.isArray(nav.navItems) && nav.navItems.length > 0 && (
               <div>
                 <p className="text-xs font-medium text-muted-foreground mb-2">Nav Items</p>
                 <div className="flex flex-wrap gap-1.5">
@@ -225,8 +230,10 @@ export default function AuditorPanel({ run }: AuditorPanelProps) {
             )}
           </CardContent>
         </Card>
+        )}
 
         {/* Price Analysis */}
+        {price && (
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm">
@@ -266,6 +273,7 @@ export default function AuditorPanel({ run }: AuditorPanelProps) {
             </div>
           </CardContent>
         </Card>
+        )}
 
         {/* Bundle Detection */}
         {data.bundleDetection && (
@@ -339,7 +347,7 @@ export default function AuditorPanel({ run }: AuditorPanelProps) {
       )}
 
       {/* ── Critical Findings ──────────────────────────────────── */}
-      {data.criticalFindings.length > 0 && (
+      {Array.isArray(data.criticalFindings) && data.criticalFindings.length > 0 && (
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm">
@@ -437,7 +445,7 @@ function PriceStat({ label, value, currency = '$', highlight = false }: {
         'text-sm font-bold',
         highlight ? 'text-primary' : 'text-slate-700 dark:text-slate-300'
       )}>
-        {currency}{value.toLocaleString()}
+        {currency}{(value ?? 0).toLocaleString()}
       </p>
     </div>
   )
@@ -569,7 +577,7 @@ function BundleDetectionCard({ detection }: { detection: BundleDetection }) {
           </MetaRow>
         </div>
 
-        {detection.signals.length > 0 && (
+        {Array.isArray(detection.signals) && detection.signals.length > 0 && (
           <div>
             <p className="text-xs font-medium text-muted-foreground mb-2">Signals</p>
             <div className="space-y-1">
@@ -584,7 +592,7 @@ function BundleDetectionCard({ detection }: { detection: BundleDetection }) {
           </div>
         )}
 
-        {detection.keywordsFound.length > 0 && (
+        {Array.isArray(detection.keywordsFound) && detection.keywordsFound.length > 0 && (
           <div>
             <p className="text-xs font-medium text-muted-foreground mb-2">Keywords</p>
             <div className="flex flex-wrap gap-1.5">
@@ -595,7 +603,7 @@ function BundleDetectionCard({ detection }: { detection: BundleDetection }) {
           </div>
         )}
 
-        {detection.appsDetected.length > 0 && (
+        {Array.isArray(detection.appsDetected) && detection.appsDetected.length > 0 && (
           <div>
             <p className="text-xs font-medium text-muted-foreground mb-2">Apps Detected</p>
             <div className="flex flex-wrap gap-1.5">

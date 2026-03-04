@@ -57,7 +57,7 @@ export default function StrategyPanel({ run }: StrategyPanelProps) {
   const data = run.strategyResults
   const [expandedIndex, setExpandedIndex] = useState<number | null>(0)
 
-  if (!data || data.strategies.length === 0) {
+  if (!data || !Array.isArray(data.strategies) || data.strategies.length === 0) {
     return <EmptyPanel message="No strategy data available for this run." />
   }
 
@@ -138,9 +138,9 @@ interface StrategyCardProps {
 }
 
 function StrategyCard({ strategy, rank, currencySymbol: cs, isExpanded, onToggle }: StrategyCardProps) {
-  const pillarColor = getPillarColor(strategy.pillarName)
+  const pillarColor = getPillarColor(strategy.pillarName ?? '')
   const math = strategy.offerMathematics
-  const savingsPct = math.discount
+  const savingsPct = math?.discount ?? 0
 
   return (
     <Card className={cn(
@@ -211,6 +211,7 @@ function StrategyCard({ strategy, rank, currencySymbol: cs, isExpanded, onToggle
               </p>
 
               {/* Products list */}
+              {Array.isArray(math?.products) && math.products.length > 0 && (
               <div className="space-y-1.5">
                 {math.products.map((prod, i) => (
                   <div key={i} className="flex items-center justify-between py-1 border-b border-slate-50 dark:border-slate-800">
@@ -219,33 +220,36 @@ function StrategyCard({ strategy, rank, currencySymbol: cs, isExpanded, onToggle
                       <span className="text-sm text-slate-700 dark:text-slate-300">{prod.name}</span>
                     </div>
                     <span className="text-sm font-mono text-slate-600 dark:text-slate-400">
-                      {cs}{prod.price.toLocaleString()}
+                      {cs}{(prod.price ?? 0).toLocaleString()}
                     </span>
                   </div>
                 ))}
               </div>
+              )}
 
               {/* Pricing summary */}
+              {math && (
               <div className="rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 overflow-hidden">
                 <div className="flex items-center justify-between px-3 py-2 text-xs">
                   <span className="text-muted-foreground">Original Total</span>
                   <span className="font-mono line-through text-muted-foreground">
-                    {cs}{math.originalTotal.toLocaleString()}
+                    {cs}{(math.originalTotal ?? 0).toLocaleString()}
                   </span>
                 </div>
                 <div className="flex items-center justify-between px-3 py-2 text-xs border-t border-slate-200 dark:border-slate-700">
                   <span className="text-muted-foreground">Savings</span>
                   <span className="font-mono text-emerald-600 dark:text-emerald-400">
-                    -{cs}{math.savingsAmount.toLocaleString()} ({math.discount}%)
+                    -{cs}{(math.savingsAmount ?? 0).toLocaleString()} ({math.discount ?? 0}%)
                   </span>
                 </div>
                 <div className="flex items-center justify-between px-3 py-2.5 bg-primary/5 border-t border-primary/20">
                   <span className="text-sm font-semibold text-primary">Bundle Price</span>
                   <span className="text-sm font-black font-mono text-primary">
-                    {cs}{math.bundlePrice.toLocaleString()}
+                    {cs}{(math.bundlePrice ?? 0).toLocaleString()}
                   </span>
                 </div>
               </div>
+              )}
             </div>
 
             {/* Right: Execution details */}
@@ -255,23 +259,29 @@ function StrategyCard({ strategy, rank, currencySymbol: cs, isExpanded, onToggle
                 Execution Details
               </h4>
 
+              {strategy.psychologicalTrigger && (
               <DetailRow
                 icon={<Target className="w-3.5 h-3.5 text-violet-500" />}
                 label="Psychological Trigger"
-                value={strategy.psychologicalTrigger}
+                value={typeof strategy.psychologicalTrigger === 'string' ? strategy.psychologicalTrigger : JSON.stringify(strategy.psychologicalTrigger)}
               />
+              )}
 
+              {strategy.executionTool && (
               <DetailRow
                 icon={<Zap className="w-3.5 h-3.5 text-blue-500" />}
                 label="Execution Tool"
-                value={strategy.executionTool}
+                value={typeof strategy.executionTool === 'string' ? strategy.executionTool : JSON.stringify(strategy.executionTool)}
               />
+              )}
 
+              {strategy.expectedImpact && (
               <DetailRow
                 icon={<TrendingUp className="w-3.5 h-3.5 text-emerald-500" />}
                 label="Expected Impact"
-                value={strategy.expectedImpact}
+                value={typeof strategy.expectedImpact === 'string' ? strategy.expectedImpact : JSON.stringify(strategy.expectedImpact)}
               />
+              )}
             </div>
           </div>
         </div>
