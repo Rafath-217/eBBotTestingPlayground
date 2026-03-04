@@ -15,7 +15,6 @@ import { runFullAnalysis } from '../services/baasDataService'
 const APP_OPTIONS = [
   { value: '', label: 'None (skip order analysis)' },
   { value: 'kite', label: 'Kite' },
-  { value: 'giftkart', label: 'Giftkart' },
   { value: 'fly', label: 'Fly' },
 ] as const
 

@@ -110,9 +110,8 @@ export const Layout: React.FC<LayoutProps> = ({ children, isDark, toggleDark, vi
             <SidebarGroup
               icon={Package}
               label="EB Bundle Setup"
-              isActive={['/', '/playground', '/history', '/churn-analysis', '/churn-report', '/results', '/evaluation-runs', '/run-comparison'].includes(pathname)}
+              isActive={['/playground', '/history', '/churn-analysis', '/churn-report', '/results', '/evaluation-runs', '/run-comparison'].includes(pathname)}
             >
-              <SidebarItem icon={LayoutDashboard} label="Overview" active={pathname === '/'} onClick={() => navigate('/')} indent />
               <SidebarItem icon={Play} label="Playground" active={pathname === '/playground'} onClick={() => navigate('/playground')} indent />
               <SidebarItem icon={History} label="Pipeline History" active={pathname === '/history'} onClick={() => navigate('/history')} indent />
               <SidebarItem icon={TrendingDown} label="Churn Analysis" active={pathname === '/churn-analysis'} onClick={() => navigate('/churn-analysis')} indent />
