@@ -22,9 +22,10 @@ interface ReportPanelProps {
 export default function ReportPanel({ run }: ReportPanelProps) {
   const [copied, setCopied] = useState(false)
 
-  // Prefer enriched reportResults; fall back to legacy strategy string
+  // reportResults can be { markdownContent: string } or a raw string (normalized in toEnriched)
   const content: string | null =
     run.reportResults?.markdownContent ??
+    (typeof run.reportResults === 'string' ? run.reportResults : null) ??
     run.result?.strategy ??
     null
 

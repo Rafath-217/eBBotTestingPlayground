@@ -42,7 +42,15 @@ export default function OverviewPanel({ run, onNavigate }: OverviewPanelProps) {
   const strategy = run.strategyResults
 
   const score = auditor?.overallScore ?? run.result?.audit?.score ?? null
-  const money = analyst?.moneyLeftOnTable ?? null
+
+  // moneyLeftOnTable can be a number or an object with totalOpportunity / gradeCLiability
+  const rawMoney = analyst?.moneyLeftOnTable
+  const money: number | null =
+    typeof rawMoney === 'number' ? rawMoney
+    : rawMoney && typeof rawMoney === 'object'
+      ? (rawMoney as any).totalOpportunity ?? (rawMoney as any).gradeCLiability ?? null
+    : null
+
   const vertical = classifier?.primaryVertical ?? null
   const stratCount = strategy?.strategies?.length ?? 0
 
@@ -79,7 +87,9 @@ export default function OverviewPanel({ run, onNavigate }: OverviewPanelProps) {
           valueClass="text-violet-700 dark:text-violet-400"
           description={
             classifier
-              ? `${Math.round(classifier.confidence * 100)}% confidence`
+              ? typeof classifier.confidence === 'string'
+                ? `${classifier.confidence} confidence`
+                : `${Math.round(classifier.confidence * 100)}% confidence`
               : 'Classification pending'
           }
           onClick={() => onNavigate('classifier')}
@@ -259,8 +269,8 @@ function FindingRow({ text }: { text: string | { finding?: string; impact?: stri
   )
 }
 
-function ActionRow({ index, text }: { index: number; text: string | Record<string, unknown> }) {
-  const label = typeof text === 'string' ? text : (text as Record<string, string>).action ?? (text as Record<string, string>).recommendation ?? JSON.stringify(text)
+function ActionRow({ index, text }: { index: number; text: string | Record<string, unknown> | any }) {
+  const label = typeof text === 'string' ? text : (text as any).action ?? (text as any).recommendation ?? JSON.stringify(text)
   return (
     <div className="flex items-start gap-2">
       <Badge variant="outline" className="text-[10px] px-1.5 py-0 shrink-0 mt-0.5">

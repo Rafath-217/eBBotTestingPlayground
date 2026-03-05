@@ -31,7 +31,7 @@ import {
 } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent, Badge, cn } from '../../ui'
 import { currencySymbol } from '../../../utils'
-import type { EnrichedPipelineRun, AnalystResults } from '../../../types'
+import type { EnrichedPipelineRun, AnalystResults, AffinityTopPair } from '../../../types'
 
 interface AnalystPanelProps {
   run: EnrichedPipelineRun
@@ -46,13 +46,33 @@ export default function AnalystPanel({ run }: AnalystPanelProps) {
   }
 
   const dataOverview = data.dataOverview
-  const aovHistogram = data.aovHistogram
+  const rawHistogram = data.aovHistogram
+  const aovHistogram = Array.isArray(rawHistogram) ? rawHistogram : null
   const abcAnalysis = data.abcAnalysis
   const returnRateAnalysis = data.returnRateAnalysis
   const retentionEconomics = data.retentionEconomics
-  const affinityAnalysis = data.affinityAnalysis
-  const moneyLeftOnTable = data.moneyLeftOnTable
   const recommendedActions = data.recommendedActions
+
+  // moneyLeftOnTable can be number or object
+  const rawMoney = data.moneyLeftOnTable
+  const moneyLeftOnTable: number | null =
+    typeof rawMoney === 'number' ? rawMoney
+    : rawMoney && typeof rawMoney === 'object'
+      ? (rawMoney as any).totalOpportunity ?? (rawMoney as any).gradeCLiability ?? null
+    : null
+
+  // affinityAnalysis can be { topPairs: [...] } or AffinityPair[]
+  const rawAffinity = data.affinityAnalysis
+  const affinityTopPairs: AffinityTopPair[] | null =
+    rawAffinity && !Array.isArray(rawAffinity) && 'topPairs' in rawAffinity
+      ? (rawAffinity as any).topPairs ?? null
+      : null
+  const affinityFlatPairs = Array.isArray(rawAffinity) ? rawAffinity : null
+
+  // ABC analysis: normalize backend fields
+  const gradeAProducts = abcAnalysis?.gradeAProducts ?? abcAnalysis?.gradeATopPerformers ?? []
+  const gradeCProducts = abcAnalysis?.gradeCProducts ?? abcAnalysis?.liquidationPriority ?? []
+  const deadstockCount = abcAnalysis?.deadstockCount ?? abcAnalysis?.gradeCCount ?? 0
 
   return (
     <div className="space-y-4 p-6">
@@ -94,7 +114,7 @@ export default function AnalystPanel({ run }: AnalystPanelProps) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
         {/* AOV Histogram — show top 15 buckets, collapse the rest */}
-        {Array.isArray(aovHistogram) && aovHistogram.length > 0 && (
+        {aovHistogram && aovHistogram.length > 0 && (
           <AovHistogramCard aovHistogram={aovHistogram} />
         )}
 
@@ -175,21 +195,29 @@ export default function AnalystPanel({ run }: AnalystPanelProps) {
             <ProductGrade
               grade="A"
               label="Top performers"
-              products={abcAnalysis.gradeAProducts ?? []}
+              products={gradeAProducts}
               colorClass="text-emerald-700 dark:text-emerald-400"
               bgClass="bg-emerald-100 dark:bg-emerald-900/20"
             />
             <ProductGrade
               grade="C"
               label="Underperformers"
-              products={abcAnalysis.gradeCProducts ?? []}
+              products={gradeCProducts}
               colorClass="text-amber-700 dark:text-amber-400"
               bgClass="bg-amber-100 dark:bg-amber-900/20"
             />
             <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50">
-              <span className="text-xs text-muted-foreground">Deadstock items</span>
-              <Badge variant="warning">{abcAnalysis.deadstockCount ?? 0}</Badge>
+              <span className="text-xs text-muted-foreground">Grade C items</span>
+              <Badge variant="warning">{deadstockCount}</Badge>
             </div>
+            {abcAnalysis?.gradeCRevenue != null && abcAnalysis.gradeCRevenue > 0 && (
+              <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                <span className="text-xs text-muted-foreground">Grade C revenue</span>
+                <span className="text-xs font-mono font-semibold text-amber-600 dark:text-amber-400">
+                  {cs}{abcAnalysis.gradeCRevenue.toLocaleString()}
+                </span>
+              </div>
+            )}
           </CardContent>
         </Card>
         ) : (
@@ -198,9 +226,7 @@ export default function AnalystPanel({ run }: AnalystPanelProps) {
       </div>
 
       {/* ── Affinity Pairs ─────────────────────────────────────── */}
-      {affinityAnalysis == null ? (
-        <NotCollected title="Co-Purchase Affinity Pairs" />
-      ) : affinityAnalysis.length > 0 && (
+      {affinityTopPairs != null && affinityTopPairs.length > 0 ? (
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm">
@@ -210,7 +236,36 @@ export default function AnalystPanel({ run }: AnalystPanelProps) {
           </CardHeader>
           <CardContent className="pt-0">
             <div className="space-y-2">
-              {affinityAnalysis.map((pair, i) => (
+              {affinityTopPairs.map((pair, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-3 p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                >
+                  <span className="text-xs font-bold text-muted-foreground w-4 shrink-0">#{i + 1}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-xs font-medium text-slate-800 dark:text-slate-200 truncate">{pair.anchor}</span>
+                      <span className="text-muted-foreground text-xs">+</span>
+                      <span className="text-xs font-medium text-slate-800 dark:text-slate-200 truncate">{pair.boughtWith}</span>
+                    </div>
+                  </div>
+                  <Badge variant="blue" className="text-xs shrink-0">{pair.orders} orders</Badge>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      ) : affinityFlatPairs != null && affinityFlatPairs.length > 0 ? (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <Link className="w-4 h-4 text-slate-500" />
+              Co-Purchase Affinity Pairs
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="space-y-2">
+              {affinityFlatPairs.map((pair, i) => (
                 <AffinityRow
                   key={i}
                   rank={i + 1}
@@ -223,7 +278,9 @@ export default function AnalystPanel({ run }: AnalystPanelProps) {
             </div>
           </CardContent>
         </Card>
-      )}
+      ) : data.affinityAnalysis == null ? (
+        <NotCollected title="Co-Purchase Affinity Pairs" />
+      ) : null}
 
       {/* ── Recommended Actions ────────────────────────────────── */}
       {Array.isArray(recommendedActions) && recommendedActions.length > 0 && (
@@ -237,7 +294,7 @@ export default function AnalystPanel({ run }: AnalystPanelProps) {
           <CardContent className="pt-0">
             <ol className="space-y-2">
               {recommendedActions.map((action, i) => {
-                const label = typeof action === 'string' ? action : (action as Record<string, string>).action ?? (action as Record<string, string>).recommendation ?? JSON.stringify(action)
+                const label = typeof action === 'string' ? action : (action as any).action ?? (action as any).recommendation ?? JSON.stringify(action)
                 return (
                 <li key={i} className="flex items-start gap-3">
                   <span className="w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">

@@ -219,7 +219,15 @@ export default function ClassifierPanel({ run }: ClassifierPanelProps) {
       )}
 
       {/* ── Psychological Triggers ─────────────────────────────── */}
-      {Array.isArray(data.psychologicalTriggers) && data.psychologicalTriggers.length > 0 && (
+      {data.psychologicalTriggers && (() => {
+        // Can be a single string or string[]
+        const triggers: string[] = Array.isArray(data.psychologicalTriggers)
+          ? data.psychologicalTriggers
+          : typeof data.psychologicalTriggers === 'string'
+            ? data.psychologicalTriggers.split(/;\s*/).filter(Boolean)
+            : []
+        if (triggers.length === 0) return null
+        return (
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm">
@@ -229,7 +237,7 @@ export default function ClassifierPanel({ run }: ClassifierPanelProps) {
           </CardHeader>
           <CardContent className="pt-0">
             <div className="flex flex-wrap gap-2">
-              {data.psychologicalTriggers.map((trigger, i) => (
+              {triggers.map((trigger, i) => (
                 <span
                   key={i}
                   className={cn(
@@ -243,7 +251,8 @@ export default function ClassifierPanel({ run }: ClassifierPanelProps) {
             </div>
           </CardContent>
         </Card>
-      )}
+        )
+      })()}
     </div>
   )
 }

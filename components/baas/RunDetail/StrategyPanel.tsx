@@ -140,7 +140,13 @@ interface StrategyCardProps {
 function StrategyCard({ strategy, rank, currencySymbol: cs, isExpanded, onToggle }: StrategyCardProps) {
   const pillarColor = getPillarColor(strategy.pillarName ?? '')
   const math = strategy.offerMathematics
-  const savingsPct = math?.discount ?? 0
+
+  // Normalize offer math fields: backend uses combinedRetail/discountPercent, legacy uses originalTotal/discount
+  const originalTotal = math?.combinedRetail ?? math?.originalTotal ?? 0
+  const discountPct = math?.discountPercent ?? math?.discount ?? 0
+  const bundlePrice = math?.bundlePrice ?? 0
+  const savingsAmount = math?.savingsAmount ?? (originalTotal - bundlePrice)
+  const savingsPct = discountPct
 
   return (
     <Card className={cn(
@@ -233,19 +239,19 @@ function StrategyCard({ strategy, rank, currencySymbol: cs, isExpanded, onToggle
                 <div className="flex items-center justify-between px-3 py-2 text-xs">
                   <span className="text-muted-foreground">Original Total</span>
                   <span className="font-mono line-through text-muted-foreground">
-                    {cs}{(math.originalTotal ?? 0).toLocaleString()}
+                    {cs}{originalTotal.toLocaleString()}
                   </span>
                 </div>
                 <div className="flex items-center justify-between px-3 py-2 text-xs border-t border-slate-200 dark:border-slate-700">
                   <span className="text-muted-foreground">Savings</span>
                   <span className="font-mono text-emerald-600 dark:text-emerald-400">
-                    -{cs}{(math.savingsAmount ?? 0).toLocaleString()} ({math.discount ?? 0}%)
+                    -{cs}{savingsAmount.toLocaleString()} ({discountPct}%)
                   </span>
                 </div>
                 <div className="flex items-center justify-between px-3 py-2.5 bg-primary/5 border-t border-primary/20">
                   <span className="text-sm font-semibold text-primary">Bundle Price</span>
                   <span className="text-sm font-black font-mono text-primary">
-                    {cs}{(math.bundlePrice ?? 0).toLocaleString()}
+                    {cs}{bundlePrice.toLocaleString()}
                   </span>
                 </div>
               </div>
@@ -279,7 +285,22 @@ function StrategyCard({ strategy, rank, currencySymbol: cs, isExpanded, onToggle
               <DetailRow
                 icon={<TrendingUp className="w-3.5 h-3.5 text-emerald-500" />}
                 label="Expected Impact"
-                value={typeof strategy.expectedImpact === 'string' ? strategy.expectedImpact : JSON.stringify(strategy.expectedImpact)}
+                value={
+                  typeof strategy.expectedImpact === 'string'
+                    ? strategy.expectedImpact
+                    : [
+                        strategy.expectedImpact.aovLift && `AOV Lift: ${strategy.expectedImpact.aovLift}`,
+                        strategy.expectedImpact.targetMetric,
+                      ].filter(Boolean).join(' · ')
+                }
+              />
+              )}
+
+              {strategy.executionReason && (
+              <DetailRow
+                icon={<Package className="w-3.5 h-3.5 text-slate-500" />}
+                label="Execution Rationale"
+                value={strategy.executionReason}
               />
               )}
             </div>

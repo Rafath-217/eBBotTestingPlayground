@@ -456,16 +456,22 @@ export interface ShippingAnalysis {
 }
 
 export interface NavigationAudit {
+  hasBundleNavigation?: boolean
+  result?: string
   bundleTermsFound: string[]
   hasGiftSection: boolean
-  navItems: string[]
+  hasCustomization?: boolean
+  recommendation?: string
+  navItems?: string[]
 }
 
 export interface PdpAudit {
-  score: number
-  maxScore: number
+  score: number | string
+  maxScore?: number
   widgetsPresent: string[]
   widgetsMissing: string[]
+  productName?: string | null
+  productPrice?: number | null
 }
 
 export interface PriceAnalysis {
@@ -606,14 +612,17 @@ export interface AuditorResults {
   siteOverview?: {
     title?: string
     description?: string
+    industryHint?: string
+    productCategory?: string
   }
   shippingAnalysis: ShippingAnalysis
   navigationAudit: NavigationAudit
   pdpAudit: PdpAudit
   priceAnalysis: PriceAnalysis
-  criticalFindings: string[]
+  criticalFindings: (string | { finding?: string; impact?: string; recommendation?: string })[]
   overallScore: number
   summary: string
+  currency?: string
   evidence?: AuditorEvidence
   bundleDetection?: BundleDetection
 }
@@ -621,9 +630,11 @@ export interface AuditorResults {
 // ─── Analyst Results ──────────────────────────────────────────────────────────
 
 export interface DataOverview {
+  shop?: string
   orderCount: number
   productCount: number
   totalRevenue: number
+  dataSource?: string
 }
 
 export interface HistogramBucket {
@@ -633,22 +644,48 @@ export interface HistogramBucket {
 }
 
 export interface AbcAnalysis {
-  gradeAProducts: string[]
-  gradeCProducts: string[]
-  deadstockCount: number
+  gradeACount?: number
+  gradeATopPerformers?: string[]
+  gradeCCount?: number
+  gradeCRevenue?: number
+  liquidationPriority?: string[]
+  // Legacy fields kept for backward compat
+  gradeAProducts?: string[]
+  gradeCProducts?: string[]
+  deadstockCount?: number
 }
 
 export interface ReturnRateAnalysis {
   singleItemReturnRate: number
   multiItemReturnRate: number
+  bundlingReducesReturns?: boolean
+  insight?: string
 }
 
 export interface RetentionEconomics {
   newCustomerAov: number
   repeatCustomerAov: number
   aovGap: number
+  hasReplenishmentProblem?: boolean
+  returningCustomerRate?: number
+  ordersPerCustomer?: number
+  potentialMonthlyRecovery?: number
 }
 
+export interface AffinityTopPair {
+  anchor: string
+  boughtWith: string
+  orders: number
+}
+
+export interface AffinityAnalysis {
+  productsAnalyzed: number
+  totalAffinitiesFound: number
+  strongAffinities: number
+  topPairs: AffinityTopPair[]
+}
+
+// Legacy flat pair shape
 export interface AffinityPair {
   productA: string
   productB: string
@@ -656,15 +693,30 @@ export interface AffinityPair {
   liftScore?: number
 }
 
+export interface MoneyLeftOnTable {
+  gradeCLiability?: number | null
+  affinityFrictionGap?: number | null
+  replenishmentRecovery?: number | null
+  returnReduction?: number | null
+  totalOpportunity?: number | null
+}
+
+export interface RecommendedAction {
+  action: string
+  expectedImpact?: string
+  priority?: number
+}
+
 export interface AnalystResults {
   dataOverview: DataOverview
-  aovHistogram: HistogramBucket[]
+  aovHistogram: HistogramBucket[] | { distribution: unknown; peakBucket: unknown; insight: unknown } | null
   abcAnalysis: AbcAnalysis
   returnRateAnalysis: ReturnRateAnalysis | null
   retentionEconomics: RetentionEconomics | null
-  affinityAnalysis: AffinityPair[] | null
-  moneyLeftOnTable: number
-  recommendedActions: string[]
+  affinityAnalysis: AffinityAnalysis | AffinityPair[] | null
+  moneyLeftOnTable: MoneyLeftOnTable | number | null
+  recommendedActions: (string | RecommendedAction)[]
+  summary?: string
 }
 
 // ─── Classifier Results ───────────────────────────────────────────────────────
@@ -690,11 +742,11 @@ export interface VerticalScoreEntry {
 
 export interface ClassifierResults {
   primaryVertical: string
-  confidence: number
+  confidence: number | string
   classificationEvidence: string[]
   verticalContext: BaasVerticalContext
   recommendedPillars: BaasRecommendedPillars
-  psychologicalTriggers: string[]
+  psychologicalTriggers: string | string[]
   deterministicScoreBreakdown?: Record<string, VerticalScoreEntry>
 }
 
@@ -707,13 +759,23 @@ export interface OfferProduct {
 
 export interface BaasOfferMathematics {
   products: OfferProduct[]
-  originalTotal: number
+  // Backend sends combinedRetail; legacy sends originalTotal
+  combinedRetail?: number
+  originalTotal?: number
   bundlePrice: number
-  discount: number
-  savingsAmount: number
+  // Backend sends discountPercent; legacy sends discount
+  discountPercent?: number
+  discount?: number
+  savingsAmount?: number
+}
+
+export interface ExpectedImpact {
+  aovLift?: string
+  targetMetric?: string
 }
 
 export interface BundleStrategy {
+  number?: number
   pillarName: string
   bundleName: string
   problemSolved: string
@@ -721,18 +783,26 @@ export interface BundleStrategy {
   offerMathematics: BaasOfferMathematics
   psychologicalTrigger: string
   executionTool: string
-  expectedImpact: string
+  executionReason?: string
+  expectedImpact: string | ExpectedImpact
+  strategyType?: 'new' | 'optimize'
+  existingBundleReference?: string | null
+}
+
+export interface ImplementationPriorityItem {
+  strategyNumber: number
+  reason: string
 }
 
 export interface StrategyResults {
   strategies: BundleStrategy[]
-  implementationPriority: string[]
+  implementationPriority: (string | ImplementationPriorityItem)[]
 }
 
 // ─── Report Results ───────────────────────────────────────────────────────────
 
 export interface ReportResults {
-  markdownContent: string
+  markdownContent?: string
   generatedAt?: string
 }
 

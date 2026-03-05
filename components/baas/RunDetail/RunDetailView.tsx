@@ -36,7 +36,10 @@ import AuditorPanel from './AuditorPanel'
 import AnalystPanel from './AnalystPanel'
 import ClassifierPanel from './ClassifierPanel'
 import StrategyPanel from './StrategyPanel'
+import MetricsPanel from './MetricsPanel'
+import SalesSummaryPanel from './SalesSummaryPanel'
 import ReportPanel from './ReportPanel'
+import PipelineObservabilityPanel from './PipelineObservabilityPanel'
 import type { BaasPipelineRun, EnrichedPipelineRun, AgentName } from '../../../types'
 
 // ─── Props ────────────────────────────────────────────────────────────────────
@@ -110,12 +113,15 @@ export default function RunDetailView({ run, onClose }: RunDetailViewProps) {
 
       {/* Panel content */}
       <div className="flex-1 min-h-0">
-        {activeTab === 'overview'    && <OverviewPanel    run={enriched} onNavigate={handleNavigate} />}
-        {activeTab === 'auditor'     && <AuditorPanel     run={enriched} />}
-        {activeTab === 'analyst'     && <AnalystPanel     run={enriched} />}
-        {activeTab === 'classifier'  && <ClassifierPanel  run={enriched} />}
-        {activeTab === 'strategy'    && <StrategyPanel    run={enriched} />}
-        {activeTab === 'report'      && <ReportPanel      run={enriched} />}
+        {activeTab === 'overview'       && <OverviewPanel              run={enriched} onNavigate={handleNavigate} />}
+        {activeTab === 'auditor'        && <AuditorPanel              run={enriched} />}
+        {activeTab === 'analyst'        && <AnalystPanel              run={enriched} />}
+        {activeTab === 'classifier'     && <ClassifierPanel           run={enriched} />}
+        {activeTab === 'strategy'       && <StrategyPanel             run={enriched} />}
+        {activeTab === 'metrics'        && <MetricsPanel              run={enriched} />}
+        {activeTab === 'salesSummary'   && <SalesSummaryPanel         run={enriched} />}
+        {activeTab === 'report'         && <ReportPanel               run={enriched} />}
+        {activeTab === 'observability'  && <PipelineObservabilityPanel run={enriched} />}
       </div>
     </div>
   )
@@ -175,6 +181,17 @@ function toEnriched(run: BaasPipelineRun | EnrichedPipelineRun): EnrichedPipelin
     ]
   }
 
+  // reportResults can be a raw markdown string from backend or an object
+  const rawReport = (run as any).reportResults
+  let reportResults: { markdownContent: string; generatedAt?: string } | undefined
+  if (typeof rawReport === 'string') {
+    reportResults = { markdownContent: rawReport }
+  } else if (rawReport && typeof rawReport === 'object' && rawReport.markdownContent) {
+    reportResults = rawReport
+  } else if ((run as any).result?.strategy) {
+    reportResults = { markdownContent: (run as any).result.strategy }
+  }
+
   return {
     ...(run as any),
     agentsExecuted,
@@ -182,7 +199,8 @@ function toEnriched(run: BaasPipelineRun | EnrichedPipelineRun): EnrichedPipelin
     analystResults: (run as any).analystResults ?? undefined,
     classifierResults: (run as any).classifierResults ?? undefined,
     strategyResults: (run as any).strategyResults ?? undefined,
-    reportResults: (run as any).reportResults
-      ?? ((run as any).result?.strategy ? { markdownContent: (run as any).result.strategy } : undefined),
+    metricsResult: (run as any).metricsResult ?? undefined,
+    salesSummary: (run as any).salesSummary ?? undefined,
+    reportResults,
   }
 }

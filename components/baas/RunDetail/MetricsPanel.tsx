@@ -104,7 +104,7 @@ export default function MetricsPanel({ run }: MetricsPanelProps) {
         <MetricCard
           icon={<TrendingUp className="w-3.5 h-3.5 text-slate-400" />}
           label="Potential Bundle Uplift"
-          value={derivedMetrics?.potentialBundleUplift != null ? derivedMetrics.potentialBundleUplift * 100 : null}
+          value={derivedMetrics?.potentialBundleUplift ?? null}
           unit="%"
           isPercentage
         />

@@ -110,15 +110,15 @@ export default function SalesSummaryPanel({ run }: SalesSummaryPanelProps) {
       {data.credibility && (
         <div className="rounded-lg bg-slate-50 dark:bg-slate-800/50 px-5 py-3 flex flex-wrap items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
           <span>
-            <strong className="text-slate-700 dark:text-slate-300">{data.credibility.ordersAnalyzed}</strong> orders analyzed
+            <strong className="text-slate-700 dark:text-slate-300">{data.credibility.ordersAnalyzed}</strong>
           </span>
           <span className="hidden sm:inline text-slate-300 dark:text-slate-600">|</span>
           <span>
-            <strong className="text-slate-700 dark:text-slate-300">{data.credibility.revenueAnalyzed}</strong> revenue analyzed
+            <strong className="text-slate-700 dark:text-slate-300">{data.credibility.revenueAnalyzed}</strong>
           </span>
           <span className="hidden sm:inline text-slate-300 dark:text-slate-600">|</span>
           <span>
-            Confidence: <strong className="text-slate-700 dark:text-slate-300">{data.credibility.confidence}</strong>
+            <strong className="text-slate-700 dark:text-slate-300">{data.credibility.confidence}</strong>
           </span>
         </div>
       )}

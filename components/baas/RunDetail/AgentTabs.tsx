@@ -24,6 +24,9 @@ import {
   Tag,
   Lightbulb,
   FileText,
+  Activity,
+  TrendingUp,
+  Gauge,
 } from 'lucide-react'
 import { cn } from '../../ui'
 import type { EnrichedPipelineRun } from '../../../types'
@@ -34,7 +37,10 @@ export type TabId =
   | 'analyst'
   | 'classifier'
   | 'strategy'
+  | 'metrics'
+  | 'salesSummary'
   | 'report'
+  | 'observability'
 
 interface TabConfig {
   id: TabId
@@ -78,10 +84,28 @@ const TABS: TabConfig[] = [
     dataKey: 'strategyResults',
   },
   {
+    id: 'metrics',
+    label: 'Metrics',
+    icon: <Gauge className="w-3.5 h-3.5" />,
+    dataKey: 'metricsResult',
+  },
+  {
+    id: 'salesSummary',
+    label: 'Sales Summary',
+    icon: <TrendingUp className="w-3.5 h-3.5" />,
+    dataKey: 'salesSummary',
+  },
+  {
     id: 'report',
     label: 'Report',
     icon: <FileText className="w-3.5 h-3.5" />,
     dataKey: 'reportResults',
+  },
+  {
+    id: 'observability',
+    label: 'Pipeline',
+    icon: <Activity className="w-3.5 h-3.5" />,
+    dataKey: 'decisionLog',
   },
 ]
 

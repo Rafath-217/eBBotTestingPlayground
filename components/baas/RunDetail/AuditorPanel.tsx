@@ -145,7 +145,21 @@ export default function AuditorPanel({ run }: AuditorPanelProps) {
         )}
 
         {/* PDP Widget Audit */}
-        {pdp && (
+        {pdp && (() => {
+          // pdp.score can be "1/7" string or a number
+          let pdpScoreNum: number
+          let pdpMaxScore: number
+          if (typeof pdp.score === 'string' && pdp.score.includes('/')) {
+            const [s, m] = pdp.score.split('/').map(Number)
+            pdpScoreNum = isNaN(s) ? 0 : s
+            pdpMaxScore = isNaN(m) ? 7 : m
+          } else {
+            pdpScoreNum = typeof pdp.score === 'number' ? pdp.score : 0
+            pdpMaxScore = pdp.maxScore ?? 7
+          }
+          const pdpRatio = pdpMaxScore > 0 ? pdpScoreNum / pdpMaxScore : 0
+
+          return (
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center justify-between text-sm">
@@ -153,8 +167,8 @@ export default function AuditorPanel({ run }: AuditorPanelProps) {
                 <ShoppingBag className="w-4 h-4 text-slate-500" />
                 PDP Audit
               </span>
-              <Badge variant="outline" className={getScoreColor((pdp.maxScore ? pdp.score / pdp.maxScore : 0) * 10)}>
-                {pdp.score}/{pdp.maxScore}
+              <Badge variant="outline" className={getScoreColor(pdpRatio * 10)}>
+                {pdpScoreNum}/{pdpMaxScore}
               </Badge>
             </CardTitle>
           </CardHeader>
@@ -165,11 +179,11 @@ export default function AuditorPanel({ run }: AuditorPanelProps) {
                 <div
                   className={cn(
                     'h-full rounded-full transition-all',
-                    (pdp.maxScore ? pdp.score / pdp.maxScore : 0) >= 0.7 ? 'bg-emerald-500' :
-                    (pdp.maxScore ? pdp.score / pdp.maxScore : 0) >= 0.4 ? 'bg-amber-500' :
+                    pdpRatio >= 0.7 ? 'bg-emerald-500' :
+                    pdpRatio >= 0.4 ? 'bg-amber-500' :
                     'bg-red-500'
                   )}
-                  style={{ width: `${(pdp.maxScore ? (pdp.score / pdp.maxScore) : 0) * 100}%` }}
+                  style={{ width: `${pdpRatio * 100}%` }}
                 />
               </div>
             </div>
@@ -184,7 +198,8 @@ export default function AuditorPanel({ run }: AuditorPanelProps) {
             </div>
           </CardContent>
         </Card>
-        )}
+          )
+        })()}
 
         {/* Navigation Audit */}
         {nav && (
@@ -196,11 +211,35 @@ export default function AuditorPanel({ run }: AuditorPanelProps) {
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0 space-y-3">
+            {nav.hasBundleNavigation != null && (
+              <MetaRow label="Bundle Navigation">
+                <Badge variant={nav.hasBundleNavigation ? 'success' : 'destructive'}>
+                  {nav.hasBundleNavigation ? 'Present' : 'Missing'}
+                </Badge>
+              </MetaRow>
+            )}
+
+            {nav.result && (
+              <MetaRow label="Result">
+                <Badge variant={nav.result.includes('FAIL') ? 'destructive' : 'success'} className="text-[10px]">
+                  {nav.result}
+                </Badge>
+              </MetaRow>
+            )}
+
             <MetaRow label="Gift Section">
               <Badge variant={nav.hasGiftSection ? 'success' : 'outline'}>
                 {nav.hasGiftSection ? 'Present' : 'Absent'}
               </Badge>
             </MetaRow>
+
+            {nav.hasCustomization != null && (
+              <MetaRow label="Customization">
+                <Badge variant={nav.hasCustomization ? 'success' : 'outline'}>
+                  {nav.hasCustomization ? 'Yes' : 'No'}
+                </Badge>
+              </MetaRow>
+            )}
 
             {Array.isArray(nav.bundleTermsFound) && nav.bundleTermsFound.length > 0 && (
               <div>
@@ -211,6 +250,10 @@ export default function AuditorPanel({ run }: AuditorPanelProps) {
                   ))}
                 </div>
               </div>
+            )}
+
+            {nav.recommendation && (
+              <p className="text-xs text-muted-foreground italic mt-2">{nav.recommendation}</p>
             )}
 
             {Array.isArray(nav.navItems) && nav.navItems.length > 0 && (
@@ -870,7 +913,7 @@ function ShippingEvidenceSection({ shipping }: { shipping: NonNullable<AuditorEv
           <EvidenceRow label="Anchor Band" value={shipping.anchorBand} />
         )}
         {shipping.anchorDominance != null && (
-          <EvidenceRow label="Anchor Dominance" value={`${(shipping.anchorDominance * 100).toFixed(0)}%`} />
+          <EvidenceRow label="Anchor Dominance" value={`${shipping.anchorDominance}%`} />
         )}
         {shipping.dominanceStrength && (
           <EvidenceRow label="Dominance" value={shipping.dominanceStrength} />
