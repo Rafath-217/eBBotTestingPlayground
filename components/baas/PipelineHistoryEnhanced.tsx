@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { RefreshCw } from 'lucide-react'
-import { getHistory, deleteHistoryItem } from '../../services/baasDataService'
+import { getHistory, getHistoryItem, deleteHistoryItem } from '../../services/baasDataService'
 import {
   getRunScore, getRunOpportunity, getRunVertical,
   computeDashboardStats,
@@ -126,6 +126,7 @@ export default function PipelineHistoryEnhanced({ refreshKey, showStats = false,
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedItem, setSelectedItem] = useState<AnyRun | null>(null)
+  const [detailLoading, setDetailLoading] = useState(false)
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
 
@@ -173,6 +174,25 @@ export default function PipelineHistoryEnhanced({ refreshKey, showStats = false,
   const filtered = useMemo(() => applyFilters(items, filters), [items, filters])
   const sorted = useMemo(() => sortRuns(filtered, sort.field, sort.dir), [filtered, sort])
   const stats = useMemo(() => computeDashboardStats(items), [items])
+
+  // Fetch full run details when selecting a run (list endpoint may omit large fields)
+  const handleSelectRun = useCallback(async (run: AnyRun | null) => {
+    if (!run) { setSelectedItem(null); return }
+    // If already viewing this run, deselect
+    if (selectedItem?._id === run._id) { setSelectedItem(null); return }
+    // Optimistically show the run from the list while fetching full details
+    setSelectedItem(run)
+    setDetailLoading(true)
+    try {
+      const { data } = await getHistoryItem(run._id)
+      const fullRun: AnyRun = data.data || data
+      if (isMounted.current) setSelectedItem(fullRun)
+    } catch {
+      // If fetch fails, keep using the list item
+    } finally {
+      if (isMounted.current) setDetailLoading(false)
+    }
+  }, [selectedItem])
 
   const handleDelete = useCallback(async (id: string) => {
     if (!confirm('Delete this pipeline run?')) return
@@ -306,7 +326,7 @@ export default function PipelineHistoryEnhanced({ refreshKey, showStats = false,
                   <RunCard
                     key={run._id} run={run} view="card"
                     selected={selectedItem?._id === run._id}
-                    onSelect={() => setSelectedItem(selectedItem?._id === run._id ? null : run)}
+                    onSelect={() => handleSelectRun(selectedItem?._id === run._id ? null : run)}
                     onDelete={() => handleDelete(run._id)}
                     checked={selectedIds.has(run._id)}
                     onCheck={(c) => handleCheck(run._id, c)}
@@ -335,7 +355,7 @@ export default function PipelineHistoryEnhanced({ refreshKey, showStats = false,
                 <RunCard
                   key={run._id} run={run} view="row"
                   selected={selectedItem?._id === run._id}
-                  onSelect={() => setSelectedItem(selectedItem?._id === run._id ? null : run)}
+                  onSelect={() => handleSelectRun(selectedItem?._id === run._id ? null : run)}
                   onDelete={() => handleDelete(run._id)}
                   checked={selectedIds.has(run._id)}
                   onCheck={(c) => handleCheck(run._id, c)}
