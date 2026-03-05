@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import { Clock, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Loader2, AlertCircle, Calendar, Search, Filter, TrendingDown, AlertTriangle, Store, Zap, Download } from 'lucide-react';
+import { Clock, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Loader2, AlertCircle, Calendar, Search, Filter, TrendingDown, AlertTriangle, Store, Zap, Download, Tag, Check, X } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent, Button, Badge, CodeBlock, cn, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../components/ui';
 import { ViewMode } from '../components/Layout';
 import { PMResultView } from '../components/PMViews';
 import { getChurnedStores, getStoreDetail, analyseStore, backfillChurnData, ChurnedStore, ChurnQuery, StoreDetail, ChurnReason, ChurnAnalysisResult } from '../services/churnAnalysisApi';
+import { getPatternTags } from '../services/pipelineHistoryApi';
 
 interface ChurnAnalysisProps {
   viewMode: ViewMode;
@@ -234,6 +235,11 @@ const ChurnAnalysis: React.FC<ChurnAnalysisProps> = ({ viewMode }) => {
   const [sortBy, setSortBy] = useState<string>('uninstalledAt');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
+  // Pattern tags filter
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
+  const [selectedPatterns, setSelectedPatterns] = useState<string[]>([]);
+  const [patternDropdownOpen, setPatternDropdownOpen] = useState(false);
+
   // Formatting helpers
   const formatDate = (date: string) =>
     new Date(date).toLocaleString('en-US', {
@@ -272,6 +278,30 @@ const ChurnAnalysis: React.FC<ChurnAnalysisProps> = ({ viewMode }) => {
     return null;
   })();
 
+  // Fetch available pattern tags on mount
+  useEffect(() => {
+    getPatternTags().then(setAvailableTags).catch(() => {});
+  }, []);
+
+  const groupedTags = availableTags.reduce<Record<string, string[]>>((acc, tag) => {
+    const [prefix] = tag.split(':');
+    const group = prefix.charAt(0).toUpperCase() + prefix.slice(1);
+    if (!acc[group]) acc[group] = [];
+    acc[group].push(tag);
+    return acc;
+  }, {});
+
+  const formatTagLabel = (tag: string) => {
+    const [, ...rest] = tag.split(':');
+    return rest.join(':').replace(/_/g, ' ');
+  };
+
+  const togglePattern = (tag: string) => {
+    setSelectedPatterns((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
+  };
+
   // Fetch stores
   const fetchStores = async () => {
     setLoading(true);
@@ -289,6 +319,7 @@ const ChurnAnalysis: React.FC<ChurnAnalysisProps> = ({ viewMode }) => {
       if (minRuns) query.minRuns = Number(minRuns);
       if (maxRuns) query.maxRuns = Number(maxRuns);
       if (hadErrors === 'WITH_ERRORS') query.hadErrors = 'true';
+      if (selectedPatterns.length > 0) query.patterns = selectedPatterns;
 
       const response = await getChurnedStores(query);
       setStores(response.data.stores);
@@ -373,6 +404,7 @@ const ChurnAnalysis: React.FC<ChurnAnalysisProps> = ({ viewMode }) => {
     setMinRuns('');
     setMaxRuns('');
     setHadErrors('ALL');
+    setSelectedPatterns([]);
     setSortBy('uninstalledAt');
     setSortOrder('desc');
     setCurrentPage(1);
@@ -393,6 +425,7 @@ const ChurnAnalysis: React.FC<ChurnAnalysisProps> = ({ viewMode }) => {
       if (minRuns) query.minRuns = Number(minRuns);
       if (maxRuns) query.maxRuns = Number(maxRuns);
       if (hadErrors === 'WITH_ERRORS') query.hadErrors = 'true';
+      if (selectedPatterns.length > 0) query.patterns = selectedPatterns;
 
       const response = await getChurnedStores(query);
       const exportData = {
@@ -651,6 +684,93 @@ const ChurnAnalysis: React.FC<ChurnAnalysisProps> = ({ viewMode }) => {
               </div>
             </div>
           </div>
+
+          {/* Pattern Tags Filter (only visible when localStorage "filters" is "true") */}
+          {localStorage.getItem('filters') === 'true' && availableTags.length > 0 && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium flex items-center gap-2">
+                <Tag className="w-4 h-4" />
+                Pattern Tags
+                {selectedPatterns.length > 0 && (
+                  <Badge variant="secondary" className="text-xs ml-1">
+                    {selectedPatterns.length}
+                  </Badge>
+                )}
+              </label>
+              <div className="relative">
+                <button
+                  onClick={() => setPatternDropdownOpen(!patternDropdownOpen)}
+                  className="h-9 px-3 rounded-md border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring flex items-center gap-2 min-w-[200px] text-sm"
+                >
+                  <span className="flex-1 text-left truncate">
+                    {selectedPatterns.length === 0
+                      ? 'Select patterns...'
+                      : `${selectedPatterns.length} tag${selectedPatterns.length > 1 ? 's' : ''} selected`}
+                  </span>
+                  <ChevronDown className={cn('w-4 h-4 transition-transform', patternDropdownOpen && 'rotate-180')} />
+                </button>
+
+                {patternDropdownOpen && (
+                  <>
+                    <div className="fixed inset-0 z-10" onClick={() => setPatternDropdownOpen(false)} />
+                    <div className="absolute z-20 mt-1 w-72 max-h-80 overflow-y-auto rounded-md border bg-background shadow-lg">
+                      {selectedPatterns.length > 0 && (
+                        <button
+                          onClick={() => setSelectedPatterns([])}
+                          className="w-full px-3 py-1.5 text-xs text-muted-foreground hover:bg-muted text-left border-b"
+                        >
+                          Clear all
+                        </button>
+                      )}
+                      {Object.entries(groupedTags).map(([group, tags]) => (
+                        <div key={group}>
+                          <div className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground bg-muted/50 sticky top-0">
+                            {group}
+                          </div>
+                          {tags.map((tag) => (
+                            <button
+                              key={tag}
+                              onClick={() => togglePattern(tag)}
+                              className={cn(
+                                'w-full px-3 py-1.5 text-sm text-left hover:bg-muted flex items-center gap-2 transition-colors',
+                                selectedPatterns.includes(tag) && 'bg-primary/10'
+                              )}
+                            >
+                              <div className={cn(
+                                'w-4 h-4 rounded border flex items-center justify-center flex-shrink-0',
+                                selectedPatterns.includes(tag)
+                                  ? 'bg-primary border-primary'
+                                  : 'border-muted-foreground/30'
+                              )}>
+                                {selectedPatterns.includes(tag) && (
+                                  <Check className="w-3 h-3 text-primary-foreground" />
+                                )}
+                              </div>
+                              {formatTagLabel(tag)}
+                            </button>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+              {selectedPatterns.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {selectedPatterns.map((tag) => (
+                    <button
+                      key={tag}
+                      onClick={() => togglePattern(tag)}
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground hover:bg-destructive/20 transition-colors"
+                    >
+                      {tag}
+                      <X className="w-3 h-3" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Row 3: Action buttons + result count */}
           <div className="flex items-center justify-between border-t pt-4">

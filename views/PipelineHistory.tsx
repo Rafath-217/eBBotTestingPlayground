@@ -4,7 +4,7 @@ import { Card, CardHeader, CardTitle, CardContent, Button, Badge, CodeBlock, cn 
 import { ViewMode } from '../components/Layout';
 import { PMResultView, PMDiscountsPanel, PMRulesPanel, PMStepsPanel } from '../components/PMViews';
 import { PipelineHistoryLog, PipelineHistoryPagination, FeedbackRating } from '../types';
-import { getPipelineHistory, searchPipelineHistory, submitFeedback } from '../services/pipelineHistoryApi';
+import { getPipelineHistory, searchPipelineHistory, submitFeedback, getPatternTags } from '../services/pipelineHistoryApi';
 
 interface PipelineHistoryProps {
   viewMode: ViewMode;
@@ -246,6 +246,11 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
   const [merchantTextFilter, setMerchantTextFilter] = useState<'ALL' | 'EMPTY' | 'NON_EMPTY'>('ALL');
   const [shopNameSearch, setShopNameSearch] = useState<string>('');
 
+  // Pattern tags filter
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
+  const [selectedPatterns, setSelectedPatterns] = useState<string[]>([]);
+  const [patternDropdownOpen, setPatternDropdownOpen] = useState(false);
+
   // Shop name search mode (server-side)
   const [isSearchMode, setIsSearchMode] = useState(false);
   const [fetchTrigger, setFetchTrigger] = useState(0);
@@ -284,6 +289,31 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
     }
   };
 
+  // Fetch available pattern tags on mount
+  useEffect(() => {
+    getPatternTags().then(setAvailableTags).catch(() => {});
+  }, []);
+
+  // Group tags by prefix for display
+  const groupedTags = availableTags.reduce<Record<string, string[]>>((acc, tag) => {
+    const [prefix] = tag.split(':');
+    const group = prefix.charAt(0).toUpperCase() + prefix.slice(1);
+    if (!acc[group]) acc[group] = [];
+    acc[group].push(tag);
+    return acc;
+  }, {});
+
+  const formatTagLabel = (tag: string) => {
+    const [, ...rest] = tag.split(':');
+    return rest.join(':').replace(/_/g, ' ');
+  };
+
+  const togglePattern = (tag: string) => {
+    setSelectedPatterns((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
+  };
+
   const fetchHistory = async () => {
     setLoading(true);
     setError(null);
@@ -305,6 +335,7 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
           source: sourceFilter,
           feedback: feedbackFilter,
           merchantText: merchantTextFilter,
+          patterns: selectedPatterns.length > 0 ? selectedPatterns : undefined,
         });
       }
 
@@ -339,6 +370,7 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
     setSourceFilter('ALL');
     setFeedbackFilter('ALL');
     setMerchantTextFilter('ALL');
+    setSelectedPatterns([]);
     setShopNameSearch('');
     setIsSearchMode(false);
     setCurrentPage(1);
@@ -498,6 +530,94 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
             </div>
           </div>
 
+          {/* Pattern Tags Filter (only visible when localStorage "filters" is "true") */}
+          {localStorage.getItem('filters') === 'true' && availableTags.length > 0 && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium flex items-center gap-2">
+                <Tag className="w-4 h-4" />
+                Pattern Tags
+                {selectedPatterns.length > 0 && (
+                  <Badge variant="secondary" className="text-xs ml-1">
+                    {selectedPatterns.length}
+                  </Badge>
+                )}
+              </label>
+              <div className="relative">
+                <button
+                  onClick={() => setPatternDropdownOpen(!patternDropdownOpen)}
+                  className="h-10 px-3 rounded-md border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring flex items-center gap-2 min-w-[200px] text-sm"
+                >
+                  <span className="flex-1 text-left truncate">
+                    {selectedPatterns.length === 0
+                      ? 'Select patterns...'
+                      : `${selectedPatterns.length} tag${selectedPatterns.length > 1 ? 's' : ''} selected`}
+                  </span>
+                  <ChevronDown className={cn('w-4 h-4 transition-transform', patternDropdownOpen && 'rotate-180')} />
+                </button>
+
+                {patternDropdownOpen && (
+                  <>
+                    <div className="fixed inset-0 z-10" onClick={() => setPatternDropdownOpen(false)} />
+                    <div className="absolute z-20 mt-1 w-72 max-h-80 overflow-y-auto rounded-md border bg-background shadow-lg">
+                      {selectedPatterns.length > 0 && (
+                        <button
+                          onClick={() => setSelectedPatterns([])}
+                          className="w-full px-3 py-1.5 text-xs text-muted-foreground hover:bg-muted text-left border-b"
+                        >
+                          Clear all
+                        </button>
+                      )}
+                      {Object.entries(groupedTags).map(([group, tags]) => (
+                        <div key={group}>
+                          <div className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground bg-muted/50 sticky top-0">
+                            {group}
+                          </div>
+                          {tags.map((tag) => (
+                            <button
+                              key={tag}
+                              onClick={() => togglePattern(tag)}
+                              className={cn(
+                                'w-full px-3 py-1.5 text-sm text-left hover:bg-muted flex items-center gap-2 transition-colors',
+                                selectedPatterns.includes(tag) && 'bg-primary/10'
+                              )}
+                            >
+                              <div className={cn(
+                                'w-4 h-4 rounded border flex items-center justify-center flex-shrink-0',
+                                selectedPatterns.includes(tag)
+                                  ? 'bg-primary border-primary'
+                                  : 'border-muted-foreground/30'
+                              )}>
+                                {selectedPatterns.includes(tag) && (
+                                  <Check className="w-3 h-3 text-primary-foreground" />
+                                )}
+                              </div>
+                              {formatTagLabel(tag)}
+                            </button>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+              {/* Selected tags chips */}
+              {selectedPatterns.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {selectedPatterns.map((tag) => (
+                    <button
+                      key={tag}
+                      onClick={() => togglePattern(tag)}
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground hover:bg-destructive/20 transition-colors"
+                    >
+                      {tag}
+                      <X className="w-3 h-3" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Action buttons + result count */}
           <div className="flex items-center gap-4">
             <Button onClick={handleApplyFilter} className="h-10">
@@ -539,7 +659,7 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
             <p className="text-muted-foreground">
               {isSearchMode
                 ? `No runs found for shop "${shopNameSearch}". Try a different search term.`
-                : startDate || endDate || sourceFilter !== 'ALL' || feedbackFilter !== 'ALL' || merchantTextFilter !== 'ALL'
+                : startDate || endDate || sourceFilter !== 'ALL' || feedbackFilter !== 'ALL' || merchantTextFilter !== 'ALL' || selectedPatterns.length > 0
                 ? 'No runs found for the selected filters. Try adjusting your criteria.'
                 : 'No pipeline runs have been recorded yet.'}
             </p>
@@ -551,7 +671,7 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
       {!loading && !error && logs.length > 0 && (
         <div className="space-y-3">
           {/* Column Headers */}
-          <div className="grid grid-cols-[150px_220px_80px_100px_80px_1fr_40px] items-center px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b">
+          <div className="grid grid-cols-[150px_200px_70px_80px_80px_1fr_40px] items-center px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b">
             <span>Date</span>
             <span>Shop</span>
             <span>Bundle</span>
@@ -565,7 +685,7 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
               {/* Header Row - Always Visible */}
               <div
                 onClick={() => toggleExpand(log.id)}
-                className="grid grid-cols-[150px_220px_80px_100px_80px_1fr_40px] items-center p-4 cursor-pointer hover:bg-muted/50 transition-colors"
+                className="grid grid-cols-[150px_200px_70px_80px_80px_1fr_40px] items-center p-4 cursor-pointer hover:bg-muted/50 transition-colors"
               >
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <Clock className="w-3 h-3 flex-shrink-0" />
@@ -614,9 +734,36 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                     <span className="text-xs text-muted-foreground">-</span>
                   )}
                 </div>
-                <span className="text-sm text-muted-foreground truncate">
-                  {log.input.merchantText}
-                </span>
+                <div className="flex flex-col gap-1 min-w-0">
+                  <span className="text-sm text-muted-foreground truncate">
+                    {log.input.merchantText}
+                  </span>
+                  {log.patternTags && log.patternTags.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {log.patternTags.map((tag) => {
+                        const [prefix] = tag.split(':');
+                        const colorMap: Record<string, string> = {
+                          structure: 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300',
+                          discount: 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300',
+                          rules: 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300',
+                          input: 'bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300',
+                          pipeline: 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300',
+                        };
+                        return (
+                          <span
+                            key={tag}
+                            className={cn(
+                              'inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium',
+                              colorMap[prefix] || 'bg-muted text-muted-foreground'
+                            )}
+                          >
+                            {tag}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
                 <div className="flex justify-end">
                   {expandedId === log.id ? (
                     <ChevronUp className="w-5 h-5 text-muted-foreground" />

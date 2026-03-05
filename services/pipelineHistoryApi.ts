@@ -30,6 +30,9 @@ export async function getPipelineHistory(query: PipelineHistoryQuery = {}): Prom
   if (query.merchantText && query.merchantText !== 'ALL') {
     params.append('merchantText', query.merchantText);
   }
+  if (query.patterns && query.patterns.length > 0) {
+    params.append('patterns', query.patterns.join(','));
+  }
 
   const queryString = params.toString();
   const url = `${API_BASE_URL}/api/bundleSetupLlmPipeline/pipelineHistory${queryString ? `?${queryString}` : ''}`;
@@ -44,6 +47,25 @@ export async function getPipelineHistory(query: PipelineHistoryQuery = {}): Prom
   }
 
   return response.json();
+}
+
+/**
+ * Fetch available pattern tags for filtering
+ */
+export async function getPatternTags(): Promise<string[]> {
+  const url = `${API_BASE_URL}/api/bundleSetupLlmPipeline/pipelineHistory/patternTags`;
+
+  const response = await fetch(url, {
+    headers: { 'secret-key': API_SECRET_KEY },
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'Network error' }));
+    throw new Error(error.message || `HTTP ${response.status}`);
+  }
+
+  const result = await response.json();
+  return result.data?.tags || [];
 }
 
 /**

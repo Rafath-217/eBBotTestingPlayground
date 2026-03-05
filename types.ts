@@ -255,6 +255,7 @@ export interface PipelineHistoryLog {
   output: PipelineHistoryOutput;
   durationMs?: number;
   feedback?: PipelineHistoryFeedback | null;
+  patternTags?: string[];
 }
 
 export interface PipelineHistoryPagination {
@@ -281,6 +282,7 @@ export interface PipelineHistoryQuery {
   source?: 'ALL' | 'APP' | 'NON-APP';
   feedback?: 'ALL' | 'CORRECT' | 'INCORRECT' | 'PARTIALLY_CORRECT' | 'NO_FEEDBACK';
   merchantText?: 'ALL' | 'EMPTY' | 'NON_EMPTY';
+  patterns?: string[];
 }
 
 // --- EVALUATION TYPES ---

@@ -40,6 +40,7 @@ export interface ChurnQuery {
   reason?: string;
   hadErrors?: string;
   search?: string;
+  patterns?: string[];
 }
 
 export interface StoreDetailRun {
@@ -94,7 +95,11 @@ export async function getChurnedStores(query: ChurnQuery = {}): Promise<{
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(query)) {
     if (value !== undefined && value !== null && value !== '') {
-      params.set(key, String(value));
+      if (key === 'patterns' && Array.isArray(value) && value.length > 0) {
+        params.set(key, value.join(','));
+      } else if (!Array.isArray(value)) {
+        params.set(key, String(value));
+      }
     }
   }
 
