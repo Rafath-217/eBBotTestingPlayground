@@ -1,5 +1,6 @@
 import { Target, DollarSign, TrendingUp, Package, Circle } from 'lucide-react'
-import { Badge, cn } from '../../ui'
+import { Badge, cn, InfoTip } from '../../ui'
+import { TIPS } from '../../../constants/baasTooltips'
 import type { EnrichedPipelineRun, SalesSummary } from '../../../types'
 
 interface SalesSummaryPanelProps {
@@ -39,7 +40,7 @@ export default function SalesSummaryPanel({ run }: SalesSummaryPanelProps) {
       {data.rootCauses && data.rootCauses.length > 0 && (
         <div>
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-            Root Causes
+            Root Causes<InfoTip text={TIPS.rootCauses} />
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {data.rootCauses.map((cause, i) => (
@@ -63,7 +64,7 @@ export default function SalesSummaryPanel({ run }: SalesSummaryPanelProps) {
           <div className="flex items-center gap-2 mb-3">
             <Target className="w-5 h-5 text-indigo-500" />
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-              Priority Move
+              Priority Move<InfoTip text={TIPS.priorityMove} />
             </h3>
           </div>
           <p className="text-base font-bold text-slate-900 dark:text-slate-100">
@@ -84,22 +85,22 @@ export default function SalesSummaryPanel({ run }: SalesSummaryPanelProps) {
       {impact && (
         <div>
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-            90-Day Projections
+            90-Day Projections<InfoTip text={TIPS.projectedRevenue} />
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <StatCard
               icon={DollarSign}
-              label="Projected Revenue"
+              label={<>Projected Revenue<InfoTip text={TIPS.projectedRevenue} /></>}
               value={impact.projectedRevenue}
             />
             <StatCard
               icon={TrendingUp}
-              label="Projected AOV Lift"
+              label={<>Projected AOV Lift<InfoTip text={TIPS.projectedAovLift} /></>}
               value={impact.projectedAOVLift}
             />
             <StatCard
               icon={Package}
-              label="Inventory Impact"
+              label={<>Inventory Impact<InfoTip text={TIPS.inventoryImpact} /></>}
               value={impact.inventoryImpact}
             />
           </div>
@@ -126,7 +127,7 @@ export default function SalesSummaryPanel({ run }: SalesSummaryPanelProps) {
   )
 }
 
-function StatCard({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) {
+function StatCard({ icon: Icon, label, value }: { icon: React.ElementType; label: React.ReactNode; value: string }) {
   return (
     <div className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4">
       <div className="flex items-center gap-2 mb-1">

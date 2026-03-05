@@ -29,7 +29,8 @@ import {
   TrendingUp,
   MinusCircle,
 } from 'lucide-react'
-import { Card, CardHeader, CardTitle, CardContent, Badge, cn } from '../../ui'
+import { Card, CardHeader, CardTitle, CardContent, Badge, cn, InfoTip } from '../../ui'
+import { TIPS } from '../../../constants/baasTooltips'
 import { currencySymbol } from '../../../utils'
 import type { EnrichedPipelineRun, AnalystResults, AffinityTopPair } from '../../../types'
 
@@ -80,7 +81,7 @@ export default function AnalystPanel({ run }: AnalystPanelProps) {
       {moneyLeftOnTable != null && moneyLeftOnTable > 0 && (
         <div className="rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 p-5 flex items-center justify-between text-white">
           <div>
-            <p className="text-sm font-medium opacity-80">Estimated Revenue Opportunity</p>
+            <p className="text-sm font-medium opacity-80">Estimated Revenue Opportunity<InfoTip text={TIPS.moneyLeftOnTable} /></p>
             <p className="text-3xl font-black mt-1">{cs}{moneyLeftOnTable.toLocaleString()}</p>
             <p className="text-xs opacity-70 mt-1">money left on table — capturable through bundling</p>
           </div>
@@ -93,17 +94,17 @@ export default function AnalystPanel({ run }: AnalystPanelProps) {
       <div className="grid grid-cols-3 gap-4">
         <MiniStat
           icon={<ShoppingCart className="w-4 h-4" />}
-          label="Orders"
+          label={<>Orders<InfoTip text={TIPS.orders} /></>}
           value={(dataOverview.orderCount ?? 0).toLocaleString()}
         />
         <MiniStat
           icon={<Package className="w-4 h-4" />}
-          label="Products"
+          label={<>Products<InfoTip text={TIPS.products} /></>}
           value={(dataOverview.productCount ?? 0).toLocaleString()}
         />
         <MiniStat
           icon={<DollarSign className="w-4 h-4" />}
-          label="Revenue"
+          label={<>Revenue<InfoTip text={TIPS.revenue} /></>}
           value={`${cs}${(dataOverview.totalRevenue ?? 0).toLocaleString()}`}
           valueClass="text-emerald-700 dark:text-emerald-400"
         />
@@ -124,7 +125,7 @@ export default function AnalystPanel({ run }: AnalystPanelProps) {
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-sm">
                 <RefreshCw className="w-4 h-4 text-slate-500" />
-                Return Rate Analysis
+                Return Rate Analysis<InfoTip text={TIPS.returnRateAnalysis} />
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0 space-y-4">
@@ -157,7 +158,7 @@ export default function AnalystPanel({ run }: AnalystPanelProps) {
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-sm">
                 <Users className="w-4 h-4 text-slate-500" />
-                Retention Economics
+                Retention Economics<InfoTip text={TIPS.retentionEconomics} />
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0 space-y-4">
@@ -188,7 +189,7 @@ export default function AnalystPanel({ run }: AnalystPanelProps) {
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm">
               <Package className="w-4 h-4 text-slate-500" />
-              ABC Product Analysis
+              ABC Product Analysis<InfoTip text={TIPS.abcAnalysis} />
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0 space-y-3">
@@ -231,7 +232,7 @@ export default function AnalystPanel({ run }: AnalystPanelProps) {
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm">
               <Link className="w-4 h-4 text-slate-500" />
-              Co-Purchase Affinity Pairs
+              Co-Purchase Affinity Pairs<InfoTip text={TIPS.affinityPairs} />
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
@@ -260,7 +261,7 @@ export default function AnalystPanel({ run }: AnalystPanelProps) {
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm">
               <Link className="w-4 h-4 text-slate-500" />
-              Co-Purchase Affinity Pairs
+              Co-Purchase Affinity Pairs<InfoTip text={TIPS.affinityPairs} />
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
@@ -288,7 +289,7 @@ export default function AnalystPanel({ run }: AnalystPanelProps) {
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm">
               <TrendingUp className="w-4 h-4 text-primary" />
-              Analyst Recommendations
+              Analyst Recommendations<InfoTip text={TIPS.analystRecommendations} />
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
@@ -333,7 +334,7 @@ function AovHistogramCard({ aovHistogram }: { aovHistogram: { label: string; cou
         <CardTitle className="flex items-center justify-between text-sm">
           <span className="flex items-center gap-2">
             <BarChart2 className="w-4 h-4 text-slate-500" />
-            AOV Distribution
+            AOV Distribution<InfoTip text={TIPS.aovDistribution} />
           </span>
           <span className="text-xs font-normal text-muted-foreground">
             {aovHistogram.length} buckets
@@ -419,7 +420,7 @@ function AovHistogramCard({ aovHistogram }: { aovHistogram: { label: string; cou
 
 function MiniStat({ icon, label, value, valueClass = '' }: {
   icon: React.ReactNode
-  label: string
+  label: React.ReactNode
   value: string
   valueClass?: string
 }) {

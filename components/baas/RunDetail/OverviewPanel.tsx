@@ -25,7 +25,8 @@ import {
   ArrowRight,
   Info,
 } from 'lucide-react'
-import { Card, CardHeader, CardTitle, CardContent, Badge, cn } from '../../ui'
+import { Card, CardHeader, CardTitle, CardContent, Badge, cn, InfoTip } from '../../ui'
+import { TIPS } from '../../../constants/baasTooltips'
 import { getScoreColor } from '../../../utils'
 import type { EnrichedPipelineRun } from '../../../types'
 
@@ -59,7 +60,7 @@ export default function OverviewPanel({ run, onNavigate }: OverviewPanelProps) {
       {/* ── Stat Cards ────────────────────────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          label="Audit Score"
+          label={<>Audit Score<InfoTip text={TIPS.auditScore} /></>}
           value={score !== null ? `${score}/10` : '—'}
           icon={<Target className="w-4 h-4" />}
           valueClass={score !== null ? getScoreColor(score) : ''}
@@ -73,7 +74,7 @@ export default function OverviewPanel({ run, onNavigate }: OverviewPanelProps) {
           onClick={() => onNavigate('auditor')}
         />
         <StatCard
-          label="Revenue Opportunity"
+          label={<>Revenue Opportunity<InfoTip text={TIPS.revenueOpportunity} /></>}
           value={money !== null ? `$${money.toLocaleString()}` : '—'}
           icon={<DollarSign className="w-4 h-4" />}
           valueClass="text-emerald-700 dark:text-emerald-400"
@@ -81,7 +82,7 @@ export default function OverviewPanel({ run, onNavigate }: OverviewPanelProps) {
           onClick={() => onNavigate('analyst')}
         />
         <StatCard
-          label="Vertical"
+          label={<>Vertical<InfoTip text={TIPS.vertical} /></>}
           value={vertical ?? '—'}
           icon={<Layers className="w-4 h-4" />}
           valueClass="text-violet-700 dark:text-violet-400"
@@ -95,7 +96,7 @@ export default function OverviewPanel({ run, onNavigate }: OverviewPanelProps) {
           onClick={() => onNavigate('classifier')}
         />
         <StatCard
-          label="Bundle Strategies"
+          label={<>Bundle Strategies<InfoTip text={TIPS.bundleStrategies} /></>}
           value={stratCount > 0 ? `${stratCount}` : '—'}
           icon={<TrendingUp className="w-4 h-4" />}
           valueClass="text-blue-700 dark:text-blue-400"
@@ -112,7 +113,7 @@ export default function OverviewPanel({ run, onNavigate }: OverviewPanelProps) {
             <CardTitle className="flex items-center justify-between text-sm">
               <span className="flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 text-amber-500" />
-                Critical Findings
+                Critical Findings<InfoTip text={TIPS.criticalFindings} />
               </span>
               <button
                 onClick={() => onNavigate('auditor')}
@@ -139,7 +140,7 @@ export default function OverviewPanel({ run, onNavigate }: OverviewPanelProps) {
             <CardTitle className="flex items-center justify-between text-sm">
               <span className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                Recommended Actions
+                Recommended Actions<InfoTip text={TIPS.recommendedActions} />
               </span>
               <button
                 onClick={() => onNavigate('analyst')}
@@ -168,7 +169,7 @@ export default function OverviewPanel({ run, onNavigate }: OverviewPanelProps) {
             <CardTitle className="flex items-center justify-between text-sm">
               <span className="flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-primary" />
-                Implementation Priority
+                Implementation Priority<InfoTip text={TIPS.implementationPriority} />
               </span>
               <button
                 onClick={() => onNavigate('strategy')}
@@ -223,7 +224,7 @@ export default function OverviewPanel({ run, onNavigate }: OverviewPanelProps) {
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
 interface StatCardProps {
-  label: string
+  label: React.ReactNode
   value: string
   icon: React.ReactNode
   valueClass?: string

@@ -26,7 +26,8 @@ import {
   Target,
   BarChart3,
 } from 'lucide-react'
-import { Card, CardHeader, CardTitle, CardContent, Badge, cn } from '../../ui'
+import { Card, CardHeader, CardTitle, CardContent, Badge, cn, InfoTip } from '../../ui'
+import { TIPS } from '../../../constants/baasTooltips'
 import type { EnrichedPipelineRun, VerticalScoreEntry } from '../../../types'
 
 interface ClassifierPanelProps {
@@ -63,7 +64,7 @@ export default function ClassifierPanel({ run }: ClassifierPanelProps) {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">
-                Primary Vertical
+                Primary Vertical<InfoTip text={TIPS.primaryVertical} />
               </p>
               <h2 className="text-2xl font-black text-slate-900 dark:text-slate-100">
                 {data.primaryVertical}
@@ -73,7 +74,7 @@ export default function ClassifierPanel({ run }: ClassifierPanelProps) {
             {/* Confidence meter */}
             <div className="flex flex-col items-end gap-2 min-w-[160px]">
               <div className="flex items-center gap-2 justify-end">
-                <span className="text-xs text-muted-foreground">Confidence</span>
+                <span className="text-xs text-muted-foreground">Confidence<InfoTip text={TIPS.confidence} /></span>
                 <span
                   className={cn(
                     'text-sm font-bold',
@@ -107,7 +108,7 @@ export default function ClassifierPanel({ run }: ClassifierPanelProps) {
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm">
               <BookOpen className="w-4 h-4 text-slate-500" />
-              Classification Evidence
+              Classification Evidence<InfoTip text={TIPS.classificationEvidence} />
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0 space-y-2">
@@ -129,7 +130,7 @@ export default function ClassifierPanel({ run }: ClassifierPanelProps) {
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm">
               <Target className="w-4 h-4 text-slate-500" />
-              Recommended Bundle Pillars
+              Recommended Bundle Pillars<InfoTip text={TIPS.recommendedBundlePillars} />
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0 space-y-4">
@@ -159,14 +160,14 @@ export default function ClassifierPanel({ run }: ClassifierPanelProps) {
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm">
               <BookOpen className="w-4 h-4 text-slate-500" />
-              Vertical Context
+              Vertical Context<InfoTip text={TIPS.verticalContext} />
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0 space-y-4">
             {data.verticalContext?.focus && (
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1.5">
-                Strategic Focus
+                Strategic Focus<InfoTip text={TIPS.strategicFocus} />
               </p>
               <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
                 {data.verticalContext.focus}
@@ -177,7 +178,7 @@ export default function ClassifierPanel({ run }: ClassifierPanelProps) {
             {Array.isArray(data.verticalContext?.keyBundleTypes) && data.verticalContext.keyBundleTypes.length > 0 && (
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1.5">
-                  Key Bundle Types
+                  Key Bundle Types<InfoTip text={TIPS.keyBundleTypes} />
                 </p>
                 <div className="flex flex-wrap gap-1.5">
                   {data.verticalContext.keyBundleTypes.map((bt, i) => (
@@ -199,7 +200,7 @@ export default function ClassifierPanel({ run }: ClassifierPanelProps) {
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm">
               <BarChart3 className="w-4 h-4 text-slate-500" />
-              Vertical Score Breakdown
+              Vertical Score Breakdown<InfoTip text={TIPS.verticalScoreBreakdown} />
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
@@ -232,7 +233,7 @@ export default function ClassifierPanel({ run }: ClassifierPanelProps) {
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm">
               <Brain className="w-4 h-4 text-slate-500" />
-              Psychological Triggers
+              Psychological Triggers<InfoTip text={TIPS.psychologicalTriggers} />
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">

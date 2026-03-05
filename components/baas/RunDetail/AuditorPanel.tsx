@@ -35,7 +35,8 @@ import {
   Image,
   Cpu,
 } from 'lucide-react'
-import { Card, CardHeader, CardTitle, CardContent, Badge, cn } from '../../ui'
+import { Card, CardHeader, CardTitle, CardContent, Badge, cn, InfoTip } from '../../ui'
+import { TIPS } from '../../../constants/baasTooltips'
 import { getScoreColor, currencySymbol } from '../../../utils'
 import type { AuditorResults, EnrichedPipelineRun, ScoreCategory, BundleDetection, CatalogAnalysis, AuditorEvidence } from '../../../types'
 
@@ -98,22 +99,22 @@ export default function AuditorPanel({ run }: AuditorPanelProps) {
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm">
               <Truck className="w-4 h-4 text-slate-500" />
-              Shipping Analysis
+              Shipping Analysis<InfoTip text={TIPS.shippingAnalysis} />
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0 space-y-3">
-            <MetaRow label="Free Shipping">
+            <MetaRow label={<>Free Shipping<InfoTip text={TIPS.freeShipping} /></>}>
               <Badge variant={shipping.hasFreeShipping ? 'success' : 'destructive'}>
                 {shipping.hasFreeShipping ? 'Yes' : 'No'}
               </Badge>
             </MetaRow>
             {shipping.threshold != null && (
-              <MetaRow label="Threshold">
+              <MetaRow label={<>Threshold<InfoTip text={TIPS.shippingThreshold} /></>}>
                 <span className="text-sm font-mono">{cs}{shipping.threshold}</span>
               </MetaRow>
             )}
             {shipping.deadZoneGap != null && (
-              <MetaRow label="Dead-Zone Gap">
+              <MetaRow label={<>Dead-Zone Gap<InfoTip text={TIPS.deadZoneGap} /></>}>
                 <span className="text-sm font-mono text-amber-600 dark:text-amber-400">
                   {cs}{shipping.deadZoneGap}
                 </span>
@@ -121,19 +122,19 @@ export default function AuditorPanel({ run }: AuditorPanelProps) {
               </MetaRow>
             )}
             {shipping.entryPriceGap != null && (
-              <MetaRow label="Entry Price Gap">
+              <MetaRow label={<>Entry Price Gap<InfoTip text={TIPS.entryPriceGap} /></>}>
                 <span className="text-sm font-mono text-amber-600 dark:text-amber-400">
                   {cs}{shipping.entryPriceGap}
                 </span>
               </MetaRow>
             )}
             {shipping.confidence && (
-              <MetaRow label="Confidence">
+              <MetaRow label={<>Confidence<InfoTip text={TIPS.shippingConfidence} /></>}>
                 <Badge variant="outline" className="text-[10px]">{shipping.confidence}</Badge>
               </MetaRow>
             )}
             {shipping.coreProductPrice != null && (
-              <MetaRow label="Core Product Price">
+              <MetaRow label={<>Core Product Price<InfoTip text={TIPS.coreProductPrice} /></>}>
                 <span className="text-sm font-mono">{cs}{shipping.coreProductPrice}</span>
               </MetaRow>
             )}
@@ -165,7 +166,7 @@ export default function AuditorPanel({ run }: AuditorPanelProps) {
             <CardTitle className="flex items-center justify-between text-sm">
               <span className="flex items-center gap-2">
                 <ShoppingBag className="w-4 h-4 text-slate-500" />
-                PDP Audit
+                PDP Audit<InfoTip text={TIPS.pdpAudit} />
               </span>
               <Badge variant="outline" className={getScoreColor(pdpRatio * 10)}>
                 {pdpScoreNum}/{pdpMaxScore}
@@ -207,12 +208,12 @@ export default function AuditorPanel({ run }: AuditorPanelProps) {
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm">
               <Navigation className="w-4 h-4 text-slate-500" />
-              Navigation Audit
+              Navigation Audit<InfoTip text={TIPS.navigationAudit} />
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0 space-y-3">
             {nav.hasBundleNavigation != null && (
-              <MetaRow label="Bundle Navigation">
+              <MetaRow label={<>Bundle Navigation<InfoTip text={TIPS.bundleNavigation} /></>}>
                 <Badge variant={nav.hasBundleNavigation ? 'success' : 'destructive'}>
                   {nav.hasBundleNavigation ? 'Present' : 'Missing'}
                 </Badge>
@@ -227,14 +228,14 @@ export default function AuditorPanel({ run }: AuditorPanelProps) {
               </MetaRow>
             )}
 
-            <MetaRow label="Gift Section">
+            <MetaRow label={<>Gift Section<InfoTip text={TIPS.giftSection} /></>}>
               <Badge variant={nav.hasGiftSection ? 'success' : 'outline'}>
                 {nav.hasGiftSection ? 'Present' : 'Absent'}
               </Badge>
             </MetaRow>
 
             {nav.hasCustomization != null && (
-              <MetaRow label="Customization">
+              <MetaRow label={<>Customization<InfoTip text={TIPS.customization} /></>}>
                 <Badge variant={nav.hasCustomization ? 'success' : 'outline'}>
                   {nav.hasCustomization ? 'Yes' : 'No'}
                 </Badge>
@@ -243,7 +244,7 @@ export default function AuditorPanel({ run }: AuditorPanelProps) {
 
             {Array.isArray(nav.bundleTermsFound) && nav.bundleTermsFound.length > 0 && (
               <div>
-                <p className="text-xs font-medium text-muted-foreground mb-2">Bundle Terms Found</p>
+                <p className="text-xs font-medium text-muted-foreground mb-2">Bundle Terms Found<InfoTip text={TIPS.bundleTermsFound} /></p>
                 <div className="flex flex-wrap gap-1.5">
                   {nav.bundleTermsFound.map((term, i) => (
                     <Badge key={i} variant="blue" className="text-xs">{term}</Badge>
@@ -281,7 +282,7 @@ export default function AuditorPanel({ run }: AuditorPanelProps) {
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm">
               <DollarSign className="w-4 h-4 text-slate-500" />
-              Price Range Analysis
+              Price Range Analysis<InfoTip text={TIPS.priceRangeAnalysis} />
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0 space-y-3">
@@ -395,7 +396,7 @@ export default function AuditorPanel({ run }: AuditorPanelProps) {
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm">
               <AlertTriangle className="w-4 h-4 text-amber-500" />
-              Critical Findings
+              Critical Findings<InfoTip text={TIPS.criticalFindings} />
               <Badge variant="warning" className="ml-auto">{data.criticalFindings.length}</Badge>
             </CardTitle>
           </CardHeader>
@@ -449,7 +450,7 @@ function LargeScoreRing({ score }: { score: number }) {
   )
 }
 
-function MetaRow({ label, children }: { label: string; children: React.ReactNode }) {
+function MetaRow({ label, children }: { label: React.ReactNode; children: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between">
       <span className="text-xs text-muted-foreground">{label}</span>
@@ -504,7 +505,7 @@ function ScoreBreakdownSection({ categories }: { categories: ScoreCategory[] }) 
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-sm">
           <Search className="w-4 h-4 text-slate-500" />
-          Score Breakdown
+          Score Breakdown<InfoTip text={TIPS.scoreBreakdown} />
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-0 space-y-2">
@@ -587,7 +588,7 @@ function BundleDetectionCard({ detection }: { detection: BundleDetection }) {
         <CardTitle className="flex items-center justify-between text-sm">
           <span className="flex items-center gap-2">
             <Boxes className="w-4 h-4 text-slate-500" />
-            Bundle Detection
+            Bundle Detection<InfoTip text={TIPS.bundleDetection} />
           </span>
           <Badge className={cn('text-xs', confColor)}>
             {detection.confidence}
@@ -603,17 +604,17 @@ function BundleDetectionCard({ detection }: { detection: BundleDetection }) {
         )}
 
         <div className="space-y-2">
-          <MetaRow label="Dedicated Nav">
+          <MetaRow label={<>Dedicated Nav<InfoTip text={TIPS.dedicatedNav} /></>}>
             <Badge variant={detection.hasDedicatedNavigation ? 'success' : 'outline'} className="text-[10px]">
               {detection.hasDedicatedNavigation ? 'Yes' : 'No'}
             </Badge>
           </MetaRow>
-          <MetaRow label="Gift Section">
+          <MetaRow label={<>Gift Section<InfoTip text={TIPS.giftSection} /></>}>
             <Badge variant={detection.hasGiftSection ? 'success' : 'outline'} className="text-[10px]">
               {detection.hasGiftSection ? 'Yes' : 'No'}
             </Badge>
           </MetaRow>
-          <MetaRow label="Customization">
+          <MetaRow label={<>Customization<InfoTip text={TIPS.customization} /></>}>
             <Badge variant={detection.hasCustomization ? 'success' : 'outline'} className="text-[10px]">
               {detection.hasCustomization ? 'Yes' : 'No'}
             </Badge>
@@ -622,7 +623,7 @@ function BundleDetectionCard({ detection }: { detection: BundleDetection }) {
 
         {Array.isArray(detection.signals) && detection.signals.length > 0 && (
           <div>
-            <p className="text-xs font-medium text-muted-foreground mb-2">Signals</p>
+            <p className="text-xs font-medium text-muted-foreground mb-2">Signals<InfoTip text={TIPS.signals} /></p>
             <div className="space-y-1">
               {detection.signals.map((s, i) => (
                 <div key={i} className="flex items-center gap-2 text-xs">
@@ -637,7 +638,7 @@ function BundleDetectionCard({ detection }: { detection: BundleDetection }) {
 
         {Array.isArray(detection.keywordsFound) && detection.keywordsFound.length > 0 && (
           <div>
-            <p className="text-xs font-medium text-muted-foreground mb-2">Keywords</p>
+            <p className="text-xs font-medium text-muted-foreground mb-2">Keywords<InfoTip text={TIPS.keywordsFound} /></p>
             <div className="flex flex-wrap gap-1.5">
               {detection.keywordsFound.map((kw, i) => (
                 <Badge key={i} variant="blue" className="text-[10px]">{kw}</Badge>
@@ -648,7 +649,7 @@ function BundleDetectionCard({ detection }: { detection: BundleDetection }) {
 
         {Array.isArray(detection.appsDetected) && detection.appsDetected.length > 0 && (
           <div>
-            <p className="text-xs font-medium text-muted-foreground mb-2">Apps Detected</p>
+            <p className="text-xs font-medium text-muted-foreground mb-2">Apps Detected<InfoTip text={TIPS.appsDetected} /></p>
             <div className="flex flex-wrap gap-1.5">
               {detection.appsDetected.map((app, i) => (
                 <Badge key={i} variant="purple" className="text-[10px]">{app}</Badge>
@@ -670,7 +671,7 @@ function CatalogAnalysisCard({ catalog, cs, shopName }: { catalog: CatalogAnalys
         <CardTitle className="flex items-center justify-between text-sm">
           <span className="flex items-center gap-2">
             <Boxes className="w-4 h-4 text-slate-500" />
-            Catalog Analysis
+            Catalog Analysis<InfoTip text={TIPS.catalogAnalysis} />
           </span>
           <Badge variant="outline" className="text-xs">
             {catalog.totalProducts} products
@@ -693,7 +694,7 @@ function CatalogAnalysisCard({ catalog, cs, shopName }: { catalog: CatalogAnalys
         {/* Price ranges */}
         {catalog.bundlePriceRange && catalog.bundlePriceRange.median != null && (
           <div>
-            <p className="text-xs font-medium text-muted-foreground mb-1.5">Bundle Price Range</p>
+            <p className="text-xs font-medium text-muted-foreground mb-1.5">Bundle Price Range<InfoTip text={TIPS.bundlePriceRange} /></p>
             <div className="flex items-center gap-2 text-xs font-mono text-slate-600 dark:text-slate-400">
               <span>{cs}{catalog.bundlePriceRange.min}</span>
               <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
@@ -773,7 +774,7 @@ function EvidenceTrailSection({ evidence }: { evidence: NonNullable<AuditorResul
       >
         <span className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
           <Search className="w-4 h-4 text-slate-500" />
-          Evidence Trail
+          Evidence Trail<InfoTip text={TIPS.evidenceTrail} />
         </span>
         <ChevronDown className={cn('w-4 h-4 text-muted-foreground transition-transform', open && 'rotate-180')} />
       </button>
@@ -904,46 +905,46 @@ function ShippingEvidenceSection({ shipping }: { shipping: NonNullable<AuditorEv
           </div>
         )}
         {shipping.storeShape && (
-          <EvidenceRow label="Store Shape" value={shipping.storeShape} />
+          <EvidenceRow label={<>Store Shape<InfoTip text={TIPS.storeShape} /></>} value={shipping.storeShape} />
         )}
         {shipping.anchorPrice != null && (
-          <EvidenceRow label="Anchor Price" value={`${sym}${shipping.anchorPrice}`} />
+          <EvidenceRow label={<>Anchor Price<InfoTip text={TIPS.anchorPrice} /></>} value={`${sym}${shipping.anchorPrice}`} />
         )}
         {shipping.anchorBand && (
-          <EvidenceRow label="Anchor Band" value={shipping.anchorBand} />
+          <EvidenceRow label={<>Anchor Band<InfoTip text={TIPS.anchorBand} /></>} value={shipping.anchorBand} />
         )}
         {shipping.anchorDominance != null && (
-          <EvidenceRow label="Anchor Dominance" value={`${shipping.anchorDominance}%`} />
+          <EvidenceRow label={<>Anchor Dominance<InfoTip text={TIPS.anchorDominance} /></>} value={`${shipping.anchorDominance}%`} />
         )}
         {shipping.dominanceStrength && (
-          <EvidenceRow label="Dominance" value={shipping.dominanceStrength} />
+          <EvidenceRow label={<>Dominance<InfoTip text={TIPS.dominanceStrength} /></>} value={shipping.dominanceStrength} />
         )}
         {shipping.medianProductPrice != null && (
           <EvidenceRow label="Median Product Price" value={`${sym}${shipping.medianProductPrice}`} />
         )}
         {shipping.entryPriceGap != null && (
-          <EvidenceRow label="Entry Price Gap" value={`${sym}${shipping.entryPriceGap}`} />
+          <EvidenceRow label={<>Entry Price Gap<InfoTip text={TIPS.entryPriceGap} /></>} value={`${sym}${shipping.entryPriceGap}`} />
         )}
         {shipping.thresholdAlignment && (
           <EvidenceRow
-            label="Threshold Alignment"
+            label={<>Threshold Alignment<InfoTip text={TIPS.thresholdAlignment} /></>}
             value={`${shipping.thresholdAlignment.classification} (${shipping.thresholdAlignment.multiple.toFixed(1)}x)`}
           />
         )}
         {shipping.behavioral?.behavioralGap != null && (
-          <EvidenceRow label="Behavioral Gap" value={`${sym}${shipping.behavioral.behavioralGap}`} />
+          <EvidenceRow label={<>Behavioral Gap<InfoTip text={TIPS.behavioralGap} /></>} value={`${sym}${shipping.behavioral.behavioralGap}`} />
         )}
         {shipping.behavioral?.gapReductionPotential != null && (
-          <EvidenceRow label="Gap Reduction Potential" value={`${sym}${shipping.behavioral.gapReductionPotential}`} />
+          <EvidenceRow label={<>Gap Reduction<InfoTip text={TIPS.gapReductionPotential} /></>} value={`${sym}${shipping.behavioral.gapReductionPotential}`} />
         )}
         {shipping.pricingConfidence && (
-          <EvidenceRow label="Pricing Confidence" value={shipping.pricingConfidence} />
+          <EvidenceRow label={<>Pricing Confidence<InfoTip text={TIPS.pricingConfidence} /></>} value={shipping.pricingConfidence} />
         )}
 
         {/* Price Distribution */}
         {shipping.priceDistribution && shipping.priceDistribution.length > 0 && (
           <div className="mt-2">
-            <p className="text-[11px] text-muted-foreground mb-1.5">Price Distribution</p>
+            <p className="text-[11px] text-muted-foreground mb-1.5">Price Distribution<InfoTip text={TIPS.priceDistribution} /></p>
             <div className="space-y-1">
               {shipping.priceDistribution.map((band, i) => (
                 <div key={i} className="flex items-center gap-2 text-[11px]">
@@ -965,7 +966,7 @@ function ShippingEvidenceSection({ shipping }: { shipping: NonNullable<AuditorEv
   )
 }
 
-function EvidenceRow({ label, value }: { label: string; value: string }) {
+function EvidenceRow({ label, value }: { label: React.ReactNode; value: string }) {
   return (
     <div className="flex items-center justify-between text-xs">
       <span className="text-muted-foreground">{label}</span>

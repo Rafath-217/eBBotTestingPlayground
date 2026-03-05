@@ -24,7 +24,8 @@ import {
   AlertTriangle,
   ShieldCheck,
 } from 'lucide-react'
-import { Card, CardHeader, CardTitle, CardContent, Badge, cn } from '../../ui'
+import { Card, CardHeader, CardTitle, CardContent, Badge, cn, InfoTip } from '../../ui'
+import { TIPS } from '../../../constants/baasTooltips'
 import { formatDuration } from '../../../utils'
 import type { EnrichedPipelineRun, StrategyValidation } from '../../../types'
 
@@ -90,7 +91,7 @@ export default function PipelineObservabilityPanel({ run }: PipelineObservabilit
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm">
               <Activity className="w-4 h-4 text-slate-500" />
-              Pipeline Flow
+              Pipeline Flow<InfoTip text={TIPS.pipelineFlow} />
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
@@ -146,7 +147,7 @@ export default function PipelineObservabilityPanel({ run }: PipelineObservabilit
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-sm">
                 <Brain className="w-4 h-4 text-slate-500" />
-                Planner Decisions
+                Planner Decisions<InfoTip text={TIPS.plannerDecisions} />
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0 space-y-3">
@@ -185,7 +186,7 @@ export default function PipelineObservabilityPanel({ run }: PipelineObservabilit
                   ? <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                   : <XCircle className="w-4 h-4 text-red-500" />
                 }
-                Reflection
+                Reflection<InfoTip text={TIPS.reflection} />
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0 space-y-3">
@@ -233,7 +234,7 @@ export default function PipelineObservabilityPanel({ run }: PipelineObservabilit
               {/* Overall Issues */}
               {reflectionResult.overallIssues && reflectionResult.overallIssues.length > 0 && (
                 <div className="space-y-1.5">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Overall Issues</p>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Overall Issues<InfoTip text={TIPS.overallIssues} /></p>
                   {reflectionResult.overallIssues.map((issue, i) => (
                     <div key={i} className="flex items-start gap-2">
                       <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
@@ -246,7 +247,7 @@ export default function PipelineObservabilityPanel({ run }: PipelineObservabilit
               {/* Per-Strategy Validation */}
               {reflectionResult.validationResults && reflectionResult.validationResults.length > 0 && (
                 <div className="space-y-2">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Strategy Validations</p>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Strategy Validations<InfoTip text={TIPS.strategyValidations} /></p>
                   {reflectionResult.validationResults.map((v) => (
                     <StrategyValidationRow key={v.strategyIndex} validation={v} />
                   ))}
@@ -263,7 +264,7 @@ export default function PipelineObservabilityPanel({ run }: PipelineObservabilit
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm">
               <Terminal className="w-4 h-4 text-slate-500" />
-              Decision Log
+              Decision Log<InfoTip text={TIPS.decisionLog} />
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">

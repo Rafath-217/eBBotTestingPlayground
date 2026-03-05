@@ -26,7 +26,8 @@ import {
   TrendingUp,
   Package,
 } from 'lucide-react'
-import { Card, CardHeader, CardContent, Badge, Button, cn } from '../../ui'
+import { Card, CardHeader, CardContent, Badge, Button, cn, InfoTip } from '../../ui'
+import { TIPS } from '../../../constants/baasTooltips'
 import { currencySymbol } from '../../../utils'
 import type { EnrichedPipelineRun, BundleStrategy } from '../../../types'
 
@@ -86,7 +87,7 @@ export default function StrategyPanel({ run }: StrategyPanelProps) {
           <TrendingUp className="w-4 h-4 text-primary shrink-0" />
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mr-1">
-              Launch order:
+              Launch order:<InfoTip text={TIPS.launchOrder} />
             </span>
             {implementationPriority.map((name, i) => (
               <span key={i} className="flex items-center gap-1.5">
@@ -208,7 +209,7 @@ function StrategyCard({ strategy, rank, currencySymbol: cs, isExpanded, onToggle
             <div className="p-5 space-y-4">
               <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
                 <DollarSign className="w-3.5 h-3.5" />
-                Offer Mathematics
+                Offer Mathematics<InfoTip text={TIPS.offerMathematics} />
               </h4>
 
               {/* Concept */}
@@ -237,19 +238,19 @@ function StrategyCard({ strategy, rank, currencySymbol: cs, isExpanded, onToggle
               {math && (
               <div className="rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 overflow-hidden">
                 <div className="flex items-center justify-between px-3 py-2 text-xs">
-                  <span className="text-muted-foreground">Original Total</span>
+                  <span className="text-muted-foreground">Original Total<InfoTip text={TIPS.originalTotal} /></span>
                   <span className="font-mono line-through text-muted-foreground">
                     {cs}{originalTotal.toLocaleString()}
                   </span>
                 </div>
                 <div className="flex items-center justify-between px-3 py-2 text-xs border-t border-slate-200 dark:border-slate-700">
-                  <span className="text-muted-foreground">Savings</span>
+                  <span className="text-muted-foreground">Savings<InfoTip text={TIPS.savingsAmount} /></span>
                   <span className="font-mono text-emerald-600 dark:text-emerald-400">
                     -{cs}{savingsAmount.toLocaleString()} ({discountPct}%)
                   </span>
                 </div>
                 <div className="flex items-center justify-between px-3 py-2.5 bg-primary/5 border-t border-primary/20">
-                  <span className="text-sm font-semibold text-primary">Bundle Price</span>
+                  <span className="text-sm font-semibold text-primary">Bundle Price<InfoTip text={TIPS.bundlePrice} /></span>
                   <span className="text-sm font-black font-mono text-primary">
                     {cs}{bundlePrice.toLocaleString()}
                   </span>

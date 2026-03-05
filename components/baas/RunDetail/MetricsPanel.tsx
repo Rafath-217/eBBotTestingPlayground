@@ -24,7 +24,8 @@ import {
   Activity,
   Package,
 } from 'lucide-react'
-import { Card, CardHeader, CardTitle, CardContent, Badge, cn } from '../../ui'
+import { Card, CardHeader, CardTitle, CardContent, Badge, cn, InfoTip } from '../../ui'
+import { TIPS } from '../../../constants/baasTooltips'
 import { currencySymbol } from '../../../utils'
 import type { EnrichedPipelineRun } from '../../../types'
 
@@ -65,10 +66,10 @@ export default function MetricsPanel({ run }: MetricsPanelProps) {
       {/* ── Opportunity Flags ──────────────────────────────────── */}
       {opportunities && (
       <div className="flex flex-wrap gap-2">
-        <OpportunityFlag label="Free Shipping Gap" active={opportunities.freeShippingGap ?? false} />
-        <OpportunityFlag label="Liquidation" active={opportunities.hasLiquidationOpportunity ?? false} />
-        <OpportunityFlag label="Retention Problem" active={opportunities.hasRetentionProblem ?? false} />
-        <OpportunityFlag label="AOV Bridge" active={opportunities.hasAovBridgeOpportunity ?? false} />
+        <OpportunityFlag label={<>Free Shipping Gap<InfoTip text={TIPS.freeShippingGap} /></>} active={opportunities.freeShippingGap ?? false} />
+        <OpportunityFlag label={<>Liquidation<InfoTip text={TIPS.liquidationOpportunity} /></>} active={opportunities.hasLiquidationOpportunity ?? false} />
+        <OpportunityFlag label={<>Retention Problem<InfoTip text={TIPS.retentionProblem} /></>} active={opportunities.hasRetentionProblem ?? false} />
+        <OpportunityFlag label={<>AOV Bridge<InfoTip text={TIPS.aovBridgeOpportunity} /></>} active={opportunities.hasAovBridgeOpportunity ?? false} />
       </div>
       )}
 
@@ -77,40 +78,40 @@ export default function MetricsPanel({ run }: MetricsPanelProps) {
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
         <MetricCard
           icon={<DollarSign className="w-3.5 h-3.5 text-slate-400" />}
-          label="AOV"
+          label={<>AOV<InfoTip text={TIPS.aov} /></>}
           value={rawMetrics?.aov ?? null}
           unit={cs}
           isCurrency
         />
         <MetricCard
           icon={<Package className="w-3.5 h-3.5 text-slate-400" />}
-          label="Free Shipping Threshold"
+          label={<>Free Shipping Threshold<InfoTip text={TIPS.freeShippingThreshold} /></>}
           value={rawMetrics?.freeShippingThreshold ?? null}
           unit={cs}
           isCurrency
         />
         <MetricCard
           icon={<TrendingUp className="w-3.5 h-3.5 text-slate-400" />}
-          label="AOV Bridge Amount"
+          label={<>AOV Bridge Amount<InfoTip text={TIPS.aovBridgeAmount} /></>}
           value={derivedMetrics?.aovBridgeAmount ?? null}
           unit={cs}
           isCurrency
         />
         <MetricCard
           icon={<Target className="w-3.5 h-3.5 text-slate-400" />}
-          label="Revenue Concentration"
+          label={<>Revenue Concentration<InfoTip text={TIPS.revenueConcentration} /></>}
           value={derivedMetrics?.revenueConcentrationIndex ?? null}
         />
         <MetricCard
           icon={<TrendingUp className="w-3.5 h-3.5 text-slate-400" />}
-          label="Potential Bundle Uplift"
+          label={<>Potential Bundle Uplift<InfoTip text={TIPS.potentialBundleUplift} /></>}
           value={derivedMetrics?.potentialBundleUplift ?? null}
           unit="%"
           isPercentage
         />
         <MetricCard
           icon={<Activity className="w-3.5 h-3.5 text-slate-400" />}
-          label="Grade C Revenue %"
+          label={<>Grade C Revenue %<InfoTip text={TIPS.gradeCRevenuePercent} /></>}
           value={derivedMetrics?.gradeCRevenuePercent ?? null}
           unit="%"
           isPercentage
@@ -121,8 +122,8 @@ export default function MetricsPanel({ run }: MetricsPanelProps) {
       {/* ── Risk Gauges ────────────────────────────────────────── */}
       {derivedMetrics && (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <RiskGauge label="Inventory Risk Score" score={derivedMetrics.inventoryRiskScore ?? null} />
-        <RiskGauge label="Retention Risk Score" score={derivedMetrics.retentionRiskScore ?? null} />
+        <RiskGauge label={<>Inventory Risk Score<InfoTip text={TIPS.inventoryRiskScore} /></>} score={derivedMetrics.inventoryRiskScore ?? null} />
+        <RiskGauge label={<>Retention Risk Score<InfoTip text={TIPS.retentionRiskScore} /></>} score={derivedMetrics.retentionRiskScore ?? null} />
       </div>
       )}
 
@@ -132,7 +133,7 @@ export default function MetricsPanel({ run }: MetricsPanelProps) {
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm">
               <Target className="w-4 h-4 text-slate-500" />
-              Recommended Pillars
+              Recommended Pillars<InfoTip text={TIPS.recommendedPillars} />
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
@@ -152,7 +153,7 @@ export default function MetricsPanel({ run }: MetricsPanelProps) {
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-function OpportunityFlag({ label, active }: { label: string; active: boolean }) {
+function OpportunityFlag({ label, active }: { label: React.ReactNode; active: boolean }) {
   return (
     <Badge
       variant={active ? 'success' : 'outline'}
@@ -165,7 +166,7 @@ function OpportunityFlag({ label, active }: { label: string; active: boolean }) 
 
 function MetricCard({ icon, label, value, unit, isCurrency = false, isPercentage = false }: {
   icon: React.ReactNode
-  label: string
+  label: React.ReactNode
   value: number | null
   unit?: string
   isCurrency?: boolean
@@ -194,7 +195,7 @@ function MetricCard({ icon, label, value, unit, isCurrency = false, isPercentage
   )
 }
 
-function RiskGauge({ label, score }: { label: string; score: number | null }) {
+function RiskGauge({ label, score }: { label: React.ReactNode; score: number | null }) {
   const safeScore = score ?? 0
   const barColor =
     safeScore >= 70 ? 'bg-red-500' :

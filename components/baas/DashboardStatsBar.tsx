@@ -1,5 +1,6 @@
 import { Activity, CheckCircle2, Star, DollarSign, Tag } from 'lucide-react'
-import { cn } from '../ui'
+import { cn, InfoTip } from '../ui'
+import { TIPS } from '../../constants/baasTooltips'
 import type { DashboardStats } from '../../utils'
 import { formatCurrency, getScoreTextColor } from '../../utils'
 
@@ -27,21 +28,21 @@ export default function DashboardStatsBar({ stats, loading = false }: Props) {
 
   const tiles: {
     icon: React.ReactNode
-    label: string
+    label: React.ReactNode
     value: React.ReactNode
     sub?: string
     accent?: string
   }[] = [
     {
       icon: <Activity className="w-4 h-4" />,
-      label: 'Total Runs',
+      label: <>Total Runs<InfoTip text={TIPS.totalRuns} /></>,
       value: stats.totalRuns,
       sub: stats.runningRuns > 0 ? `${stats.runningRuns} running` : undefined,
       accent: 'text-slate-900 dark:text-slate-100',
     },
     {
       icon: <CheckCircle2 className="w-4 h-4" />,
-      label: 'Success Rate',
+      label: <>Success Rate<InfoTip text={TIPS.successRate} /></>,
       value: `${stats.successRate}%`,
       sub: `${stats.completedRuns} completed · ${stats.failedRuns} failed`,
       accent:
@@ -53,7 +54,7 @@ export default function DashboardStatsBar({ stats, loading = false }: Props) {
     },
     {
       icon: <Star className="w-4 h-4" />,
-      label: 'Avg Score',
+      label: <>Avg Score<InfoTip text={TIPS.avgScore} /></>,
       value:
         stats.avgScore != null ? (
           <span className={getScoreTextColor(stats.avgScore)}>{stats.avgScore} / 10</span>
@@ -64,7 +65,7 @@ export default function DashboardStatsBar({ stats, loading = false }: Props) {
     },
     {
       icon: <DollarSign className="w-4 h-4" />,
-      label: 'Total Opportunity',
+      label: <>Total Opportunity<InfoTip text={TIPS.totalOpportunity} /></>,
       value:
         stats.totalOpportunity > 0 ? (
           <span className="text-emerald-600 dark:text-emerald-400">
@@ -77,7 +78,7 @@ export default function DashboardStatsBar({ stats, loading = false }: Props) {
     },
     {
       icon: <Tag className="w-4 h-4" />,
-      label: 'Top Vertical',
+      label: <>Top Vertical<InfoTip text={TIPS.topVertical} /></>,
       value: stats.topVertical ?? (
         <span className="text-slate-400 dark:text-slate-500">—</span>
       ),
@@ -87,9 +88,9 @@ export default function DashboardStatsBar({ stats, loading = false }: Props) {
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-      {tiles.map((tile) => (
+      {tiles.map((tile, i) => (
         <div
-          key={tile.label}
+          key={i}
           className={cn(
             'rounded-xl border border-slate-200 dark:border-slate-700',
             'bg-white dark:bg-slate-900 shadow-sm p-4 flex flex-col gap-1.5',

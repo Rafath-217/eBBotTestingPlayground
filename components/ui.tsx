@@ -1,9 +1,25 @@
 import React from 'react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { HelpCircle } from 'lucide-react';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
+}
+
+// --- INFOTIP ---
+export function InfoTip({ text }: { text: string }) {
+  return (
+    <span className="relative inline-flex items-center ml-1 group/tip">
+      <HelpCircle className="w-3 h-3 text-slate-400 cursor-help" />
+      <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1.5
+        text-[11px] leading-relaxed text-white bg-slate-900 dark:bg-slate-200 dark:text-slate-900
+        rounded-lg shadow-lg max-w-[280px] w-max opacity-0 pointer-events-none
+        group-hover/tip:opacity-100 transition-opacity z-50 whitespace-normal text-center">
+        {text}
+      </span>
+    </span>
+  );
 }
 
 // --- CARD ---
