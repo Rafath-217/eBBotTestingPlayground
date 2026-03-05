@@ -34,7 +34,9 @@ export default function StrategyView() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const canSubmit = shopName.trim().length > 0
+  const SHOP_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9-]*\.myshopify\.com$/
+  const isValidShop = SHOP_PATTERN.test(shopName.trim())
+  const canSubmit = shopName.trim().length > 0 && isValidShop
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -112,6 +114,11 @@ export default function StrategyView() {
                   'transition-colors'
                 )}
               />
+              {shopName.trim() && !isValidShop && (
+                <p className="text-xs text-red-500 dark:text-red-400 mt-1.5">
+                  Must match pattern: <span className="font-mono">abc.myshopify.com</span>
+                </p>
+              )}
             </div>
 
             {/* App Name */}

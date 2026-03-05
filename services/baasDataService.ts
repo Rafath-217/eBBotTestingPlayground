@@ -7,13 +7,17 @@ const api = axios.create({
 
 export const healthCheck = () => api.get('/health')
 
-export const runAudit = (shopName: string) => api.post('/audit', { shopName })
+export const runAudit = (shopName: string) =>
+  api.post('/audit', { shopName, url: `https://${shopName}` })
 
 export const runDataAudit = (shopName: string, appName: string) =>
-  api.post('/auditData', { shopName, appName })
+  api.post('/auditData', { shopName, url: `https://${shopName}`, appName })
 
 export const runFullAnalysis = (payload: { shopName?: string; appName?: string }) =>
-  api.post('/analyze', payload)
+  api.post('/analyze', {
+    ...payload,
+    ...(payload.shopName ? { url: `https://${payload.shopName}` } : {}),
+  })
 
 export const getHistory = (page = 1, limit = 20) =>
   api.get('/history', { params: { page, limit } })

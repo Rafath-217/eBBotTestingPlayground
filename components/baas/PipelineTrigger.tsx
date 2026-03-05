@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Loader2, Play, AlertTriangle, X } from 'lucide-react'
+import { Loader2, Play, AlertTriangle, X, ChevronDown } from 'lucide-react'
 import { runAudit, runFullAnalysis } from '../../services/baasDataService'
 import { Card, CardHeader, CardTitle, CardContent, Button, cn } from '../ui'
 import ResultDisplay from './ResultDisplay'
@@ -19,14 +19,18 @@ interface PipelineTriggerProps {
 export default function PipelineTrigger({ onPipelineComplete }: PipelineTriggerProps) {
   const [shopName, setShopName] = useState('')
   const [mode, setMode] = useState<'audit-only' | 'audit+strategy'>('audit-only')
+  const [appName, setAppName] = useState('')
   const [loading, setLoading] = useState(false)
   const [loadingMsg, setLoadingMsg] = useState('')
   const [result, setResult] = useState<Record<string, unknown> | null>(null)
   const [error, setError] = useState<string | null>(null)
 
+  const SHOP_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9-]*\.myshopify\.com$/
+  const isValidShop = SHOP_PATTERN.test(shopName.trim())
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!shopName.trim()) return
+    if (!shopName.trim() || !isValidShop) return
 
     setLoading(true)
     setResult(null)
@@ -40,9 +44,12 @@ export default function PipelineTrigger({ onPipelineComplete }: PipelineTriggerP
     }, 5000)
 
     try {
+      const trimmed = shopName.trim()
+      const payload: { shopName: string; appName?: string } = { shopName: trimmed }
+      if (mode === 'audit+strategy' && appName) payload.appName = appName
       const { data } = mode === 'audit-only'
-        ? await runAudit(shopName.trim())
-        : await runFullAnalysis({ shopName: shopName.trim() })
+        ? await runAudit(trimmed)
+        : await runFullAnalysis(payload)
       setResult(data)
       onPipelineComplete?.()
     } catch (err: unknown) {
@@ -87,6 +94,11 @@ export default function PipelineTrigger({ onPipelineComplete }: PipelineTriggerP
                   'disabled:opacity-50 disabled:cursor-not-allowed'
                 )}
               />
+              {shopName.trim() && !isValidShop && (
+                <p className="text-xs text-red-500 dark:text-red-400 mt-1.5">
+                  Must match pattern: <span className="font-mono">abc.myshopify.com</span>
+                </p>
+              )}
             </div>
 
             {/* Mode Selection */}
@@ -131,10 +143,45 @@ export default function PipelineTrigger({ onPipelineComplete }: PipelineTriggerP
               </div>
             </div>
 
+            {/* App Name — shown only for Full Analysis */}
+            {mode === 'audit+strategy' && (
+              <div>
+                <label htmlFor="app-name" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  App Name
+                  <span className="ml-1.5 text-xs font-normal text-slate-400">(required for order analysis)</span>
+                </label>
+                <div className="relative">
+                  <select
+                    id="app-name"
+                    value={appName}
+                    onChange={(e) => setAppName(e.target.value)}
+                    disabled={loading}
+                    className={cn(
+                      'w-full appearance-none px-4 py-2.5 rounded-lg border text-sm transition-colors pr-10',
+                      'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900',
+                      'text-slate-900 dark:text-slate-100',
+                      'focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent',
+                      'disabled:opacity-50 disabled:cursor-not-allowed'
+                    )}
+                  >
+                    <option value="">Select an app...</option>
+                    <option value="kite">Kite</option>
+                    <option value="fly">Fly</option>
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+                </div>
+                {!appName && (
+                  <p className="text-xs text-amber-600 dark:text-amber-400 mt-1.5">
+                    Please select an app to run full analysis.
+                  </p>
+                )}
+              </div>
+            )}
+
             {/* Submit */}
             <Button
               type="submit"
-              disabled={loading || !shopName.trim()}
+              disabled={loading || !shopName.trim() || !isValidShop || (mode === 'audit+strategy' && !appName)}
               className="w-full"
             >
               {loading ? (
