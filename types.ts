@@ -256,6 +256,8 @@ export interface PipelineHistoryLog {
   durationMs?: number;
   feedback?: PipelineHistoryFeedback | null;
   patternTags?: string[];
+  llmReasoning?: any;
+  decisionSummary?: any;
 }
 
 export interface PipelineHistoryPagination {

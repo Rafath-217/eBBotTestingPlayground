@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Loader2, AlertCircle, Calendar, Package, Tag, Search, Filter, MessageSquare, Check, X, AlertTriangle, ExternalLink } from 'lucide-react';
+import { Clock, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Loader2, AlertCircle, Calendar, Package, Tag, Search, Filter, MessageSquare, Check, X, AlertTriangle, ExternalLink, Brain } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent, Button, Badge, CodeBlock, cn } from '../components/ui';
 import { ViewMode } from '../components/Layout';
 import { PMResultView, PMDiscountsPanel, PMRulesPanel, PMStepsPanel } from '../components/PMViews';
@@ -254,6 +254,9 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
   // Shop name search mode (server-side)
   const [isSearchMode, setIsSearchMode] = useState(false);
   const [fetchTrigger, setFetchTrigger] = useState(0);
+
+  // Reasoning section collapse state
+  const [reasoningOpenId, setReasoningOpenId] = useState<string | null>(null);
 
   // Feedback state
   const [feedbackActiveId, setFeedbackActiveId] = useState<string | null>(null);
@@ -884,6 +887,56 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                       </div>
                     )}
                   </div>
+
+                  {/* LLM Reasoning & Decision Summary (collapsible) */}
+                  {((log as any).llmReasoning || (log as any).decisionSummary) && (
+                    <div className="border-t pt-4">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setReasoningOpenId(reasoningOpenId === log.id ? null : log.id);
+                        }}
+                        className="flex items-center gap-2 text-sm font-semibold uppercase text-muted-foreground tracking-wider hover:text-foreground transition-colors w-full"
+                      >
+                        <Brain className="w-4 h-4" />
+                        LLM Reasoning & Decision Summary
+                        {reasoningOpenId === log.id ? (
+                          <ChevronUp className="w-4 h-4 ml-auto" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4 ml-auto" />
+                        )}
+                      </button>
+
+                      {reasoningOpenId === log.id && (
+                        <div className="mt-3 space-y-4">
+                          {(log as any).decisionSummary && (
+                            <div>
+                              <label className="text-xs text-muted-foreground mb-1 block font-medium">Decision Summary</label>
+                              {typeof (log as any).decisionSummary === 'string' ? (
+                                <div className="p-3 bg-background rounded border text-sm whitespace-pre-wrap">
+                                  {(log as any).decisionSummary}
+                                </div>
+                              ) : (
+                                <CodeBlock label="" code={(log as any).decisionSummary} />
+                              )}
+                            </div>
+                          )}
+                          {(log as any).llmReasoning && (
+                            <div>
+                              <label className="text-xs text-muted-foreground mb-1 block font-medium">LLM Reasoning</label>
+                              {typeof (log as any).llmReasoning === 'string' ? (
+                                <div className="p-3 bg-background rounded border text-sm whitespace-pre-wrap">
+                                  {(log as any).llmReasoning}
+                                </div>
+                              ) : (
+                                <CodeBlock label="" code={(log as any).llmReasoning} />
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   {/* Feedback Section */}
                   <div className="space-y-3 border-t pt-4">

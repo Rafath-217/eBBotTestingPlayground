@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import { Clock, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Loader2, AlertCircle, Calendar, Search, Filter, TrendingDown, AlertTriangle, Store, Zap, Download, Tag, Check, X } from 'lucide-react';
+import { Clock, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Loader2, AlertCircle, Calendar, Search, Filter, TrendingDown, AlertTriangle, Store, Zap, Download, Tag, Check, X, Brain } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent, Button, Badge, CodeBlock, cn, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../components/ui';
 import { ViewMode } from '../components/Layout';
 import { PMResultView } from '../components/PMViews';
@@ -211,6 +211,7 @@ const ChurnAnalysis: React.FC<ChurnAnalysisProps> = ({ viewMode }) => {
 
   // Expanded row
   const [expandedShop, setExpandedShop] = useState<string | null>(null);
+  const [reasoningOpenRunId, setReasoningOpenRunId] = useState<string | null>(null);
   const [storeDetail, setStoreDetail] = useState<StoreDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
@@ -1120,6 +1121,53 @@ const ChurnAnalysis: React.FC<ChurnAnalysisProps> = ({ viewMode }) => {
                                               <PMResultView config={run.assembledResult?.bundleConfig || run.assembledResult} />
                                             )}
                                           </div>
+                                        </div>
+                                      )}
+
+                                      {/* LLM Reasoning & Decision Summary (collapsible) */}
+                                      {((run as any).llmReasoning || (run as any).decisionSummary) && (
+                                        <div className="border-t pt-3">
+                                          <button
+                                            onClick={() => setReasoningOpenRunId(reasoningOpenRunId === run._id ? null : run._id)}
+                                            className="flex items-center gap-2 text-sm font-semibold uppercase text-muted-foreground tracking-wider hover:text-foreground transition-colors w-full"
+                                          >
+                                            <Brain className="w-4 h-4" />
+                                            LLM Reasoning & Decision Summary
+                                            {reasoningOpenRunId === run._id ? (
+                                              <ChevronUp className="w-4 h-4 ml-auto" />
+                                            ) : (
+                                              <ChevronDown className="w-4 h-4 ml-auto" />
+                                            )}
+                                          </button>
+
+                                          {reasoningOpenRunId === run._id && (
+                                            <div className="mt-3 space-y-4">
+                                              {(run as any).decisionSummary && (
+                                                <div>
+                                                  <label className="text-xs text-muted-foreground mb-1 block font-medium">Decision Summary</label>
+                                                  {typeof (run as any).decisionSummary === 'string' ? (
+                                                    <div className="p-3 bg-background rounded border text-sm whitespace-pre-wrap">
+                                                      {(run as any).decisionSummary}
+                                                    </div>
+                                                  ) : (
+                                                    <CodeBlock label="" code={(run as any).decisionSummary} />
+                                                  )}
+                                                </div>
+                                              )}
+                                              {(run as any).llmReasoning && (
+                                                <div>
+                                                  <label className="text-xs text-muted-foreground mb-1 block font-medium">LLM Reasoning</label>
+                                                  {typeof (run as any).llmReasoning === 'string' ? (
+                                                    <div className="p-3 bg-background rounded border text-sm whitespace-pre-wrap">
+                                                      {(run as any).llmReasoning}
+                                                    </div>
+                                                  ) : (
+                                                    <CodeBlock label="" code={(run as any).llmReasoning} />
+                                                  )}
+                                                </div>
+                                              )}
+                                            </div>
+                                          )}
                                         </div>
                                       )}
                                     </CardContent>

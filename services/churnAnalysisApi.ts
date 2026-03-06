@@ -63,6 +63,8 @@ export interface StoreDetailRun {
   geminiErrorLLMsFailed: string[];
   source: string;
   churnData: any;
+  llmReasoning?: any;
+  decisionSummary?: any;
 }
 
 export interface ShopSnapshot {
