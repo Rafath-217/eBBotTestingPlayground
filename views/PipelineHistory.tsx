@@ -841,7 +841,7 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                     {viewMode === 'pm' ? (
                       /* PM Mode - Visual Cards */
                       <div className="space-y-6">
-                        {/* LLM Outputs */}
+                        {/* Individual LLM Outputs — hidden for now, only showing assembled
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                           <div>
                             <label className="text-xs text-muted-foreground mb-2 block font-medium">Structure LLM</label>
@@ -856,6 +856,7 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                             <PMRulesView output={log.output.rulesLLM} />
                           </div>
                         </div>
+                        */}
 
                         {/* Assembled Result */}
                         <div>
@@ -872,18 +873,16 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                       </div>
                     ) : (
                       /* Dev Mode - JSON Code Blocks */
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        {/* LLM Outputs */}
+                      <div className="space-y-4">
+                        {/* Individual LLM Outputs — hidden for now, only showing assembled
                         <div className="space-y-4">
                           <CodeBlock label="Structure LLM Output" code={log.output.structureLLM} />
                           <CodeBlock label="Discount LLM Output" code={log.output.discountLLM} />
                           <CodeBlock label="Rules LLM Output" code={log.output.rulesLLM} />
                         </div>
+                        */}
 
-                        {/* Assembled Result */}
-                        <div>
-                          <CodeBlock label="Assembled Result" code={log.output.assembledResult} />
-                        </div>
+                        <CodeBlock label="Assembled Result" code={log.output.assembledResult} />
                       </div>
                     )}
                   </div>

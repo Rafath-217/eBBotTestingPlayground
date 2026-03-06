@@ -1066,7 +1066,8 @@ const ChurnAnalysis: React.FC<ChurnAnalysisProps> = ({ viewMode }) => {
 
                                       {/* Dev mode: full JSON */}
                                       {viewMode === 'dev' && (
-                                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                        <div className="space-y-4">
+                                          {/* Individual LLM Outputs — hidden for now, only showing assembled
                                           <div className="space-y-3">
                                             <CodeBlock
                                               label="Structure LLM Output"
@@ -1081,19 +1082,19 @@ const ChurnAnalysis: React.FC<ChurnAnalysisProps> = ({ viewMode }) => {
                                               code={run.llmOutputs?.rulesOutput}
                                             />
                                           </div>
-                                          <div>
-                                            <CodeBlock
-                                              label="Assembled Result"
-                                              code={run.assembledResult}
-                                            />
-                                          </div>
+                                          */}
+
+                                          <CodeBlock
+                                            label="Assembled Result"
+                                            code={run.assembledResult}
+                                          />
                                         </div>
                                       )}
 
                                       {/* PM mode: rich visual cards */}
                                       {viewMode === 'pm' && (
                                         <div className="space-y-6">
-                                          {/* LLM Outputs */}
+                                          {/* Individual LLM Outputs — hidden for now, only showing assembled
                                           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                                             <div>
                                               <label className="text-xs text-muted-foreground mb-2 block font-medium">Structure LLM</label>
@@ -1108,6 +1109,7 @@ const ChurnAnalysis: React.FC<ChurnAnalysisProps> = ({ viewMode }) => {
                                               <PMRulesView output={run.llmOutputs?.rulesOutput} />
                                             </div>
                                           </div>
+                                          */}
 
                                           {/* Assembled Result */}
                                           <div>
