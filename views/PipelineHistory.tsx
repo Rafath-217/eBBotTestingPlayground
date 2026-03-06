@@ -741,6 +741,7 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                   <span className="text-sm text-muted-foreground truncate">
                     {log.input.merchantText}
                   </span>
+                  {/* Pattern tags hidden for now — too noisy on each row
                   {log.patternTags && log.patternTags.length > 0 && (
                     <div className="flex flex-wrap gap-1">
                       {log.patternTags.map((tag) => {
@@ -766,6 +767,7 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                       })}
                     </div>
                   )}
+                  */}
                 </div>
                 <div className="flex justify-end">
                   {expandedId === log.id ? (

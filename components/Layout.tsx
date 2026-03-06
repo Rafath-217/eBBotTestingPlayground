@@ -159,6 +159,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, isDark, toggleDark, vi
                 <SidebarItem icon={Rocket} label="Onboarding Flow" active={pathname === '/onboarding-flow'} onClick={() => navigate('/onboarding-flow')} />
                 <SidebarItem icon={HelpCircle} label="Store Profiling FAQ" active={pathname === '/store-profiling-faq'} onClick={() => navigate('/store-profiling-faq')} />
                 <SidebarItem icon={MessageCircleQuestion} label="Onboarding FAQ" active={pathname === '/onboarding-faq'} onClick={() => navigate('/onboarding-faq')} />
+                <SidebarItem icon={Package} label="Bundle Setup Guide" active={pathname === '/bundle-setup-testing-guide'} onClick={() => navigate('/bundle-setup-testing-guide')} />
               </div>
             </div>
           </div>
