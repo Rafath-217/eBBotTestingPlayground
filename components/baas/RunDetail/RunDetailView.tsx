@@ -72,6 +72,10 @@ const AGENT_TO_TAB: Partial<Record<AgentName, TabId>> = {
 
 export default function RunDetailView({ run, onClose }: RunDetailViewProps) {
   const enriched = toEnriched(run)
+  console.log('[DEBUG] raw run keys with data:', Object.keys(run).filter(k => (run as any)[k] != null))
+  console.log('[DEBUG] enriched.analystResults:', enriched.analystResults)
+  console.log('[DEBUG] enriched.metricsResult:', enriched.metricsResult)
+  console.log('[DEBUG] enriched.salesSummary:', enriched.salesSummary)
   const [activeTab, setActiveTab] = useState<TabId>('overview')
 
   // When the user clicks a step node in the Stepper, jump to that tab
