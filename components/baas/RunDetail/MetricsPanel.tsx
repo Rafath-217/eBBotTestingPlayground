@@ -45,6 +45,8 @@ export default function MetricsPanel({ run }: MetricsPanelProps) {
   const derivedMetrics = data.derivedMetrics
   const opportunities = data.opportunities
 
+  console.log('[DEBUG MetricsPanel] rawMetrics:', rawMetrics, 'derivedMetrics:', derivedMetrics, 'opportunities:', opportunities)
+
   if (!rawMetrics && !derivedMetrics && !opportunities) {
     return <EmptyPanel message="No metrics data available for this run." />
   }
