@@ -45,10 +45,32 @@ export default function MetricsPanel({ run }: MetricsPanelProps) {
   const derivedMetrics = data.derivedMetrics
   const opportunities = data.opportunities
 
-  console.log('[DEBUG MetricsPanel] rawMetrics:', rawMetrics, 'derivedMetrics:', derivedMetrics, 'opportunities:', opportunities)
+  // Check if metrics are all zeroed out (no revenue data access)
+  const hasNoRevenueAccess = rawMetrics &&
+    rawMetrics.aov === null &&
+    rawMetrics.totalRevenue === null &&
+    rawMetrics.orderCount === null
 
   if (!rawMetrics && !derivedMetrics && !opportunities) {
     return <EmptyPanel message="No metrics data available for this run." />
+  }
+
+  if (hasNoRevenueAccess) {
+    return (
+      <div className="space-y-4 p-6">
+        <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-5">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">Revenue Data Not Available</p>
+              <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">
+                This store has not granted access to revenue and order data. Metrics require the <code className="text-xs bg-amber-100 dark:bg-amber-900/50 px-1 py-0.5 rounded">read_reports</code> access scope to compute AOV, retention, and revenue-based insights.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (

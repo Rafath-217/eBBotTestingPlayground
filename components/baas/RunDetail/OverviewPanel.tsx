@@ -52,6 +52,7 @@ export default function OverviewPanel({ run, onNavigate }: OverviewPanelProps) {
       ? (rawMoney as any).totalOpportunity ?? (rawMoney as any).gradeCLiability ?? null
     : null
 
+  const analystHadError = !!(analyst as any)?.error
   const vertical = classifier?.primaryVertical ?? null
   const stratCount = strategy?.strategies?.length ?? 0
 
@@ -75,10 +76,10 @@ export default function OverviewPanel({ run, onNavigate }: OverviewPanelProps) {
         />
         <StatCard
           label={<>Revenue Opportunity<InfoTip text={TIPS.revenueOpportunity} /></>}
-          value={money !== null ? `$${money.toLocaleString()}` : '—'}
+          value={analystHadError ? 'N/A' : money !== null ? `$${money.toLocaleString()}` : '—'}
           icon={<DollarSign className="w-4 h-4" />}
-          valueClass="text-emerald-700 dark:text-emerald-400"
-          description="Estimated money left on table"
+          valueClass={analystHadError ? 'text-amber-500' : 'text-emerald-700 dark:text-emerald-400'}
+          description={analystHadError ? 'No revenue data access' : 'Estimated money left on table'}
           onClick={() => onNavigate('analyst')}
         />
         <StatCard

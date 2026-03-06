@@ -1,4 +1,4 @@
-import { Target, DollarSign, TrendingUp, Package, Circle } from 'lucide-react'
+import { Target, DollarSign, TrendingUp, Package, Circle, AlertTriangle } from 'lucide-react'
 import { Badge, cn, InfoTip } from '../../ui'
 import { TIPS } from '../../../constants/baasTooltips'
 import type { EnrichedPipelineRun, SalesSummary } from '../../../types'
@@ -26,10 +26,27 @@ export default function SalesSummaryPanel({ run }: SalesSummaryPanelProps) {
     )
   }
 
+  // Check if the summary is based on estimated/no-revenue data
+  const analystHadError = !!(run.analystResults as any)?.error
   const impact = data['90DayImpact']
 
   return (
     <div className="space-y-6 p-6">
+      {/* Revenue data warning */}
+      {analystHadError && (
+        <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-4">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">Estimated Projections Only</p>
+              <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">
+                Revenue data was not available for this store. Projections below are based on website audit data only and may not reflect actual performance.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 1. Hero Card */}
       <div className="rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 p-6 text-white shadow-lg">
         <h2 className="text-2xl font-bold leading-tight">{data.headlineRevenueOpportunity}</h2>
