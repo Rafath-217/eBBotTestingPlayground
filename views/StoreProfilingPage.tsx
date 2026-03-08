@@ -17,7 +17,7 @@ export default function StoreProfilingPage() {
 
       {/* ─── Title + Copy ─── */}
       <div className="flex items-start justify-between mb-1">
-        <h1 className="text-3xl font-bold">Store Modeling Profile</h1>
+        <h1 className="text-3xl font-bold">Store Profiling -- PM Handoff</h1>
         <button
           onClick={handleCopy}
           className="flex-shrink-0 ml-4 px-3 py-1.5 text-xs font-medium rounded border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
@@ -25,599 +25,545 @@ export default function StoreProfilingPage() {
           {copied ? 'Copied!' : 'Copy'}
         </button>
       </div>
-      <p className="text-lg text-slate-500 dark:text-slate-400 mb-6">How We Build the Top 50</p>
+      <blockquote className="border-l-4 border-slate-300 dark:border-slate-600 pl-4 my-4 italic text-slate-500 dark:text-slate-400">
+        <p className="mb-1"><strong>Audience</strong>: Product managers, non-technical stakeholders</p>
+        <p className="mb-0"><strong>Related docs</strong>: <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">PM_FAQ_PROFILING.md</code> (Q&amp;A), <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">PM_HANDOFF_ONBOARDING.md</code> (how onboarding uses these profiles), <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">README.md</code> (technical)</p>
+      </blockquote>
       <hr className="border-slate-200 dark:border-slate-700 mb-8" />
 
       <div ref={contentRef}>
 
-      {/* ─── Overview ─── */}
-      <h2 className="text-2xl font-semibold mb-4">Overview</h2>
-      <p className="mb-4">
-        The store modeling pipeline profiles the top Shopify stores that use EasyBundles, producing a structured
-        profile for each one. The goal: understand what a store sells, how it performs, how well its bundles work,
-        and what bundle strategy it runs. These profiles serve two purposes:
-      </p>
-      <ol className="list-decimal list-inside mb-4 space-y-1">
-        <li><strong>REFERENCE data</strong> -- The top stores become the "reference library" that new stores get compared against during onboarding.</li>
-        <li><strong>Onboarding recommendations</strong> -- When a new store installs, we run a subset of these jobs on the fly, match the new store to similar reference stores, and recommend a bundle type and product selection.</li>
-      </ol>
-      <p className="mb-4">
-        The pipeline is made up of <strong>5 sequential jobs</strong> (Jobs 1-4 build data, Job 5 synthesizes it), orchestrated by <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">service.runAll()</code> in <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">ebCalculateSuccessMetrics.service.js</code>:
-      </p>
+      {/* ─── Quick Reference ─── */}
+      <h2 className="text-2xl font-semibold mb-4">Quick Reference: Profiling Thresholds</h2>
 
       <table className="w-full border border-slate-300 dark:border-slate-600 text-sm mb-8">
         <thead>
           <tr className="bg-slate-50 dark:bg-slate-800">
-            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">Job</th>
-            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">Name</th>
-            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">Data Source</th>
-            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">What It Produces</th>
+            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">What</th>
+            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">Value</th>
+            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">Plain English</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">1</td>
-            <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">Structural</td>
-            <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">Shopify Products API</td>
-            <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">SKU count, prices, industry, complementarity, archetype</td>
-          </tr>
-          <tr>
-            <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">2</td>
-            <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">Performance</td>
-            <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">ShopifyQL or REST Orders</td>
-            <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">60-day revenue, AOV, repeat rate, ABC analysis</td>
-          </tr>
-          <tr>
-            <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">3</td>
-            <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">EB Metrics</td>
-            <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">bundleAnalytics DB</td>
-            <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">Bundle revenue contribution, attach rate, success tier</td>
-          </tr>
-          <tr>
-            <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">4</td>
-            <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">Bundle Strategy</td>
-            <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">stepsConfiguration + mixAndMatch DBs</td>
-            <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">Bundle types, patterns, dominant strategy</td>
-          </tr>
-          <tr>
-            <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">5</td>
-            <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">Archetype + Audit</td>
-            <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">Computed from Jobs 1-4</td>
-            <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">Archetype ID, store audit problems</td>
-          </tr>
+          {[
+            ['Products analyzed per store (max)', '1,000', 'We look at up to 1,000 products'],
+            ['Orders analyzed per store (max)', '50,000', 'Safety cap for very large stores'],
+            ['Performance window', '60 days', 'All sales metrics use a rolling 2-month window'],
+            ['Low price band', 'Under $25 median', 'Affordable / impulse-buy products'],
+            ['High price band', 'Over $100 median', 'Premium / considered-purchase products'],
+            ['Small store', 'Under 100 SKUs', ''],
+            ['Large store', 'Over 500 SKUs', ''],
+            ['Low catalog diversity', 'Under 0.3', 'Most products are the same type'],
+            ['High catalog diversity', '0.3 or above', 'Products spread across multiple types'],
+            ['Strong tier: bundle contribution', '12%+', 'Bundles drive at least 12% of total revenue'],
+            ['Strong tier: attach rate', '5%+', 'At least 5% of orders include a bundle'],
+            ['Strong tier: stability', '0.6+', 'Revenue is consistent month to month'],
+            ['Strong tier: revenue floor', '$50,000 / 60 days', 'Must be a meaningfully-sized store'],
+            ['Moderate tier: bundle contribution', '5%+', 'Only this one condition'],
+          ].map(([what, value, plain], i) => (
+            <tr key={i}>
+              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">{what}</td>
+              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2 font-mono">{value}</td>
+              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">{plain}</td>
+            </tr>
+          ))}
         </tbody>
       </table>
 
-      <p className="mb-8">
-        The data model lives in <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">storeModelingProfile.model.js</code>.
-        Each store gets a single document identified by <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">shopName</code>.
+      <hr className="border-slate-200 dark:border-slate-700 mb-8" />
+
+      {/* ─── What Is Store Profiling? ─── */}
+      <h2 className="text-2xl font-semibold mb-4">What Is Store Profiling?</h2>
+      <p className="mb-4">
+        The store profiling pipeline analyzes the top ~100 Shopify stores that use EasyBundles and builds a structured profile for each one. These profiles become our <strong>reference library</strong> -- the database of successful stores that new stores get compared against during onboarding.
       </p>
+      <p className="mb-4">
+        Think of it like building a database of healthy patients at a doctor's office. We measure every vital sign so that when a new patient walks in, we can compare them to similar healthy patients and prescribe the right treatment.
+      </p>
+      <p className="mb-4">
+        The pipeline runs <strong>5 jobs in order</strong>:
+      </p>
+      <pre className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded p-4 text-sm font-mono mb-8 overflow-x-auto">
+        <code>{`Job 1: What does this store sell?       (catalog)
+Job 2: How is it performing?            (60-day sales)
+Job 3: How are its bundles doing?       (bundle revenue)
+Job 4: What bundle strategy does it use?(bundle config)
+Job 5: What type of store is it?        (archetype + audit)
+     ↓
+Stored as REFERENCE profiles`}</code>
+      </pre>
 
       <hr className="border-slate-200 dark:border-slate-700 mb-8" />
 
       {/* ─── Running Example ─── */}
-      <h2 className="text-2xl font-semibold mb-4">Running Example: 83a38c-0c.myshopify.com</h2>
-
+      <h2 className="text-2xl font-semibold mb-4">Running Example</h2>
       <p className="mb-4">
-        Throughout this document we will use a real store to illustrate each job's output. Here is the store at a glance:
+        Throughout this doc we'll follow: <strong>83a38c-0c.myshopify.com</strong> -- a German candy and beverage shop.
+      </p>
+
+      <table className="w-full border border-slate-300 dark:border-slate-600 text-sm mb-8">
+        <tbody>
+          {[
+            ['Products', '223 SKUs, median price $4.99'],
+            ['Sales', '$2,403 over 60 days, 59 orders, $40.73 average order'],
+            ['Customer behavior', '78% of orders have 3+ items, 17% repeat rate'],
+            ['Industry', 'Food & Gourmet / Beverages'],
+            ['Store type', 'MID_HIGH_COMP (mid-size catalog, diverse products)'],
+          ].map(([field, value]) => (
+            <tr key={field}>
+              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2 font-semibold">{field}</td>
+              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">{value}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <hr className="border-slate-200 dark:border-slate-700 mb-8" />
+
+      {/* ─── Job 1 ─── */}
+      <h2 className="text-2xl font-semibold mb-2">Job 1: "What Does This Store Sell?"</h2>
+
+      <h3 className="text-xl font-semibold mb-3 mt-6">What happens</h3>
+      <p className="mb-4">
+        We pull the store's product catalog from Shopify and analyze it across four dimensions: pricing, catalog diversity, industry, and store type.
+      </p>
+
+      <h3 className="text-xl font-semibold mb-3">What counts as a "product"</h3>
+      <ul className="list-disc list-inside mb-4 space-y-1">
+        <li><strong>Only active products</strong> -- draft and archived products are completely ignored</li>
+        <li>We analyze up to <strong>1,000 products</strong> per store (if they have more, we use the first 1,000)</li>
+        <li>If a store has <strong>zero active products</strong>, this job fails and we move on</li>
+      </ul>
+
+      <h3 className="text-xl font-semibold mb-3">How pricing works</h3>
+      <p className="mb-4">
+        For each product, we take the <strong>cheapest variant's price</strong> (e.g., if a shirt comes in S/$10, M/$15, L/$20, we use $10). This gives the most conservative view of the store's pricing.
+      </p>
+      <p className="mb-2"><strong>What's excluded from pricing:</strong></p>
+      <ul className="list-disc list-inside mb-4 space-y-1">
+        <li>Variants priced at $0.00 (free gifts, test products) are filtered out</li>
+        <li>Products where ALL variants are $0 are excluded from price math (but still counted in the SKU total)</li>
+      </ul>
+      <p className="mb-2">We then compute:</p>
+      <ul className="list-disc list-inside mb-4 space-y-1">
+        <li><strong>Median price</strong> -- the "typical" product price. We use the median (middle value) instead of the average so that one expensive gift set in a store full of $5 candies doesn't skew the number.</li>
+        <li><strong>Price band</strong> -- a simple label:</li>
+      </ul>
+
+      <table className="w-full border border-slate-300 dark:border-slate-600 text-sm mb-4">
+        <thead>
+          <tr className="bg-slate-50 dark:bg-slate-800">
+            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">Band</th>
+            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">Rule</th>
+            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">Example stores</th>
+          </tr>
+        </thead>
+        <tbody>
+          {[
+            ['Low', 'Median price under $25', 'Candy shops, accessories'],
+            ['Mid', 'Median price $25-$100', 'Apparel, skincare'],
+            ['High', 'Median price over $100', 'Furniture, luxury goods'],
+          ].map(([band, rule, example]) => (
+            <tr key={band}>
+              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2 font-semibold">{band}</td>
+              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">{rule}</td>
+              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">{example}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <p className="mb-6">
+        <strong>83a38c-0c</strong>: Median $4.99 = <strong>Low</strong> price band.
+      </p>
+
+      <h3 className="text-xl font-semibold mb-3">How catalog diversity is measured</h3>
+      <p className="mb-4">
+        We look at how a store's products are spread across different product types. Think of it this way:
+      </p>
+      <blockquote className="border-l-4 border-slate-300 dark:border-slate-600 pl-4 my-4 italic text-slate-500 dark:text-slate-400">
+        <p className="mb-1"><strong>Store A</strong> sells 100 products, all coffee. Diversity = 0 (no variety at all).</p>
+        <p className="mb-1"><strong>Store B</strong> sells 100 products: 25 coffees, 25 mugs, 25 cookies, 25 gift sets. Diversity = 1.0 (maximum variety).</p>
+        <p className="mb-0"><strong>Most real stores</strong> fall somewhere in the 0.3-0.7 range.</p>
+      </blockquote>
+      <p className="mb-4">
+        We call this the <strong>catalog diversity score</strong> (0 to 1). Products with no type assigned are grouped under "Other."
+      </p>
+      <p className="mb-2"><strong>Why this matters for bundling:</strong></p>
+      <ul className="list-disc list-inside mb-4 space-y-1">
+        <li><strong>High diversity (0.3+)</strong>: Natural fit for mix-and-match bundles -- customers can combine products from different categories</li>
+        <li><strong>Low diversity (under 0.3)</strong>: Better suited for volume discounts -- "buy more of the same thing, save more"</li>
+      </ul>
+      <p className="mb-6">
+        <strong>83a38c-0c</strong>: Diversity score of 0.42 (moderate). They sell candy, beverages, snacks, and gift sets, but candy dominates.
+      </p>
+
+      <h3 className="text-xl font-semibold mb-3">How industry is classified</h3>
+      <p className="mb-4">
+        An AI classifies the store into one of <strong>50 predefined industries</strong> (e.g., "Beauty &amp; Cosmetics," "Food &amp; Gourmet," "Fashion &amp; Apparel") using a two-step process:
+      </p>
+      <ol className="list-decimal list-inside mb-4 space-y-2">
+        <li><strong>First pass</strong>: The AI looks at product types and sample product titles, then picks an industry + sub-industry</li>
+        <li><strong>Verification pass</strong>: A second AI call reviews the first answer, either confirms or corrects it, and assigns a confidence score (0-100%)</li>
+      </ol>
+      <p className="mb-4">
+        If the two passes disagree, the verification pass wins. If someone on our team has <strong>manually verified</strong> a store's industry, the AI step is skipped on future runs.
+      </p>
+      <p className="mb-6">
+        <strong>83a38c-0c</strong>: Food &amp; Gourmet / Beverages, 95% confidence. Both AI passes agreed.
+      </p>
+
+      <h3 className="text-xl font-semibold mb-3">How stores are bucketed into types (archetypes)</h3>
+      <p className="mb-4">
+        Every store gets an <strong>archetype</strong> -- a label that summarizes "what kind of store is this?" based on catalog size, diversity, and price band:
       </p>
 
       <table className="w-full border border-slate-300 dark:border-slate-600 text-sm mb-4">
         <thead>
           <tr className="bg-slate-50 dark:bg-slate-800">
-            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">Field</th>
-            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">Value</th>
+            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">Archetype</th>
+            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">Who fits here</th>
+            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">Typical examples</th>
+            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">Default bundle type</th>
           </tr>
         </thead>
         <tbody>
           {[
-            ['shopName', '83a38c-0c.myshopify.com'],
-            ['Industry', 'Food & Gourmet / Beverages'],
-            ['SKU count', '223'],
-            ['Median price', '$4.99'],
-            ['Price band', 'low'],
-            ['Complementarity', '0.4227'],
-            ['Archetype', 'MID_HIGH_COMP'],
-            ['60-day revenue', '$2,403.08'],
-            ['60-day orders', '59'],
-            ['AOV', '$40.73'],
-            ['Repeat rate', '16.95%'],
-          ].map(([field, value]) => (
-            <tr key={field}>
-              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2 font-medium">{field}</td>
+            ['SMALL_LOW_COMP', 'Small catalog (<100 SKUs), single-product focus', 'DTC supplement brand', 'Volume Discount'],
+            ['SMALL_HIGH_COMP', 'Small catalog, diverse products', 'Curated boutique, gift shop', 'Fixed Bundle Price'],
+            ['MID_HIGH_COMP', 'Mid-size catalog (100-500 SKUs), diverse', 'Most mid-market Shopify stores', 'Mix & Match'],
+            ['LARGE_LOW_PRICE', 'Large catalog (500+ SKUs), low price point', 'High-volume discount retailers', 'Volume Discount'],
+            ['MID_LARGE_HIGH_COMP', 'Everything else', 'Large diverse catalogs', 'Mix & Match'],
+          ].map(([arch, who, typical, bundle]) => (
+            <tr key={arch}>
+              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2 font-mono">{arch}</td>
+              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">{who}</td>
+              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">{typical}</td>
+              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">{bundle}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <p className="mb-4">
+        <strong>Why Large stores don't use diversity</strong>: When you have 500+ products, almost every store has high diversity just by volume. So for large stores, we use the price band instead to differentiate.
+      </p>
+      <p className="mb-4">
+        <strong>Why "everything else" for MID_LARGE_HIGH_COMP</strong>: This is the catch-all bucket. It captures mid-size stores with low diversity and large stores with higher price points. The Mix &amp; Match default works broadly for these.
+      </p>
+      <p className="mb-8">
+        <strong>83a38c-0c</strong>: 223 SKUs (Mid) + 0.42 diversity (High) = <strong>MID_HIGH_COMP</strong>.
+      </p>
+
+      <hr className="border-slate-200 dark:border-slate-700 mb-8" />
+
+      {/* ─── Job 2 ─── */}
+      <h2 className="text-2xl font-semibold mb-2">Job 2: "How Is This Store Performing?"</h2>
+
+      <h3 className="text-xl font-semibold mb-3 mt-6">What happens</h3>
+      <p className="mb-4">
+        We pull the store's order data from Shopify for the last 60 days and compute sales metrics, customer behavior, and product-level performance.
+      </p>
+
+      <h3 className="text-xl font-semibold mb-3">Which orders count (and which don't)</h3>
+      <p className="mb-4">Not every Shopify order makes it into our analysis:</p>
+
+      <table className="w-full border border-slate-300 dark:border-slate-600 text-sm mb-4">
+        <thead>
+          <tr className="bg-slate-50 dark:bg-slate-800">
+            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">Order type</th>
+            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">Counted?</th>
+            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">Why</th>
+          </tr>
+        </thead>
+        <tbody>
+          {[
+            ['Paid orders', 'YES', 'Core revenue data'],
+            ['Cancelled but paid (no refund issued)', 'YES', 'The payment was real revenue'],
+            ['Fully refunded orders', 'NO', 'Money was returned'],
+            ['Partially refunded orders', 'NO', 'Excluded to keep data clean'],
+            ['Pending / authorized (not yet paid)', 'NO', "Payment hasn't cleared"],
+            ['Test orders', 'NO', 'Not real transactions'],
+          ].map(([type, counted, why], i) => (
+            <tr key={i}>
+              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">{type}</td>
+              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2 font-semibold">{counted}</td>
+              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">{why}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <p className="mb-6">
+        <strong>In plain English</strong>: We only count orders where money actually changed hands <strong>and stayed</strong> with the merchant.
+      </p>
+
+      <h3 className="text-xl font-semibold mb-3">What we measure</h3>
+
+      <h4 className="text-lg font-semibold mb-2">Revenue &amp; orders</h4>
+
+      <table className="w-full border border-slate-300 dark:border-slate-600 text-sm mb-4">
+        <thead>
+          <tr className="bg-slate-50 dark:bg-slate-800">
+            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">Metric</th>
+            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">What it means</th>
+            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">83a38c-0c</th>
+          </tr>
+        </thead>
+        <tbody>
+          {[
+            ['Total revenue (60d)', 'Sum of all qualifying order totals', '$2,403.08'],
+            ['Total orders (60d)', 'Count of qualifying orders', '59'],
+            ['Average order value (AOV)', 'Revenue divided by orders', '$40.73'],
+          ].map(([metric, meaning, value], i) => (
+            <tr key={i}>
+              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">{metric}</td>
+              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">{meaning}</td>
               <td className="border border-slate-300 dark:border-slate-600 px-3 py-2 font-mono">{value}</td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      <p className="mb-8">
-        This is a German candy and beverage store -- low price points, moderate product diversity, and customers who buy
-        multiple items per order (78% of orders contain 3+ items).
-      </p>
-
-      <hr className="border-slate-200 dark:border-slate-700 mb-8" />
-
-      {/* ─── Job 1 ─── */}
-      <h2 className="text-2xl font-semibold mb-2">Job 1: Structural Analysis</h2>
-      <p className="text-lg text-slate-500 dark:text-slate-400 italic mb-4">"What does this store sell?"</p>
-
-      <h3 className="text-xl font-semibold mb-3">What it does</h3>
-      <p className="mb-4">
-        Job 1 answers the catalog question. It fetches every active product from Shopify, computes price statistics,
-        measures how diverse the catalog is, classifies the store's industry via LLM, and determines which structural
-        archetype the store belongs to.
-      </p>
-      <p className="mb-4">
-        <strong>Source:</strong> <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">service.runStructuralJob()</code> in <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">ebCalculateSuccessMetrics.service.js</code>, lines ~96-228.
-      </p>
-
-      <h3 className="text-xl font-semibold mb-3">How it works</h3>
-      <ol className="list-decimal list-inside mb-6 space-y-2">
-        <li><strong>Fetch products</strong> -- Paginate through the Shopify Products API (<code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">shopify.product.list</code>), fetching up to 1,000 active products in batches of 250.</li>
-        <li><strong>Extract prices</strong> -- For each product, take the minimum variant price (the cheapest variant). Filter out zero/null prices. Sort ascending.</li>
-        <li><strong>Compute price statistics</strong> -- Median, P25, P75, and price band.</li>
-        <li><strong>Compute complementarity</strong> -- Build a frequency map of <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">product_type</code> values, then run normalized Shannon entropy over it.</li>
-        <li><strong>Classify industry</strong> -- Two-pass Gemini LLM classification (classify, then verify). Skip if the store's industry has been manually verified.</li>
-        <li><strong>Upsert</strong> -- Save all structural fields to the profile document.</li>
-      </ol>
-
-      <h3 className="text-xl font-semibold mb-3">Store example: 83a38c-0c.myshopify.com</h3>
-      <pre className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded p-4 text-sm font-mono mb-4 overflow-x-auto">
-        <code>{`skuCount:                 223
-medianProductPrice:       $4.99
-priceP25:                 $2.00
-priceP75:                 $8.99
-priceBand:                "low"
-industry:                 "Food & Gourmet"
-subIndustry:              "Beverages"
-classificationConfidence: 0.95
-complementarityScore:     0.4227`}</code>
-      </pre>
-      <p className="mb-6">
-        The LLM classified this store as Food &amp; Gourmet / Beverages with 95% confidence. The verification pass agreed with the initial classification.
-      </p>
-
-      <h3 className="text-xl font-semibold mb-3">Key concepts explained</h3>
-
-      <h4 className="text-lg font-semibold mb-2">Price analysis: median, P25, P75, priceBand</h4>
-      <p className="mb-2">
-        We use the <strong>median</strong> product price rather than the mean because a single $500 gift set in a store
-        full of $5 candies would skew the average. The median gives you the "typical" product price.
-      </p>
-      <ul className="list-disc list-inside mb-4 space-y-1">
-        <li><strong>P25</strong> (25th percentile): 25% of products cost less than this. For 83a38c-0c, P25 = $2.00.</li>
-        <li><strong>P75</strong> (75th percentile): 75% of products cost less than this. For 83a38c-0c, P75 = $8.99.</li>
-        <li><strong>priceBand</strong>: A simple bucket derived from the median price:
-          <ul className="list-disc list-inside ml-6 mt-1 space-y-1">
-            <li><code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">"low"</code> -- median &lt; $25</li>
-            <li><code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">"mid"</code> -- median $25-$100</li>
-            <li><code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">"high"</code> -- median &gt; $100</li>
-          </ul>
-        </li>
-      </ul>
-      <p className="mb-4">
-        At $4.99 median, 83a38c-0c is firmly in the <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">"low"</code> band. This is typical for candy and beverage stores.
-      </p>
-      <p className="mb-2">The thresholds are defined in <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">config.js</code>:</p>
-      <pre className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded p-4 text-sm font-mono mb-6 overflow-x-auto">
-        <code>{`PRICE_BANDS: {
-  low: 25,   // median < $25 -> "low"
-  high: 100, // median > $100 -> "high", else "mid"
-}`}</code>
-      </pre>
-
-      <h4 className="text-lg font-semibold mb-2">Complementarity Score (Shannon entropy)</h4>
-      <p className="mb-2">
-        The complementarity score measures <strong>how diverse</strong> a store's catalog is, using normalized Shannon entropy over the <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">product_type</code> distribution.
-      </p>
-      <p className="mb-2">
-        Think of it as a "surprise meter." If every product in the store is the same type (e.g., all "Candy"), there is zero surprise -- complementarity = 0. If products are evenly spread across many types (e.g., "Candy", "Beverages", "Snacks", "Gift Sets"), there is maximum surprise -- complementarity approaches 1.0.
-      </p>
-      <p className="mb-2">The math (from <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">utils.js</code>):</p>
-      <pre className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded p-4 text-sm font-mono mb-4 overflow-x-auto">
-        <code>{`function normalizedEntropy(freqMap) {
-  const values = Object.values(freqMap).filter((v) => v > 0);
-  if (values.length <= 1) return 0;
-
-  const total = values.reduce((a, b) => a + b, 0);
-  const maxEntropy = Math.log2(values.length);
-
-  let entropy = 0;
-  for (const count of values) {
-    const p = count / total;
-    entropy -= p * Math.log2(p);
-  }
-
-  return maxEntropy > 0 ? entropy / maxEntropy : 0;
-}`}</code>
-      </pre>
-      <p className="mb-4">
-        The key insight: the raw Shannon entropy is divided by <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">log2(N)</code> where N is the number of unique product types. This normalizes the score to 0-1 regardless of how many types exist.
-      </p>
-      <p className="mb-4">
-        For 83a38c-0c, the score is <strong>0.4227</strong> -- moderate diversity. The store has several product types (candy, beverages, snacks, etc.) but some types dominate more than others.
-      </p>
-      <p className="mb-6">
-        <strong>Why this matters for bundling:</strong> High-complementarity stores (score &gt;= 0.3) are natural fits for cross-category bundles (mix &amp; match). Low-complementarity stores work better with volume discounts on the same product.
-      </p>
-
-      <h4 className="text-lg font-semibold mb-2">Industry Classification (2-pass LLM)</h4>
-      <p className="mb-2">
-        Industry is classified by Gemini 2.0 Flash in two passes:
-      </p>
-      <ol className="list-decimal list-inside mb-4 space-y-2">
-        <li><strong>First pass</strong> (<code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">classifyIndustryLLM</code>): Given the top product types and a sample of product titles, classify into one of ~40 predefined industries (e.g., "Beauty &amp; Cosmetics", "Food &amp; Gourmet", "Fashion &amp; Apparel") plus a sub-industry.</li>
-        <li><strong>Second pass</strong> (<code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">verifyIndustryLLM</code>): Given the same data plus the first pass's answer, either confirm or correct the classification. This produces a confidence score (0-1).</li>
-      </ol>
-      <p className="mb-2">
-        If the two passes disagree, the verification pass wins. The system logs whether verification agreed or disagreed.
-      </p>
-      <p className="mb-2">
-        If a store's industry has been <strong>manually verified</strong> (via the <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">industryVerified</code> flag), the LLM step is skipped entirely on subsequent runs.
-      </p>
-      <p className="mb-4">
-        For 83a38c-0c, both passes agreed: Food &amp; Gourmet / Beverages at 0.95 confidence.
-      </p>
-      <p className="mb-6">
-        The industry classification feeds into the <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">INDUSTRY_ADJACENCY</code> map in <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">config.js</code>, which defines which industries are considered "similar" (e.g., "Food &amp; Gourmet" is adjacent to "Coffee &amp; Tea" and "Beverages"). This is used during store matching.
-      </p>
-
-      <h4 className="text-lg font-semibold mb-2">Archetype Assignment</h4>
-      <p className="mb-2">
-        The archetype is a structural bucket that summarizes "what kind of store is this?" based on three inputs: SKU count, complementarity score, and price band.
-      </p>
-      <p className="mb-2">The logic (from <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">getArchetypeId()</code>):</p>
-      <pre className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded p-4 text-sm font-mono mb-4 overflow-x-auto">
-        <code>{`size = skuCount < 100 ? "SMALL" : skuCount <= 500 ? "MID" : "LARGE"
-comp = complementarityScore < 0.3 ? "LOW" : "HIGH"`}</code>
-      </pre>
+      <h4 className="text-lg font-semibold mb-2">Customer behavior</h4>
 
       <table className="w-full border border-slate-300 dark:border-slate-600 text-sm mb-4">
         <thead>
           <tr className="bg-slate-50 dark:bg-slate-800">
-            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">Archetype</th>
-            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">Conditions</th>
-            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">Typical store</th>
+            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">Metric</th>
+            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">What it means</th>
+            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">83a38c-0c</th>
           </tr>
         </thead>
         <tbody>
           {[
-            ['SMALL_LOW_COMP', '<100 SKUs, comp <0.3', 'Single-product brand, supplements'],
-            ['SMALL_HIGH_COMP', '<100 SKUs, comp >=0.3', 'Curated boutique, gift shop'],
-            ['MID_HIGH_COMP', '100-500 SKUs, comp >=0.3', 'Mid-size store with variety'],
-            ['LARGE_LOW_PRICE', '>500 SKUs, priceBand="low"', 'High-volume discount store'],
-            ['MID_LARGE_HIGH_COMP', 'Everything else', 'Large diverse catalog'],
-          ].map(([arch, cond, typical]) => (
-            <tr key={arch}>
-              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2 font-mono">{arch}</td>
-              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">{cond}</td>
-              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">{typical}</td>
+            ['Repeat rate', 'What % of orders come from returning customers', '16.95%'],
+            ['First-time AOV', "Average spend for a customer's first-ever order", '$40.58'],
+            ['Repeat AOV', 'Average spend for returning customer orders', '$41.46'],
+          ].map(([metric, meaning, value], i) => (
+            <tr key={i}>
+              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">{metric}</td>
+              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">{meaning}</td>
+              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2 font-mono">{value}</td>
             </tr>
           ))}
         </tbody>
       </table>
 
+      <h4 className="text-lg font-semibold mb-2">Revenue concentration</h4>
       <p className="mb-4">
-        For 83a38c-0c: 223 SKUs is "MID", complementarity 0.4227 is "HIGH" (&gt;= 0.3), so the archetype is <strong>MID_HIGH_COMP</strong>.
+        What percentage of total revenue comes from the <strong>single best-selling product</strong>. Under 15% = healthy. Over 25% = "hero product" dependency.
       </p>
-      <p className="mb-8">
-        Note: for LARGE stores (&gt;500 SKUs), the complementarity score is replaced by priceBand in the decision. This is because at scale, complementarity loses discriminating power -- almost every large store has high entropy.
-      </p>
-
-      <hr className="border-slate-200 dark:border-slate-700 mb-8" />
-
-      {/* ─── Job 2 ─── */}
-      <h2 className="text-2xl font-semibold mb-2">Job 2: Performance Analysis</h2>
-      <p className="text-lg text-slate-500 dark:text-slate-400 italic mb-4">"How is this store performing?"</p>
-
-      <h3 className="text-xl font-semibold mb-3">What it does</h3>
-      <p className="mb-4">
-        Job 2 measures the store's sales performance over a rolling 60-day window. It fetches order data from Shopify, computes revenue rollups, customer behavior metrics, and product-level revenue for ABC analysis.
-      </p>
-      <p className="mb-4">
-        <strong>Source:</strong> <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">service.runShopifyPerformanceJob()</code> in <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">ebCalculateSuccessMetrics.service.js</code>, lines ~564-668.
+      <p className="mb-6">
+        <strong>83a38c-0c</strong>: 14.22% -- healthy, no single product dominates.
       </p>
 
-      <h3 className="text-xl font-semibold mb-3">Data paths: ShopifyQL vs REST</h3>
-      <p className="mb-4">There are two ways to get order data from Shopify:</p>
+      <h4 className="text-lg font-semibold mb-2">Basket size (units per order)</h4>
+
       <table className="w-full border border-slate-300 dark:border-slate-600 text-sm mb-4">
         <thead>
           <tr className="bg-slate-50 dark:bg-slate-800">
-            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">Path</th>
-            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">Requires</th>
-            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">Speed</th>
-            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">Data richness</th>
+            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">Category</th>
+            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">Definition</th>
+            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">83a38c-0c</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td className="border border-slate-300 dark:border-slate-600 px-3 py-2 font-semibold">ShopifyQL</td>
-            <td className="border border-slate-300 dark:border-slate-600 px-3 py-2 font-mono">read_reports scope</td>
-            <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">Fast (pre-aggregated)</td>
-            <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">Daily revenue + orders + unique customers + product revenue</td>
-          </tr>
-          <tr>
-            <td className="border border-slate-300 dark:border-slate-600 px-3 py-2 font-semibold">REST</td>
-            <td className="border border-slate-300 dark:border-slate-600 px-3 py-2 font-mono">Basic scope</td>
-            <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">Slow (raw orders)</td>
-            <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">Everything above PLUS order histogram, units per order, first-time vs repeat AOV</td>
-          </tr>
+          {[
+            ['Single-item orders', '1 unit total', '5 orders (8%)'],
+            ['Two-item orders', 'Exactly 2 units', '8 orders (14%)'],
+            ['Multi-item orders', '3 or more units', '46 orders (78%)'],
+          ].map(([cat, def_, val], i) => (
+            <tr key={i}>
+              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">{cat}</td>
+              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">{def_}</td>
+              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2 font-mono">{val}</td>
+            </tr>
+          ))}
         </tbody>
       </table>
-      <p className="mb-2">
-        The system checks at startup which stores have <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">read_reports</code> scope (via <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">getStoresWithReadReports()</code>). Stores with it use ShopifyQL; the rest fall back to REST.
-      </p>
-      <p className="mb-2">
-        ShopifyQL returns pre-aggregated daily data, so it cannot compute order-level metrics like the histogram or units-per-order. These fields retain their last REST-computed values for ShopifyQL stores.
-      </p>
+
       <p className="mb-6">
-        83a38c-0c has <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">read_reports</code> scope and used <strong>ShopifyQL</strong>.
+        This metric drives the highest-priority decision in the onboarding recommendation engine.
       </p>
 
-      <h3 className="text-xl font-semibold mb-3">60-day metrics</h3>
-      <p className="mb-4">
-        After daily data is fetched and stored in <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">storeDailyPerformance</code>, the system computes rolling 60-day aggregates via <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">computeAndSaveRollingMetrics()</code>:
-      </p>
+      <h4 className="text-lg font-semibold mb-2">ABC product grading</h4>
+      <p className="mb-2">Products ranked by 60-day revenue, split into three tiers:</p>
 
-      <h4 className="text-lg font-semibold mb-2">Store example: 83a38c-0c.myshopify.com</h4>
-      <pre className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded p-4 text-sm font-mono mb-6 overflow-x-auto">
-        <code>{`totalRevenue60:          $2,403.08
-totalOrders60:           59
-aov60:                   $40.73
-repeatRate60:            0.1695  (16.95%)
-revenueConcentration60:  0.1422  (14.22%)
-firstTimeAOV60:          $40.58
-repeatAOV60:             $41.46`}</code>
-      </pre>
-
-      <h3 className="text-xl font-semibold mb-3">Key concepts explained</h3>
-
-      <h4 className="text-lg font-semibold mb-2">AOV (Average Order Value)</h4>
-      <p className="mb-2">
-        Simply <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">totalRevenue60 / totalOrders60</code>. For 83a38c-0c: $2,403.08 / 59 = $40.73.
-      </p>
-      <p className="mb-6">
-        This is important context: the median product price is $4.99 but the AOV is $40.73, meaning customers buy roughly 8 items per order on average. This is a strong signal that volume discounts will work.
-      </p>
-
-      <h4 className="text-lg font-semibold mb-2">Repeat rate</h4>
-      <p className="mb-2">
-        <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">repeatRate60 = (totalOrders60 - uniqueCustomers) / totalOrders60</code>
-      </p>
-      <p className="mb-6">
-        If a store has 59 orders from 49 unique customers, repeat rate = (59-49)/59 = 16.95%. Higher repeat rates suggest loyal customers who may respond well to bundles.
-      </p>
-
-      <h4 className="text-lg font-semibold mb-2">Revenue concentration</h4>
-      <p className="mb-2">
-        <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">revenueConcentration60 = maxProductRevenue / totalRevenue60</code>
-      </p>
-      <p className="mb-6">
-        This measures how much of the store's revenue comes from a single product. At 14.22%, 83a38c-0c has a well-distributed revenue -- no single product dominates. High concentration (&gt;25%) suggests a "hero product" store that might benefit from mix-and-match bundles to drive discovery of other products.
-      </p>
-
-      <h4 className="text-lg font-semibold mb-2">ABC analysis</h4>
-      <p className="mb-2">
-        Products are ranked by revenue and split into three grades:
-      </p>
-      <ul className="list-disc list-inside mb-4 space-y-1">
-        <li><strong>Grade A</strong> (top 20% of SKUs): The revenue drivers. For 83a38c-0c, 30 SKUs generate the bulk of revenue.</li>
-        <li><strong>Grade B</strong> (next 30% of SKUs): Solid mid-tier products. 31 SKUs.</li>
-        <li><strong>Grade C</strong> (bottom 50% of SKUs): The long tail. 52 SKUs with minimal individual revenue.</li>
-      </ul>
-      <p className="mb-4">
-        The ABC split is computed in <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">computeAbcAnalysis()</code>. It is used during onboarding to select which products go into the recommended bundle -- Grade A products are picked first.
-      </p>
-      <p className="mb-2">From the onboarding trace for 83a38c-0c:</p>
-      <pre className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded p-4 text-sm font-mono mb-6 overflow-x-auto">
-        <code>{`ABC Analysis:
-  Total products with revenue: 113
-  Grade A: 30 products (26.5%)
-  Grade B: 31 products (27.4%)
-  Grade C: 52 products (46.0%)`}</code>
-      </pre>
-
-      <h4 className="text-lg font-semibold mb-2">Units per order</h4>
-      <p className="mb-2">
-        Counts how many line item units each order contains:
-      </p>
-      <ul className="list-disc list-inside mb-4 space-y-1">
-        <li><strong>oneItemOrders</strong>: Orders with 1 unit total</li>
-        <li><strong>twoItemOrders</strong>: Orders with exactly 2 units</li>
-        <li><strong>threePlusOrders</strong>: Orders with 3+ units</li>
-      </ul>
-      <p className="mb-6">
-        For 83a38c-0c: 46 out of 59 orders (78%) contained 3+ items. This is a very strong multi-item signal, which is why the onboarding system triggered a behavioral override to recommend volume discounts.
-      </p>
-
-      <h4 className="text-lg font-semibold mb-2">Incremental fetch</h4>
-      <p className="mb-2">
-        Job 2 uses smart incremental fetching. On subsequent runs, it only fetches days since <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">lastPerformanceUpdateAt</code>, rather than re-fetching the full 60-day window. The rolling metrics are always recomputed from all stored daily snapshots within the 60-day window.
-      </p>
-      <p className="mb-8">
-        Special case: if a previous run resulted in $0 revenue (likely a data issue), the system does a full 60-day backfill instead of an incremental fetch.
-      </p>
+      <table className="w-full border border-slate-300 dark:border-slate-600 text-sm mb-8">
+        <thead>
+          <tr className="bg-slate-50 dark:bg-slate-800">
+            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">Grade</th>
+            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">Which products</th>
+            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">Purpose</th>
+            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">83a38c-0c</th>
+          </tr>
+        </thead>
+        <tbody>
+          {[
+            ['A', 'Top 20% by count', 'Revenue drivers -- picked first for bundles', '30 products'],
+            ['B', 'Next 30%', 'Solid mid-tier', '31 products'],
+            ['C', 'Bottom 50%', 'Long tail -- bundled with bestsellers to drive discovery', '52 products'],
+          ].map(([grade, which, purpose, val], i) => (
+            <tr key={i}>
+              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2 font-semibold">{grade}</td>
+              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">{which}</td>
+              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">{purpose}</td>
+              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2 font-mono">{val}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
 
       <hr className="border-slate-200 dark:border-slate-700 mb-8" />
 
       {/* ─── Job 3 ─── */}
-      <h2 className="text-2xl font-semibold mb-2">Job 3: Bundle Success Analysis</h2>
-      <p className="text-lg text-slate-500 dark:text-slate-400 italic mb-4">"How well are bundles doing?"</p>
+      <h2 className="text-2xl font-semibold mb-2">Job 3: "How Well Are Their Bundles Doing?"</h2>
 
-      <h3 className="text-xl font-semibold mb-3">What it does</h3>
+      <blockquote className="border-l-4 border-slate-300 dark:border-slate-600 pl-4 my-4 italic text-slate-500 dark:text-slate-400">
+        <p><strong>Note</strong>: Only runs for <strong>reference stores</strong> (stores already using bundles). New stores skip this.</p>
+      </blockquote>
+
+      <h3 className="text-xl font-semibold mb-3">What happens</h3>
       <p className="mb-4">
-        Job 3 measures how well the store's existing bundles perform. Unlike Jobs 1-2 which talk to Shopify, Job 3 reads from the internal <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">bundleAnalytics</code> database -- our own tracking of bundle orders and revenue.
-      </p>
-      <p className="mb-4">
-        <strong>Source:</strong> <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">service.runEbMetricsJob()</code> in <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">ebCalculateSuccessMetrics.service.js</code>, lines ~674-789.
+        Reads from our internal analytics database to measure how well the store's EasyBundles perform over a 60-day window.
       </p>
 
-      <h3 className="text-xl font-semibold mb-3">Metrics computed</h3>
-      <p className="mb-4">
-        The job reads monthly revenue and order data from <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">bundleAnalytics</code>, covering a 60-day window approximated by three calendar months (current month pro-rated, previous month full, month before that partially):
-      </p>
-      <ul className="list-disc list-inside mb-6 space-y-1">
-        <li><strong>bundleRevenue60</strong>: Total bundle revenue over the 60-day window (net of cancellations)</li>
-        <li><strong>bundleOrders60</strong>: Total bundle orders over the window</li>
-        <li><strong>bundleRevenueContribution60</strong>: <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">bundleRevenue60 / totalRevenue60</code> -- what percentage of total store revenue comes from bundles</li>
-        <li><strong>attachRate60</strong>: <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">bundleOrders60 / totalOrders60</code> -- what percentage of orders include a bundle</li>
-        <li><strong>stabilityScore60</strong>: <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">min(netMonth1, netMonth2) / max(netMonth1, netMonth2)</code> -- how consistent bundle revenue is month-over-month. A score of 1.0 means perfectly stable; 0.0 means one month had zero revenue.</li>
+      <h3 className="text-xl font-semibold mb-3">How cancelled orders are handled here</h3>
+      <p className="mb-2"><strong>Different from Job 2:</strong></p>
+      <ul className="list-disc list-inside mb-4 space-y-1">
+        <li><strong>Job 2</strong>: Cancelled/refunded orders are filtered out at the Shopify level -- we never see them</li>
+        <li><strong>Job 3</strong>: We start with total revenue and <strong>subtract</strong> cancelled order revenue ourselves</li>
       </ul>
-
-      <h3 className="text-xl font-semibold mb-3">Store example: 83a38c-0c.myshopify.com</h3>
-      <p className="mb-2">
-        83a38c-0c is a <strong>new store</strong> being onboarded, so it does not yet have EB metrics. During onboarding, Jobs 3 and 4 are skipped (they are only relevant for existing REFERENCE stores). The EB metrics for 83a38c-0c would all be zero/null at onboarding time.
-      </p>
       <p className="mb-6">
-        However, its <strong>matched reference stores</strong> have these metrics. For example, handsomescent.myshopify.com (the top "strong" match) has <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">bundleRevenueContribution60 = 0.5989</code> (59.89% of revenue from bundles).
+        Same end result -- cancelled orders don't inflate metrics -- different mechanism.
       </p>
 
-      <h3 className="text-xl font-semibold mb-3">Success Tier classification</h3>
-      <p className="mb-4">
-        Each store is assigned an <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">ebSuccessTier</code> based on its EB metrics, via <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">computeSuccessTier()</code>:
+      <h3 className="text-xl font-semibold mb-3">What we measure</h3>
+
+      <table className="w-full border border-slate-300 dark:border-slate-600 text-sm mb-4">
+        <thead>
+          <tr className="bg-slate-50 dark:bg-slate-800">
+            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">Metric</th>
+            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">What it means</th>
+          </tr>
+        </thead>
+        <tbody>
+          {[
+            ['Bundle revenue (60d)', 'Total bundle revenue after subtracting cancellations'],
+            ['Bundle orders (60d)', 'Total bundle orders'],
+            ['Bundle revenue contribution', 'Bundle revenue as % of total store revenue'],
+            ['Attach rate', 'Bundle orders as % of total store orders'],
+            ['Stability score', 'How consistent bundle revenue is month-over-month'],
+          ].map(([metric, meaning], i) => (
+            <tr key={i}>
+              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2 font-semibold">{metric}</td>
+              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">{meaning}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <p className="mb-6">
+        <strong>Stability score</strong>: Ratio of the smaller month to the larger month (last 2 full months). Score of 1.0 = perfectly stable. Score of 0 = one month had zero revenue.
       </p>
-      <p className="mb-2"><strong>Strong</strong> -- All four conditions must be met:</p>
-      <ul className="list-disc list-inside mb-4 space-y-1">
-        <li><code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">bundleRevenueContribution60 &gt;= 0.12</code> (12%)</li>
-        <li><code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">attachRate60 &gt;= 0.05</code> (5%)</li>
-        <li><code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">stabilityScore60 &gt;= 0.6</code></li>
-        <li><code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">totalRevenue60 &gt;= $50,000</code></li>
-      </ul>
-      <p className="mb-2"><strong>Moderate</strong> -- Just one condition:</p>
-      <ul className="list-disc list-inside mb-4 space-y-1">
-        <li><code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">bundleRevenueContribution60 &gt;= 0.05</code> (5%)</li>
-      </ul>
-      <p className="mb-4"><strong>Weak</strong> -- Everything else.</p>
-      <p className="mb-2">These thresholds are defined in <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">config.js</code>:</p>
-      <pre className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded p-4 text-sm font-mono mb-4 overflow-x-auto">
-        <code>{`SUCCESS_TIER: {
-  strong: {
-    bundleRevenueContribution: 0.12,
-    attachRate: 0.05,
-    stability: 0.6,
-    minRevenue: 50000,
-  },
-  moderate: {
-    bundleRevenueContribution: 0.05,
-  },
-}`}</code>
-      </pre>
+
+      <h3 className="text-xl font-semibold mb-3">Success tiers</h3>
+      <p className="mb-2">
+        <strong>Strong</strong> (ALL 4 must be true): 12%+ bundle contribution, 5%+ attach rate, 0.6+ stability, $50k+ total revenue.
+      </p>
+      <p className="mb-2">
+        <strong>Moderate</strong>: 5%+ bundle contribution only.
+      </p>
       <p className="mb-8">
-        The "strong" tier is intentionally strict -- it requires meaningful bundle revenue contribution, consistent performance, customer adoption, AND a minimum revenue floor. This ensures that reference stores recommended during onboarding are genuinely successful, not just small stores with high percentages.
+        <strong>Weak</strong>: Everything else.
       </p>
 
       <hr className="border-slate-200 dark:border-slate-700 mb-8" />
 
       {/* ─── Job 4 ─── */}
-      <h2 className="text-2xl font-semibold mb-2">Job 4: Bundle Strategy Analysis</h2>
-      <p className="text-lg text-slate-500 dark:text-slate-400 italic mb-4">"What strategy are they using?"</p>
+      <h2 className="text-2xl font-semibold mb-2">Job 4: "What Bundle Strategy Are They Using?"</h2>
 
-      <h3 className="text-xl font-semibold mb-3">What it does</h3>
+      <blockquote className="border-l-4 border-slate-300 dark:border-slate-600 pl-4 my-4 italic text-slate-500 dark:text-slate-400">
+        <p><strong>Note</strong>: Only runs for <strong>reference stores</strong>. New stores skip this.</p>
+      </blockquote>
+
+      <h3 className="text-xl font-semibold mb-3">What happens</h3>
       <p className="mb-4">
-        Job 4 reads the store's actual bundle configurations from the database and classifies each bundle by type, pattern, and discount structure. It then produces a store-level summary of the dominant strategy.
-      </p>
-      <p className="mb-4">
-        <strong>Source:</strong> <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">service.runBundleStrategyJob()</code> in <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">ebCalculateSuccessMetrics.service.js</code>, lines ~1004-1302.
+        Reads the store's bundle configurations, classifies each one by type and pattern, and determines the dominant strategy.
       </p>
 
-      <h3 className="text-xl font-semibold mb-3">Bundle type classification</h3>
-      <p className="mb-3">
-        Each bundle is classified via <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">normalizeBundleType()</code>. The input is the raw <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">bundleType</code> field from the database (e.g., "FULLPAGE_BUNDLE", "MIX_AND_MATCH"), plus the bundle's configuration details.
-      </p>
-      <p className="mb-3">The full classification table:</p>
+      <h3 className="text-xl font-semibold mb-3">Bundle type classification (priority order -- first match wins)</h3>
 
       <table className="w-full border border-slate-300 dark:border-slate-600 text-sm mb-4">
         <thead>
           <tr className="bg-slate-50 dark:bg-slate-800">
-            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">Raw bundleType</th>
-            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">Condition</th>
-            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">Normalized type</th>
+            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">Type</th>
+            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">What it is</th>
           </tr>
         </thead>
         <tbody>
           {[
-            ['MIX_AND_MATCH', '--', 'mixAndMatch'],
-            ['SUBSCRIPTION_BUNDLE', '--', 'subscription'],
-            ['FULLPAGE_BUNDLE', 'addonProducts.isEnabled', 'addonFreeGift'],
-            ['FULLPAGE_BUNDLE', 'discount rules have getsQuantity', 'bxgy'],
-            ['FULLPAGE_BUNDLE', 'discountMode = FIXED_BUNDLE_PRICE', 'fixedBundlePrice'],
-            ['FULLPAGE_BUNDLE', 'boxSelection.rules.length >= 2', 'volumeDiscount'],
-            ['FULLPAGE_BUNDLE', '>=2 amount rules', 'tieredDiscount'],
-            ['FULLPAGE_BUNDLE', '>=2 quantity rules', 'volumeDiscount'],
-            ['FULLPAGE_BUNDLE', 'everything else', 'classic'],
-            ['null/undefined', '--', 'classic'],
-          ].map(([raw, cond, norm], i) => (
+            ['Mix & Match', 'Customer picks from a curated selection'],
+            ['Subscription', 'Recurring delivery'],
+            ['Add-on / Free Gift', '"Add X to get Y free"'],
+            ['Buy X Get Y', '"Buy 2 get 1 free"'],
+            ['Fixed Bundle Price', '"This bundle for $49.99"'],
+            ['Volume Discount', '"Buy 2 for 10% off, 3 for 20% off"'],
+            ['Tiered Discount', '"Spend $50 for 10% off, $100 for 15% off"'],
+            ['Classic', 'Simple bundle with flat discount'],
+          ].map(([type, desc], i) => (
             <tr key={i}>
-              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2 font-mono">{raw}</td>
-              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">{cond}</td>
-              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2 font-mono">{norm}</td>
+              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2 font-semibold">{type}</td>
+              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">{desc}</td>
             </tr>
           ))}
         </tbody>
       </table>
-      <p className="mb-6">
-        The order matters -- the first matching condition wins. This means a FULLPAGE_BUNDLE with addon products enabled is always classified as <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">addonFreeGift</code>, even if it also has volume discount rules.
-      </p>
 
-      <h3 className="text-xl font-semibold mb-3">Pattern detection</h3>
-      <p className="mb-2">
-        Each bundle's products are analyzed to determine the cross-sell pattern, via <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">classifyBundlePattern()</code>:
+      <h3 className="text-xl font-semibold mb-3">Dominant strategy</h3>
+      <p className="mb-8">
+        Determined by <strong>most revenue</strong> over last 2 months. If no revenue data, falls back to most common type by count.
       </p>
-      <ul className="list-disc list-inside mb-6 space-y-1">
-        <li><strong>same-category</strong>: All products share the same <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">product_type</code></li>
-        <li><strong>cross-category</strong>: Products span multiple product types, none dominant</li>
-        <li><strong>upsell-addon</strong>: One dominant product type (&gt;60% of products) plus add-ons from other types</li>
-      </ul>
-
-      <h3 className="text-xl font-semibold mb-3">Store-level summary</h3>
-      <p className="mb-2">The job aggregates across all active bundles to produce:</p>
-      <pre className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded p-4 text-sm font-mono mb-4 overflow-x-auto">
-        <code>{`bundleStrategySummary: {
-  totalActiveBundles: Number,
-  bundleTypes: { classic: 3, mixAndMatch: 2, ... },
-  dominantStrategy: String,        // type driving most revenue
-  avgDiscountPercent: Number,
-  avgProductsPerBundle: Number,
-  topBundlePattern: String,        // most common pattern
-  revenueShareByType: {
-    classic: { share, revenue, subtypes: { fixedBundlePrice: {...}, ... } },
-    mixAndMatch: { share, revenue },
-  },
-}`}</code>
-      </pre>
-      <p className="mb-6">
-        The <strong>dominant strategy</strong> is determined by revenue first -- whichever bundle type generates the most 2-month revenue wins. If no revenue data exists, it falls back to the most common type by count.
-      </p>
-
-      <h3 className="text-xl font-semibold mb-3">Store example</h3>
-      <p className="mb-2">
-        Like Job 3, 83a38c-0c is a new store with no existing bundles. But its matched reference stores show their strategies:
-      </p>
-      <ul className="list-disc list-inside mb-8 space-y-1">
-        <li>city-pop.myshopify.com: dominant strategy = <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">fixedBundlePrice</code></li>
-        <li>uniko-2.myshopify.com: dominant strategy = <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">classic</code></li>
-        <li>handsomescent.myshopify.com: dominant strategy = <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">volumeDiscount</code></li>
-      </ul>
 
       <hr className="border-slate-200 dark:border-slate-700 mb-8" />
 
       {/* ─── Job 5 ─── */}
-      <h2 className="text-2xl font-semibold mb-2">Job 5: Archetype + Store Audit</h2>
+      <h2 className="text-2xl font-semibold mb-2">Job 5: Store Audit -- "What Problems Does This Store Have?"</h2>
 
       <p className="mb-4">
-        Job 5 runs after all data is collected. It:
+        After all data is collected, we run <strong>6 automated health checks</strong>:
       </p>
-      <ol className="list-decimal list-inside mb-4 space-y-2">
-        <li>
-          <strong>Assigns the archetype</strong> using the same <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">getArchetypeId()</code> logic described in Job 1, but also computes <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">defaultBundleType</code> -- the subtype with the highest revenue from <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">revenueShareByType</code>.
-        </li>
-        <li>
-          <strong>Runs a store audit</strong> (<code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">runAudit()</code>) that detects specific problems in the store's data (e.g., "hero product dependency", "low basket size") and recommends a bundle type to address them.
-        </li>
-      </ol>
+
+      <table className="w-full border border-slate-300 dark:border-slate-600 text-sm mb-4">
+        <thead>
+          <tr className="bg-slate-50 dark:bg-slate-800">
+            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">Check</th>
+            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">What it detects</th>
+            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">Triggers when</th>
+            <th className="border border-slate-300 dark:border-slate-600 px-3 py-2 text-left font-semibold">Recommends</th>
+          </tr>
+        </thead>
+        <tbody>
+          {[
+            ['Dead weight inventory', 'Too many products not earning', 'Bottom 50% < 15% of revenue', 'Mix & Match'],
+            ['Low bundle adoption', 'Bundles not contributing enough', 'Bundle revenue < 15%', 'Add-on bundles'],
+            ['Repeat customer drop', 'Returning customers spending less', 'Repeat AOV < first-time AOV', 'Volume discount'],
+            ['Hero product dependency', 'Over-reliance on few bestsellers', 'Top 20% > 80% of revenue', 'Fixed bundle'],
+            ['Low basket size', 'Customers buying single items', '60%+ single-item orders', 'Volume discount'],
+          ].map(([check, detects, triggers, recommends], i) => (
+            <tr key={i}>
+              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2 font-semibold">{check}</td>
+              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">{detects}</td>
+              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">{triggers}</td>
+              <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">{recommends}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
       <p className="mb-4">
-        The audit result is stored in <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">storeAudit</code> with a list of detected problems, their severities, and a primary problem + recommended bundle type.
+        The most severe problem becomes the primary recommendation. Confidence = gap between #1 and #2 severity.
       </p>
 
       </div>
