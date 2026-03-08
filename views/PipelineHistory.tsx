@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Loader2, AlertCircle, Calendar, Package, Tag, Search, Filter, MessageSquare, Check, X, AlertTriangle, ExternalLink, Brain } from 'lucide-react';
+import { Clock, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Loader2, AlertCircle, Calendar, Package, Tag, Search, Filter, MessageSquare, Check, X, AlertTriangle, ExternalLink, Brain, Play } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent, Button, Badge, CodeBlock, cn } from '../components/ui';
 import { ViewMode } from '../components/Layout';
 import { PMResultView, PMDiscountsPanel, PMRulesPanel, PMStepsPanel } from '../components/PMViews';
-import { PipelineHistoryLog, PipelineHistoryPagination, FeedbackRating } from '../types';
+import { PipelineHistoryLog, PipelineHistoryPagination, FeedbackRating, PipelineResult } from '../types';
 import { getPipelineHistory, searchPipelineHistory, submitFeedback, getPatternTags } from '../services/pipelineHistoryApi';
+import { runPipeline } from '../services/pipelineApi';
 
 interface PipelineHistoryProps {
   viewMode: ViewMode;
@@ -263,6 +264,29 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
   const [feedbackRating, setFeedbackRating] = useState<FeedbackRating | null>(null);
   const [feedbackRemarks, setFeedbackRemarks] = useState('');
   const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
+
+  // Re-run state
+  const [rerunningId, setRerunningId] = useState<string | null>(null);
+  const [rerunResults, setRerunResults] = useState<Record<string, any>>({});
+  const [rerunErrors, setRerunErrors] = useState<Record<string, string>>({});
+
+  const handleRerun = async (log: PipelineHistoryLog) => {
+    setRerunningId(log.id);
+    setRerunErrors((prev) => { const next = { ...prev }; delete next[log.id]; return next; });
+    try {
+      const response = await runPipeline({
+        merchantText: log.input.merchantText,
+        products: log.input.products || [],
+        collections: log.input.collections || [],
+        skipLogging: true,
+      });
+      setRerunResults((prev) => ({ ...prev, [log.id]: response.data }));
+    } catch (err: any) {
+      setRerunErrors((prev) => ({ ...prev, [log.id]: err.message || 'Pipeline run failed' }));
+    } finally {
+      setRerunningId(null);
+    }
+  };
 
   const handleFeedbackSelect = (logId: string, rating: FeedbackRating) => {
     setFeedbackActiveId(logId);
@@ -885,6 +909,75 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                         */}
 
                         <CodeBlock label="Assembled Result" code={log.output.assembledResult} />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* ─── Re-run with Current Pipeline ─── */}
+                  <div className="border-t pt-4 space-y-4">
+                    <div className="flex items-center gap-3">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={rerunningId === log.id || !log.input.merchantText}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRerun(log);
+                        }}
+                        className="flex items-center gap-2"
+                      >
+                        {rerunningId === log.id ? (
+                          <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Running...</>
+                        ) : (
+                          <><Play className="w-3.5 h-3.5" /> Re-run with Current Pipeline</>
+                        )}
+                      </Button>
+                      {!log.input.merchantText && (
+                        <span className="text-xs text-muted-foreground">No merchant text — cannot re-run</span>
+                      )}
+                    </div>
+
+                    {rerunErrors[log.id] && (
+                      <div className="p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded text-sm text-red-700 dark:text-red-300 flex items-center gap-2">
+                        <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                        {rerunErrors[log.id]}
+                      </div>
+                    )}
+
+                    {rerunResults[log.id] && (
+                      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                        {/* Original Result */}
+                        <div className="rounded-lg border-2 border-slate-300 dark:border-slate-600 overflow-hidden">
+                          <div className="px-4 py-2 bg-slate-100 dark:bg-slate-800 border-b border-slate-300 dark:border-slate-600">
+                            <span className="text-sm font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Original Pipeline Output</span>
+                          </div>
+                          <div className="p-4">
+                            {viewMode === 'pm' ? (
+                              <PMResultView config={log.output.assembledResult?.bundleConfig || log.output.assembledResult} />
+                            ) : (
+                              <CodeBlock label="" code={log.output.assembledResult} />
+                            )}
+                          </div>
+                        </div>
+
+                        {/* New Result */}
+                        <div className="rounded-lg border-2 border-blue-400 dark:border-blue-500 overflow-hidden">
+                          <div className="px-4 py-2 bg-blue-50 dark:bg-blue-950/40 border-b border-blue-400 dark:border-blue-500">
+                            <span className="text-sm font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wider">Current Pipeline Output</span>
+                            {rerunResults[log.id].status && (
+                              <Badge className="ml-2" variant={rerunResults[log.id].status === 'AUTO' ? 'success' : 'destructive'}>
+                                {rerunResults[log.id].status}
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="p-4">
+                            {viewMode === 'pm' ? (
+                              <PMResultView config={rerunResults[log.id].bundleConfig || rerunResults[log.id]} />
+                            ) : (
+                              <CodeBlock label="" code={rerunResults[log.id]} />
+                            )}
+                          </div>
+                        </div>
                       </div>
                     )}
                   </div>

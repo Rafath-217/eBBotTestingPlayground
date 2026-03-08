@@ -176,6 +176,7 @@ export interface PipelineRequest {
   merchantText: string;
   collections: { id: string; title: string }[];
   products: { id: string; productType: string; title?: string }[];
+  skipLogging?: boolean;
 }
 
 export interface PipelineDebug {
