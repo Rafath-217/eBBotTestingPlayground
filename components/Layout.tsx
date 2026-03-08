@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FileJson, Tag, ShieldCheck, BarChart3, Moon, Sun, Menu, ChevronRight, ChevronDown, Play, Boxes, Code, Users, History, ListChecks, ArrowLeftRight, TrendingDown, FileBarChart, Store, Stethoscope, BookOpen, Rocket, HelpCircle, MessageCircleQuestion, ShoppingCart, Target, Package, Sparkles } from 'lucide-react';
+import { LayoutDashboard, FileJson, Tag, ShieldCheck, BarChart3, Moon, Sun, Menu, ChevronRight, ChevronDown, Play, Boxes, Code, Users, History, ListChecks, ArrowLeftRight, TrendingDown, FileBarChart, Store, Stethoscope, BookOpen, Rocket, HelpCircle, MessageCircleQuestion, ShoppingCart, Target, Package, Sparkles, FileText } from 'lucide-react';
 import { Button, cn } from './ui';
 
 interface SidebarItemProps {
@@ -35,7 +35,7 @@ interface SidebarGroupProps {
   isActive?: boolean;
 }
 
-const SidebarGroup: React.FC<SidebarGroupProps> = ({ icon: Icon, label, children, defaultOpen = false, isActive = false }) => {
+const SidebarGroup: React.FC<SidebarGroupProps> = ({ icon: Icon, label, children, defaultOpen = true, isActive = false }) => {
   const [open, setOpen] = React.useState(defaultOpen || isActive);
 
   React.useEffect(() => {
@@ -128,7 +128,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, isDark, toggleDark, vi
             <SidebarGroup
               icon={Sparkles}
               label="Magic Bundles"
-              isActive={['/success-metrics', '/onboarding-diagnosis', '/onboarding-history', '/store-profiling', '/onboarding-flow', '/store-profiling-faq', '/onboarding-faq'].includes(pathname)}
+              isActive={['/success-metrics', '/onboarding-diagnosis', '/onboarding-history', '/store-profiling', '/onboarding-flow', '/store-profiling-faq', '/onboarding-faq', '/case-study-83a38c', '/case-study-9cfda4'].includes(pathname)}
             >
               <SidebarItem icon={Store} label="Store Profiles" active={pathname === '/success-metrics'} onClick={() => navigate('/success-metrics')} indent />
               <SidebarItem icon={Stethoscope} label="Diagnosis" active={pathname === '/onboarding-diagnosis'} onClick={() => navigate('/onboarding-diagnosis')} indent />
@@ -137,6 +137,11 @@ export const Layout: React.FC<LayoutProps> = ({ children, isDark, toggleDark, vi
               <SidebarItem icon={HelpCircle} label="Store Profiling FAQ" active={pathname === '/store-profiling-faq'} onClick={() => navigate('/store-profiling-faq')} indent />
               <SidebarItem icon={Rocket} label="Onboarding Flow" active={pathname === '/onboarding-flow'} onClick={() => navigate('/onboarding-flow')} indent />
               <SidebarItem icon={MessageCircleQuestion} label="Onboarding FAQ" active={pathname === '/onboarding-faq'} onClick={() => navigate('/onboarding-faq')} indent />
+              <div className="pl-3 pt-2 pb-1">
+                <span className="text-[10px] font-semibold text-muted-foreground tracking-wider uppercase">Case Studies</span>
+              </div>
+              <SidebarItem icon={FileText} label="83a38c-0c (Candy Shop)" active={pathname === '/case-study-83a38c'} onClick={() => navigate('/case-study-83a38c')} indent />
+              <SidebarItem icon={FileText} label="9cfda4-f5 (Skincare)" active={pathname === '/case-study-9cfda4'} onClick={() => navigate('/case-study-9cfda4')} indent />
             </SidebarGroup>
 
             {/* 4. BaaS */}

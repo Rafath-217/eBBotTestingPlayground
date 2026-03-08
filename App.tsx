@@ -25,6 +25,8 @@ import StrategyView from './views/StrategyView';
 import BundleSetupTestingGuidePage from './views/BundleSetupTestingGuidePage';
 import BaasHandoffPage from './views/BaasHandoffPage';
 import BaasFAQPage from './views/BaasFAQPage';
+import CaseStudy83a38cPage from './views/CaseStudy83a38cPage';
+import CaseStudy9cfda4Page from './views/CaseStudy9cfda4Page';
 import { getMetrics, getAllResults, getEnrichedResults, EnrichedResult, getLLMSpecs, getTestCases } from './services/dataService';
 import { getLatestEvaluationRun, getPromptVersionStats } from './services/evaluationApi';
 import { Metrics, LLMSpecs, TestCase, EvaluationRunDetail, PromptVersionStats } from './types';
@@ -235,6 +237,8 @@ function App() {
           <Route path="/run-strategy" element={<StrategyView />} />
           <Route path="/baas-handoff" element={<BaasHandoffPage />} />
           <Route path="/baas-faq" element={<BaasFAQPage />} />
+          <Route path="/case-study-83a38c" element={<CaseStudy83a38cPage />} />
+          <Route path="/case-study-9cfda4" element={<CaseStudy9cfda4Page />} />
         </Routes>
     </Layout>
   );
