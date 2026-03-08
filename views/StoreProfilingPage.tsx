@@ -613,7 +613,7 @@ repeatAOV60:             $41.46`}</code>
           <strong>Assigns the archetype</strong> using the same <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">getArchetypeId()</code> logic described in Job 1, but also computes <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">defaultBundleType</code> -- the subtype with the highest revenue from <code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">revenueShareByType</code>.
         </li>
         <li>
-          <strong>Runs a store audit</strong> (<code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">runAudit()</code>) that detects specific problems in the store's data (e.g., "dead zone below free shipping threshold", "hero product dependency") and recommends a bundle type to address them.
+          <strong>Runs a store audit</strong> (<code className="text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5">runAudit()</code>) that detects specific problems in the store's data (e.g., "hero product dependency", "low basket size") and recommends a bundle type to address them.
         </li>
       </ol>
       <p className="mb-4">
