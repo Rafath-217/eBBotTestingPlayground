@@ -23,6 +23,8 @@ import OnboardingFAQPage from './views/OnboardingFAQPage';
 import BaasOverview from './views/BaasOverview';
 import StrategyView from './views/StrategyView';
 import BundleSetupTestingGuidePage from './views/BundleSetupTestingGuidePage';
+import BaasHandoffPage from './views/BaasHandoffPage';
+import BaasFAQPage from './views/BaasFAQPage';
 import { getMetrics, getAllResults, getEnrichedResults, EnrichedResult, getLLMSpecs, getTestCases } from './services/dataService';
 import { getLatestEvaluationRun, getPromptVersionStats } from './services/evaluationApi';
 import { Metrics, LLMSpecs, TestCase, EvaluationRunDetail, PromptVersionStats } from './types';
@@ -231,6 +233,8 @@ function App() {
           <Route path="/bundle-setup-testing-guide" element={<BundleSetupTestingGuidePage />} />
           <Route path="/baas-overview" element={<BaasOverview />} />
           <Route path="/run-strategy" element={<StrategyView />} />
+          <Route path="/baas-handoff" element={<BaasHandoffPage />} />
+          <Route path="/baas-faq" element={<BaasFAQPage />} />
         </Routes>
     </Layout>
   );

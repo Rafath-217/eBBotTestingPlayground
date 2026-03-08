@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FileJson, Tag, ShieldCheck, BarChart3, Moon, Sun, Menu, ChevronRight, ChevronDown, Play, Boxes, Code, Users, History, ListChecks, ArrowLeftRight, TrendingDown, FileBarChart, Store, Stethoscope, BookOpen, Rocket, HelpCircle, MessageCircleQuestion, ShoppingCart, Target, Package } from 'lucide-react';
+import { LayoutDashboard, FileJson, Tag, ShieldCheck, BarChart3, Moon, Sun, Menu, ChevronRight, ChevronDown, Play, Boxes, Code, Users, History, ListChecks, ArrowLeftRight, TrendingDown, FileBarChart, Store, Stethoscope, BookOpen, Rocket, HelpCircle, MessageCircleQuestion, ShoppingCart, Target, Package, Sparkles } from 'lucide-react';
 import { Button, cn } from './ui';
 
 interface SidebarItemProps {
@@ -110,7 +110,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, isDark, toggleDark, vi
             <SidebarGroup
               icon={Package}
               label="EB Bundle Setup"
-              isActive={['/playground', '/history', '/churn-analysis', '/churn-report', '/results', '/evaluation-runs', '/run-comparison'].includes(pathname)}
+              isActive={['/playground', '/history', '/churn-analysis', '/churn-report', '/results', '/evaluation-runs', '/run-comparison', '/bundle-setup-testing-guide'].includes(pathname)}
             >
               <SidebarItem icon={Play} label="Playground" active={pathname === '/playground'} onClick={() => navigate('/playground')} indent />
               <SidebarItem icon={History} label="Pipeline History" active={pathname === '/history'} onClick={() => navigate('/history')} indent />
@@ -121,47 +121,36 @@ export const Layout: React.FC<LayoutProps> = ({ children, isDark, toggleDark, vi
               {compareRuns && (
                 <SidebarItem icon={ArrowLeftRight} label="Run Comparison" active={pathname === '/run-comparison'} onClick={() => navigate('/run-comparison')} indent />
               )}
+              <SidebarItem icon={BookOpen} label="Bundle Setup Guide" active={pathname === '/bundle-setup-testing-guide'} onClick={() => navigate('/bundle-setup-testing-guide')} indent />
             </SidebarGroup>
 
-            {/* 2. Successful Store Profiles */}
-            <SidebarItem
-              icon={Store}
-              label="Store Profiles"
-              active={pathname === '/success-metrics'}
-              onClick={() => navigate('/success-metrics')}
-            />
-
-            {/* 3. Magic Bundles Onboarding */}
+            {/* 2. Magic Bundles */}
             <SidebarGroup
-              icon={Stethoscope}
-              label="MB Onboarding"
-              isActive={['/onboarding-diagnosis', '/onboarding-history'].includes(pathname)}
+              icon={Sparkles}
+              label="Magic Bundles"
+              isActive={['/success-metrics', '/onboarding-diagnosis', '/onboarding-history', '/store-profiling', '/onboarding-flow', '/store-profiling-faq', '/onboarding-faq'].includes(pathname)}
             >
+              <SidebarItem icon={Store} label="Store Profiles" active={pathname === '/success-metrics'} onClick={() => navigate('/success-metrics')} indent />
               <SidebarItem icon={Stethoscope} label="Diagnosis" active={pathname === '/onboarding-diagnosis'} onClick={() => navigate('/onboarding-diagnosis')} indent />
               <SidebarItem icon={History} label="History" active={pathname === '/onboarding-history'} onClick={() => navigate('/onboarding-history')} indent />
+              <SidebarItem icon={BookOpen} label="Store Profiling" active={pathname === '/store-profiling'} onClick={() => navigate('/store-profiling')} indent />
+              <SidebarItem icon={HelpCircle} label="Store Profiling FAQ" active={pathname === '/store-profiling-faq'} onClick={() => navigate('/store-profiling-faq')} indent />
+              <SidebarItem icon={Rocket} label="Onboarding Flow" active={pathname === '/onboarding-flow'} onClick={() => navigate('/onboarding-flow')} indent />
+              <SidebarItem icon={MessageCircleQuestion} label="Onboarding FAQ" active={pathname === '/onboarding-faq'} onClick={() => navigate('/onboarding-faq')} indent />
             </SidebarGroup>
 
             {/* 4. BaaS */}
             <SidebarGroup
               icon={ShoppingCart}
               label="BaaS"
-              isActive={['/baas-overview', '/run-strategy'].includes(pathname)}
+              isActive={['/baas-overview', '/run-strategy', '/baas-handoff', '/baas-faq'].includes(pathname)}
             >
               <SidebarItem icon={ShoppingCart} label="BaaS Overview" active={pathname === '/baas-overview'} onClick={() => navigate('/baas-overview')} indent />
               <SidebarItem icon={Target} label="Run Full Strategy" active={pathname === '/run-strategy'} onClick={() => navigate('/run-strategy')} indent />
+              <SidebarItem icon={BookOpen} label="BaaS Handoff" active={pathname === '/baas-handoff'} onClick={() => navigate('/baas-handoff')} indent />
+              <SidebarItem icon={HelpCircle} label="BaaS FAQ" active={pathname === '/baas-faq'} onClick={() => navigate('/baas-faq')} indent />
             </SidebarGroup>
 
-            {/* 5. Learn */}
-            <div className="pt-4 pb-2">
-              <h4 className="px-2 text-xs font-semibold text-muted-foreground tracking-wider uppercase mb-2">Learn</h4>
-              <div className="space-y-1">
-                <SidebarItem icon={BookOpen} label="Store Profiling" active={pathname === '/store-profiling'} onClick={() => navigate('/store-profiling')} />
-                <SidebarItem icon={Rocket} label="Onboarding Flow" active={pathname === '/onboarding-flow'} onClick={() => navigate('/onboarding-flow')} />
-                <SidebarItem icon={HelpCircle} label="Store Profiling FAQ" active={pathname === '/store-profiling-faq'} onClick={() => navigate('/store-profiling-faq')} />
-                <SidebarItem icon={MessageCircleQuestion} label="Onboarding FAQ" active={pathname === '/onboarding-faq'} onClick={() => navigate('/onboarding-faq')} />
-                <SidebarItem icon={Package} label="Bundle Setup Guide" active={pathname === '/bundle-setup-testing-guide'} onClick={() => navigate('/bundle-setup-testing-guide')} />
-              </div>
-            </div>
           </div>
 
           <div className="p-4 border-t space-y-3">
