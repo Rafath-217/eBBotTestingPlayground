@@ -16,17 +16,22 @@ export function parseCollections(input: string): { id: string; title: string }[]
 }
 
 /**
- * Parse comma-separated product types (and optional titles) into API format
+ * Parse comma-separated product titles and types into API format.
+ * Titles and types are paired positionally: title 1 → type 1, title 2 → type 2, etc.
+ * Either input can be provided independently.
  */
-export function parseProducts(input: string, titlesInput?: string): { id: string; productType: string; title?: string }[] {
-  if (!input.trim()) return [];
-  const types = input.split(',').map(t => t.trim()).filter(Boolean);
+export function parseProducts(typesInput: string, titlesInput?: string): { id: string; productType: string; title?: string }[] {
+  const types = typesInput.trim()
+    ? typesInput.split(',').map(t => t.trim()).filter(Boolean)
+    : [];
   const titles = titlesInput?.trim()
     ? titlesInput.split(',').map(t => t.trim()).filter(Boolean)
     : [];
-  return types.map((productType, i) => ({
+  const length = Math.max(types.length, titles.length);
+  if (length === 0) return [];
+  return Array.from({ length }, (_, i) => ({
     id: `p_${i + 1}`,
-    productType,
+    productType: types[i] || '',
     ...(titles[i] ? { title: titles[i] } : {}),
   }));
 }

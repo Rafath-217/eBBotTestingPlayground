@@ -124,9 +124,20 @@ const Playground: React.FC<PlaygroundProps> = ({ viewMode }) => {
   const [result, setResult] = useState<PipelineResult | null>(null);
   const [copied, setCopied] = useState(false);
 
+  const hasProductMismatch = () => {
+    const titlesCount = productTitlesInput.split(',').map(s => s.trim()).filter(Boolean).length;
+    const typesCount = productsInput.split(',').map(s => s.trim()).filter(Boolean).length;
+    return titlesCount > 0 && typesCount > 0 && titlesCount !== typesCount;
+  };
+
   const handleSubmit = async () => {
     if (!merchantText.trim()) {
       setError('Please enter a merchant query');
+      return;
+    }
+
+    if (hasProductMismatch()) {
+      setError('Product titles and product types count must match. Each title should map to a type positionally.');
       return;
     }
 
