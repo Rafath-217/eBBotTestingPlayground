@@ -121,7 +121,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, isDark, toggleDark, vi
               {compareRuns && (
                 <SidebarItem icon={ArrowLeftRight} label="Run Comparison" active={pathname === '/run-comparison'} onClick={() => navigate('/run-comparison')} indent />
               )}
-              <SidebarItem icon={BookOpen} label="Bundle Setup Guide" active={pathname === '/bundle-setup-testing-guide'} onClick={() => navigate('/bundle-setup-testing-guide')} indent />
+              <SidebarItem icon={BookOpen} label="Bundle Testing Guide" active={pathname === '/bundle-setup-testing-guide'} onClick={() => navigate('/bundle-setup-testing-guide')} indent />
               <SidebarItem icon={Rocket} label="Pipeline Handoff" active={pathname === '/bundle-setup-pipeline'} onClick={() => navigate('/bundle-setup-pipeline')} indent />
               <SidebarItem icon={MessageCircleQuestion} label="Pipeline FAQ" active={pathname === '/bundle-setup-pipeline-faq'} onClick={() => navigate('/bundle-setup-pipeline-faq')} indent />
             </SidebarGroup>
