@@ -110,7 +110,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, isDark, toggleDark, vi
             <SidebarGroup
               icon={Package}
               label="EB Bundle Setup"
-              isActive={['/playground', '/history', '/churn-analysis', '/churn-report', '/results', '/evaluation-runs', '/run-comparison', '/bundle-setup-testing-guide'].includes(pathname)}
+              isActive={['/playground', '/history', '/churn-analysis', '/churn-report', '/results', '/evaluation-runs', '/run-comparison', '/bundle-setup-testing-guide', '/bundle-setup-pipeline', '/bundle-setup-pipeline-faq'].includes(pathname)}
             >
               <SidebarItem icon={Play} label="Playground" active={pathname === '/playground'} onClick={() => navigate('/playground')} indent />
               <SidebarItem icon={History} label="Pipeline History" active={pathname === '/history'} onClick={() => navigate('/history')} indent />
@@ -122,6 +122,8 @@ export const Layout: React.FC<LayoutProps> = ({ children, isDark, toggleDark, vi
                 <SidebarItem icon={ArrowLeftRight} label="Run Comparison" active={pathname === '/run-comparison'} onClick={() => navigate('/run-comparison')} indent />
               )}
               <SidebarItem icon={BookOpen} label="Bundle Setup Guide" active={pathname === '/bundle-setup-testing-guide'} onClick={() => navigate('/bundle-setup-testing-guide')} indent />
+              <SidebarItem icon={Rocket} label="Pipeline Handoff" active={pathname === '/bundle-setup-pipeline'} onClick={() => navigate('/bundle-setup-pipeline')} indent />
+              <SidebarItem icon={MessageCircleQuestion} label="Pipeline FAQ" active={pathname === '/bundle-setup-pipeline-faq'} onClick={() => navigate('/bundle-setup-pipeline-faq')} indent />
             </SidebarGroup>
 
             {/* 2. Magic Bundles */}

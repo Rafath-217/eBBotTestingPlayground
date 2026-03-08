@@ -23,6 +23,8 @@ import OnboardingFAQPage from './views/OnboardingFAQPage';
 import BaasOverview from './views/BaasOverview';
 import StrategyView from './views/StrategyView';
 import BundleSetupTestingGuidePage from './views/BundleSetupTestingGuidePage';
+import BundleSetupPipelinePage from './views/BundleSetupPipelinePage';
+import BundleSetupPipelineFAQPage from './views/BundleSetupPipelineFAQPage';
 import BaasHandoffPage from './views/BaasHandoffPage';
 import BaasFAQPage from './views/BaasFAQPage';
 import CaseStudy83a38cPage from './views/CaseStudy83a38cPage';
@@ -233,6 +235,8 @@ function App() {
           <Route path="/store-profiling-faq" element={<StoreProfilingFAQPage />} />
           <Route path="/onboarding-faq" element={<OnboardingFAQPage />} />
           <Route path="/bundle-setup-testing-guide" element={<BundleSetupTestingGuidePage />} />
+          <Route path="/bundle-setup-pipeline" element={<BundleSetupPipelinePage />} />
+          <Route path="/bundle-setup-pipeline-faq" element={<BundleSetupPipelineFAQPage />} />
           <Route path="/baas-overview" element={<BaasOverview />} />
           <Route path="/run-strategy" element={<StrategyView />} />
           <Route path="/baas-handoff" element={<BaasHandoffPage />} />
