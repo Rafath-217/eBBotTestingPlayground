@@ -557,8 +557,8 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
             </div>
           </div>
 
-          {/* Pattern Tags Filter (only visible when localStorage "filters" is "true") */}
-          {localStorage.getItem('filters') === 'true' && availableTags.length > 0 && (
+          {/* Pattern Tags Filter */}
+          {availableTags.length > 0 && (
             <div className="space-y-2">
               <label className="text-sm font-medium flex items-center gap-2">
                 <Tag className="w-4 h-4" />
@@ -919,7 +919,7 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                         <Button
                           size="sm"
                           variant="outline"
-                          disabled={rerunningId === log.id || !log.input.merchantText}
+                          disabled={rerunningId === log.id}
                           onClick={(e) => {
                             e.stopPropagation();
                             handleRerun(log);
@@ -932,9 +932,6 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                             <><Play className="w-3.5 h-3.5" /> Re-run with Current Pipeline</>
                           )}
                         </Button>
-                        {!log.input.merchantText && (
-                          <span className="text-xs text-muted-foreground">No merchant text — cannot re-run</span>
-                        )}
                       </div>
 
                     {rerunErrors[log.id] && (
