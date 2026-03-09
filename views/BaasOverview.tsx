@@ -1,10 +1,6 @@
-import { useState } from 'react'
-import PipelineTrigger from '../components/baas/PipelineTrigger'
-import PipelineHistoryEnhanced from '../components/baas/PipelineHistoryEnhanced'
+import { Construction } from 'lucide-react'
 
 export default function BaasOverview() {
-  const [refreshKey, setRefreshKey] = useState(0)
-
   return (
     <>
       <div>
@@ -14,14 +10,15 @@ export default function BaasOverview() {
         </p>
       </div>
 
-      {/* Stats bar + quick-launch trigger */}
-      <PipelineTrigger onPipelineComplete={() => setRefreshKey((k) => k + 1)} />
-
-      {/* History with aggregate stats shown inline */}
-      <PipelineHistoryEnhanced
-        refreshKey={refreshKey}
-        showStats
-      />
+      <div className="flex flex-col items-center justify-center py-20 px-6">
+        <div className="w-16 h-16 rounded-2xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mb-6">
+          <Construction className="w-8 h-8 text-amber-600 dark:text-amber-400" />
+        </div>
+        <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">Under Construction</h3>
+        <p className="text-sm text-muted-foreground text-center max-w-md">
+          The BaaS pipeline dashboard is currently being built. This page will let you trigger audits and view pipeline run history. Coming soon.
+        </p>
+      </div>
     </>
   )
 }

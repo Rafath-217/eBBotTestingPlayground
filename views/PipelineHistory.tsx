@@ -915,15 +915,7 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
 
                   {/* ─── Re-run with Current Pipeline ─── */}
                   <div className="border-t pt-4 space-y-4">
-                    {log.source === 'APP' ? (
-                      <div className="flex items-center gap-3 opacity-50">
-                        <Button size="sm" variant="outline" disabled className="flex items-center gap-2">
-                          <Play className="w-3.5 h-3.5" /> Re-run with Current Pipeline
-                        </Button>
-                        <span className="text-xs text-muted-foreground italic">Coming soon for BaaS runs</span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3">
                         <Button
                           size="sm"
                           variant="outline"
@@ -944,7 +936,6 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                           <span className="text-xs text-muted-foreground">No merchant text — cannot re-run</span>
                         )}
                       </div>
-                    )}
 
                     {rerunErrors[log.id] && (
                       <div className="p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded text-sm text-red-700 dark:text-red-300 flex items-center gap-2">
