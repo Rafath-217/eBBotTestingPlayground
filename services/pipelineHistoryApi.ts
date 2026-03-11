@@ -120,3 +120,26 @@ export async function submitFeedback(id: string, rating: FeedbackRating, remarks
 
   return response.json();
 }
+
+/**
+ * Update spec for a pipeline history entry
+ */
+export async function updateSpec(id: string, spec: string): Promise<{ statusCode: number; message: string; data: any }> {
+  const url = `${API_BASE_URL}/api/bundleSetupLlmPipeline/pipelineHistory/${id}/updateSpec`;
+
+  const response = await fetch(url, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'secret-key': API_SECRET_KEY,
+    },
+    body: JSON.stringify({ spec }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'Network error' }));
+    throw new Error(error.message || `HTTP ${response.status}`);
+  }
+
+  return response.json();
+}

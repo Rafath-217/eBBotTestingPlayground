@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Loader2, AlertCircle, Calendar, Package, Tag, Search, Filter, MessageSquare, Check, X, AlertTriangle, ExternalLink, Brain, Play } from 'lucide-react';
+import { Clock, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Loader2, AlertCircle, Calendar, Package, Tag, Search, Filter, MessageSquare, Check, X, AlertTriangle, ExternalLink, Brain, Play, FileEdit } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent, Button, Badge, CodeBlock, cn } from '../components/ui';
 import { ViewMode } from '../components/Layout';
 import { PMResultView, PMDiscountsPanel, PMRulesPanel, PMStepsPanel } from '../components/PMViews';
 import { PipelineHistoryLog, PipelineHistoryPagination, FeedbackRating, PipelineResult } from '../types';
-import { getPipelineHistory, searchPipelineHistory, submitFeedback, getPatternTags } from '../services/pipelineHistoryApi';
+import { getPipelineHistory, searchPipelineHistory, submitFeedback, updateSpec, getPatternTags } from '../services/pipelineHistoryApi';
 import { runPipeline } from '../services/pipelineApi';
 
 interface PipelineHistoryProps {
@@ -266,6 +266,11 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
   const [feedbackRemarks, setFeedbackRemarks] = useState('');
   const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
 
+  // Update Spec state
+  const [specActiveId, setSpecActiveId] = useState<string | null>(null);
+  const [specText, setSpecText] = useState('');
+  const [specSubmitting, setSpecSubmitting] = useState(false);
+
   // Re-run state
   const [rerunningId, setRerunningId] = useState<string | null>(null);
   const [rerunResults, setRerunResults] = useState<Record<string, any>>({});
@@ -314,6 +319,20 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
       console.error('Failed to submit feedback:', err);
     } finally {
       setFeedbackSubmitting(false);
+    }
+  };
+
+  const handleSpecSubmit = async (logId: string) => {
+    if (!specText.trim()) return;
+    setSpecSubmitting(true);
+    try {
+      await updateSpec(logId, specText.trim());
+      setSpecActiveId(null);
+      setSpecText('');
+    } catch (err) {
+      console.error('Failed to update spec:', err);
+    } finally {
+      setSpecSubmitting(false);
     }
   };
 
@@ -1148,6 +1167,67 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                             </div>
                           </div>
                         )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Update Spec Section */}
+                  <div className="space-y-3 border-t pt-4">
+                    <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider flex items-center gap-2">
+                      <FileEdit className="w-4 h-4" />
+                      Update Spec
+                    </h3>
+
+                    {specActiveId !== log.id ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSpecActiveId(log.id);
+                          setSpecText('');
+                        }}
+                      >
+                        <FileEdit className="w-3.5 h-3.5 mr-1.5" />
+                        Update Spec
+                      </Button>
+                    ) : (
+                      <div className="space-y-2">
+                        <textarea
+                          value={specText}
+                          onChange={(e) => setSpecText(e.target.value)}
+                          onClick={(e) => e.stopPropagation()}
+                          placeholder="Enter spec update..."
+                          className="w-full p-2 text-sm border rounded bg-background resize-none focus:outline-none focus:ring-2 focus:ring-ring font-mono"
+                          rows={4}
+                        />
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSpecSubmit(log.id);
+                            }}
+                            disabled={specSubmitting || !specText.trim()}
+                          >
+                            {specSubmitting ? (
+                              <><Loader2 className="w-3 h-3 mr-1 animate-spin" /> Submitting...</>
+                            ) : (
+                              'Submit'
+                            )}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSpecActiveId(null);
+                              setSpecText('');
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
                       </div>
                     )}
                   </div>
