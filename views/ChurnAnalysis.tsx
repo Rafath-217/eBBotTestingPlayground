@@ -1064,6 +1064,16 @@ const ChurnAnalysis: React.FC<ChurnAnalysisProps> = ({ viewMode }) => {
                                         </div>
                                       )}
 
+                                      {/* Run Summary */}
+                                      {(run as any).runSummary && (
+                                        <div className="space-y-2">
+                                          <h4 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">Run Summary</h4>
+                                          <div className="p-3 bg-slate-50 dark:bg-slate-800/50 border rounded text-sm leading-relaxed whitespace-pre-wrap">
+                                            {(run as any).runSummary}
+                                          </div>
+                                        </div>
+                                      )}
+
                                       {/* Dev mode: full JSON */}
                                       {viewMode === 'dev' && (
                                         <div className="space-y-4">
