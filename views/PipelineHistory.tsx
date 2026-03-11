@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Loader2, AlertCircle, Calendar, Package, Tag, Search, Filter, MessageSquare, Check, X, AlertTriangle, ExternalLink, Brain, Play, FileEdit } from 'lucide-react';
+import { Clock, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Loader2, AlertCircle, Calendar, Package, Tag, Search, Filter, MessageSquare, Check, X, AlertTriangle, ExternalLink, Brain, Play, FileEdit, Copy } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent, Button, Badge, CodeBlock, cn } from '../components/ui';
 import { ViewMode } from '../components/Layout';
 import { PMResultView, PMDiscountsPanel, PMRulesPanel, PMStepsPanel } from '../components/PMViews';
@@ -265,6 +265,9 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
   const [feedbackRating, setFeedbackRating] = useState<FeedbackRating | null>(null);
   const [feedbackRemarks, setFeedbackRemarks] = useState('');
   const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
+
+  // Copy summary state
+  const [copiedSummaryId, setCopiedSummaryId] = useState<string | null>(null);
 
   // Update Spec state
   const [specActiveId, setSpecActiveId] = useState<string | null>(null);
@@ -896,7 +899,20 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                   {/* Run Summary */}
                   {(log as any).runSummary && (
                     <div className="space-y-2">
-                      <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">Run Summary</h3>
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">Run Summary</h3>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigator.clipboard.writeText((log as any).runSummary);
+                            setCopiedSummaryId(log.id);
+                            setTimeout(() => setCopiedSummaryId(null), 2000);
+                          }}
+                          className="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        >
+                          {copiedSummaryId === log.id ? <><Check className="w-3 h-3" /> Copied</> : <><Copy className="w-3 h-3" /> Copy</>}
+                        </button>
+                      </div>
                       <div className="p-3 bg-slate-50 dark:bg-slate-800/50 border rounded text-sm leading-relaxed whitespace-pre-wrap">
                         {(log as any).runSummary}
                       </div>

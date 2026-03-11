@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import { Clock, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Loader2, AlertCircle, Calendar, Search, Filter, TrendingDown, AlertTriangle, Store, Zap, Download, Tag, Check, X, Brain } from 'lucide-react';
+import { Clock, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Loader2, AlertCircle, Calendar, Search, Filter, TrendingDown, AlertTriangle, Store, Zap, Download, Tag, Check, X, Brain, Copy } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent, Button, Badge, CodeBlock, cn, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../components/ui';
 import { ViewMode } from '../components/Layout';
 import { PMResultView } from '../components/PMViews';
@@ -212,6 +212,7 @@ const ChurnAnalysis: React.FC<ChurnAnalysisProps> = ({ viewMode }) => {
   // Expanded row
   const [expandedShop, setExpandedShop] = useState<string | null>(null);
   const [reasoningOpenRunId, setReasoningOpenRunId] = useState<string | null>(null);
+  const [copiedSummaryId, setCopiedSummaryId] = useState<string | null>(null);
   const [storeDetail, setStoreDetail] = useState<StoreDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
@@ -1067,7 +1068,20 @@ const ChurnAnalysis: React.FC<ChurnAnalysisProps> = ({ viewMode }) => {
                                       {/* Run Summary */}
                                       {(run as any).runSummary && (
                                         <div className="space-y-2">
-                                          <h4 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">Run Summary</h4>
+                                          <div className="flex items-center justify-between">
+                                            <h4 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">Run Summary</h4>
+                                            <button
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                navigator.clipboard.writeText((run as any).runSummary);
+                                                setCopiedSummaryId(run._id);
+                                                setTimeout(() => setCopiedSummaryId(null), 2000);
+                                              }}
+                                              className="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                                            >
+                                              {copiedSummaryId === run._id ? <><Check className="w-3 h-3" /> Copied</> : <><Copy className="w-3 h-3" /> Copy</>}
+                                            </button>
+                                          </div>
                                           <div className="p-3 bg-slate-50 dark:bg-slate-800/50 border rounded text-sm leading-relaxed whitespace-pre-wrap">
                                             {(run as any).runSummary}
                                           </div>
