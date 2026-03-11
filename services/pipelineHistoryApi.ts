@@ -133,7 +133,7 @@ export async function updateSpec(id: string, spec: string): Promise<{ statusCode
       'Content-Type': 'application/json',
       'secret-key': API_SECRET_KEY,
     },
-    body: JSON.stringify({ spec }),
+    body: JSON.stringify({ text: spec }),
   });
 
   if (!response.ok) {
