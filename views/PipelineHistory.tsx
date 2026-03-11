@@ -893,6 +893,16 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                     </div>
                   </div>
 
+                  {/* Run Summary */}
+                  {(log as any).runSummary && (
+                    <div className="space-y-2">
+                      <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">Run Summary</h3>
+                      <div className="p-3 bg-slate-50 dark:bg-slate-800/50 border rounded text-sm leading-relaxed whitespace-pre-wrap">
+                        {(log as any).runSummary}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Output Section */}
                   <div className="space-y-4">
                     <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">Output</h3>
