@@ -61,6 +61,7 @@ export default function OfferRecommendationsPage() {
               <th className={thCls}>Rank</th>
               <th className={thCls}>Offer Type</th>
               <th className={thCls}>Variant</th>
+              <th className={thCls}>Template</th>
               <th className={thCls}>Confidence</th>
               <th className={thCls}>Reason</th>
             </tr>
@@ -70,6 +71,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>1</td>
               <td className={tdCls}>Fixed Amount Off</td>
               <td className={tdCls}>Flat</td>
+              <td className={tdCls}>Save $10 on this bundle</td>
               <td className={tdCls}>Low</td>
               <td className={tdCls}>82% of revenue comes from the top product. Fixed amount discounts drive add-on purchases alongside bestsellers. With revenue concentrated in a few products, a simple flat dollar-off keeps the offer focused.</td>
             </tr>
@@ -77,6 +79,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>2</td>
               <td className={tdCls}>Percentage Discount</td>
               <td className={tdCls}>Flat</td>
+              <td className={tdCls}>Get 15% off when you buy this bundle</td>
               <td className={tdCls}>Low</td>
               <td className={tdCls}>95% of orders are single-item purchases. Percentage discounts on bundles give these customers a clear incentive to add more. A flat percentage is straightforward -- one clear discount, no complexity.</td>
             </tr>
@@ -84,6 +87,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>3</td>
               <td className={tdCls}>Fixed Bundle Price</td>
               <td className={tdCls}>Flat</td>
+              <td className={tdCls}>Get all 3 for $49</td>
               <td className={tdCls}>Low</td>
               <td className={tdCls}>A fixed bundle price simplifies the purchase decision -- customers see one clear price for the whole bundle.</td>
             </tr>
@@ -98,6 +102,7 @@ export default function OfferRecommendationsPage() {
               <th className={thCls}>Rank</th>
               <th className={thCls}>Offer Type</th>
               <th className={thCls}>Variant</th>
+              <th className={thCls}>Template</th>
               <th className={thCls}>Confidence</th>
               <th className={thCls}>Reason</th>
             </tr>
@@ -107,6 +112,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>1</td>
               <td className={tdCls}>Percentage Discount</td>
               <td className={tdCls}>Flat</td>
+              <td className={tdCls}>Get 15% off when you buy this bundle</td>
               <td className={tdCls}>High</td>
               <td className={tdCls}>21% repeat purchase rate -- returning customers respond well to percentage discounts because the savings scale with their cart. A simple flat percentage is easy for returning customers to understand.</td>
             </tr>
@@ -114,6 +120,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>2</td>
               <td className={tdCls}>Fixed Amount Off</td>
               <td className={tdCls}>Tiered</td>
+              <td className={tdCls}>Buy 2 save $5, buy 3 save $10, buy 4+ save $15</td>
               <td className={tdCls}>Medium</td>
               <td className={tdCls}>First-time customers spend 79% more than returning ones. A fixed dollar-off discount gives new customers a concrete savings number. Tiered dollar-off savings give escalating incentives that work well for high-spending new customers.</td>
             </tr>
@@ -121,6 +128,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>3</td>
               <td className={tdCls}>Fixed Bundle Price</td>
               <td className={tdCls}>Flat</td>
+              <td className={tdCls}>Get all 3 for $49</td>
               <td className={tdCls}>Medium</td>
               <td className={tdCls}>Revenue is spread across the catalog (top product is only 12%). Fixed bundle pricing works well when customers already explore multiple products.</td>
             </tr>
@@ -135,6 +143,7 @@ export default function OfferRecommendationsPage() {
               <th className={thCls}>Rank</th>
               <th className={thCls}>Offer Type</th>
               <th className={thCls}>Variant</th>
+              <th className={thCls}>Template</th>
               <th className={thCls}>Confidence</th>
               <th className={thCls}>Reason</th>
             </tr>
@@ -144,6 +153,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>1</td>
               <td className={tdCls}>Percentage Discount</td>
               <td className={tdCls}>Flat</td>
+              <td className={tdCls}>Get 15% off when you buy this bundle</td>
               <td className={tdCls}>High</td>
               <td className={tdCls}>60% repeat purchase rate -- returning customers respond well to percentage discounts because the savings scale with their cart. A simple flat percentage is easy for returning customers to understand and builds on trust.</td>
             </tr>
@@ -151,6 +161,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>2</td>
               <td className={tdCls}>Fixed Bundle Price</td>
               <td className={tdCls}>Flat</td>
+              <td className={tdCls}>Get all 3 for $49</td>
               <td className={tdCls}>Medium</td>
               <td className={tdCls}>Revenue is spread across the catalog (top product is only 1%). Fixed bundle pricing works well when customers already explore multiple products.</td>
             </tr>
@@ -158,6 +169,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>3</td>
               <td className={tdCls}>Fixed Amount Off</td>
               <td className={tdCls}>Tiered</td>
+              <td className={tdCls}>Buy 2 save $5, buy 3 save $10, buy 4+ save $15</td>
               <td className={tdCls}>Low</td>
               <td className={tdCls}>First-time customers spend 79% more than returning ones. Tiered dollar-off savings give escalating incentives that work well for high-spending new customers.</td>
             </tr>
@@ -165,6 +177,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>4</td>
               <td className={tdCls}>Buy X Get Y</td>
               <td className={tdCls}>Flat</td>
+              <td className={tdCls}>Buy 1 bestseller, get a complementary item 50% off</td>
               <td className={tdCls}>Low</td>
               <td className={tdCls}>Buy X Get Y is effective in Gifts &amp; Personalization for introducing customers to new products alongside items they already want.</td>
             </tr>
@@ -184,6 +197,7 @@ export default function OfferRecommendationsPage() {
               <th className={thCls}>Rank</th>
               <th className={thCls}>Offer Type</th>
               <th className={thCls}>Variant</th>
+              <th className={thCls}>Template</th>
               <th className={thCls}>Confidence</th>
               <th className={thCls}>Reason</th>
             </tr>
@@ -193,6 +207,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>1</td>
               <td className={tdCls}>Fixed Bundle Price</td>
               <td className={tdCls}>Flat</td>
+              <td className={tdCls}>Get all 3 for $49</td>
               <td className={tdCls}>High</td>
               <td className={tdCls}>Revenue is spread across the catalog (top product is only 9%). Fixed bundle pricing works well when customers already explore multiple products. One price for the whole bundle -- simple, clean.</td>
             </tr>
@@ -200,6 +215,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>2</td>
               <td className={tdCls}>Percentage Discount</td>
               <td className={tdCls}>Flat</td>
+              <td className={tdCls}>Get 15% off when you buy this bundle</td>
               <td className={tdCls}>Medium</td>
               <td className={tdCls}>40% of orders are single-item purchases. Percentage discounts on bundles give these customers a clear incentive to add more.</td>
             </tr>
@@ -207,6 +223,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>3</td>
               <td className={tdCls}>Fixed Amount Off</td>
               <td className={tdCls}>Flat</td>
+              <td className={tdCls}>Save $10 on this bundle</td>
               <td className={tdCls}>Medium</td>
               <td className={tdCls}>First-time customers spend 18% more than returning ones. A fixed dollar-off discount reduces purchase hesitation for new customers.</td>
             </tr>
@@ -214,6 +231,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>4</td>
               <td className={tdCls}>Buy X Get Y</td>
               <td className={tdCls}>Flat</td>
+              <td className={tdCls}>Buy 1 bestseller, get a complementary item 50% off</td>
               <td className={tdCls}>Low</td>
               <td className={tdCls}>Buy X Get Y is effective in Baby &amp; Kids for introducing customers to new products alongside items they already want.</td>
             </tr>
@@ -228,6 +246,7 @@ export default function OfferRecommendationsPage() {
               <th className={thCls}>Rank</th>
               <th className={thCls}>Offer Type</th>
               <th className={thCls}>Variant</th>
+              <th className={thCls}>Template</th>
               <th className={thCls}>Confidence</th>
               <th className={thCls}>Reason</th>
             </tr>
@@ -237,6 +256,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>1</td>
               <td className={tdCls}>Fixed Bundle Price</td>
               <td className={tdCls}>Flat</td>
+              <td className={tdCls}>Get all 3 for $49</td>
               <td className={tdCls}>High</td>
               <td className={tdCls}>62% of orders already have 3+ items -- customers naturally buy in bundles. A fixed bundle price (&quot;get all 3 for $X&quot;) matches this behavior perfectly.</td>
             </tr>
@@ -244,6 +264,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>2</td>
               <td className={tdCls}>Percentage Discount</td>
               <td className={tdCls}>Tiered</td>
+              <td className={tdCls}>Buy 2 get 10% off, buy 3 get 15% off, buy 4+ get 20% off</td>
               <td className={tdCls}>Medium</td>
               <td className={tdCls}>The catalog has a healthy long tail (bottom 50% of products contribute 13% of revenue), so tiered discounts encourage customers to explore more products at higher quantities.</td>
             </tr>
@@ -251,6 +272,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>3</td>
               <td className={tdCls}>Fixed Amount Off</td>
               <td className={tdCls}>Flat</td>
+              <td className={tdCls}>Save $10 on this bundle</td>
               <td className={tdCls}>Medium</td>
               <td className={tdCls}>Fixed amount discounts give customers a concrete dollar value saved, which can feel more tangible than a percentage.</td>
             </tr>
@@ -258,6 +280,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>4</td>
               <td className={tdCls}>Subscription</td>
               <td className={tdCls}>--</td>
+              <td className={tdCls}>Subscribe &amp; save 15% on every delivery</td>
               <td className={tdCls}>Low</td>
               <td className={tdCls}>Personal Care &amp; Grooming products are often consumable. Subscription discounts lock in recurring revenue from customers who reorder naturally.</td>
             </tr>
@@ -272,6 +295,7 @@ export default function OfferRecommendationsPage() {
               <th className={thCls}>Rank</th>
               <th className={thCls}>Offer Type</th>
               <th className={thCls}>Variant</th>
+              <th className={thCls}>Template</th>
               <th className={thCls}>Confidence</th>
               <th className={thCls}>Reason</th>
             </tr>
@@ -281,6 +305,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>1</td>
               <td className={tdCls}>Percentage Discount</td>
               <td className={tdCls}>Tiered</td>
+              <td className={tdCls}>Buy 2 get 10% off, buy 3 get 15% off, buy 4+ get 20% off</td>
               <td className={tdCls}>Low</td>
               <td className={tdCls}>13% repeat purchase rate -- returning customers respond to percentage discounts. The catalog long tail (bottom 50% = 9% of revenue) means tiered discounts encourage exploring more products.</td>
             </tr>
@@ -288,13 +313,15 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>2</td>
               <td className={tdCls}>Fixed Bundle Price</td>
               <td className={tdCls}>Tiered</td>
+              <td className={tdCls}>Pick 2 for $29, pick 3 for $39, pick 4 for $49</td>
               <td className={tdCls}>Low</td>
-              <td className={tdCls}>71% of orders have 3+ items -- customers naturally buy in bundles. Tiered bundle pricing (&quot;pick 2 for $29, pick 3 for $39&quot;) lets them choose their level and naturally upsell.</td>
+              <td className={tdCls}>71% of orders have 3+ items -- customers naturally buy in bundles. Tiered bundle pricing lets them choose their level and naturally upsell.</td>
             </tr>
             <tr>
               <td className={tdCls}>3</td>
               <td className={tdCls}>Fixed Amount Off</td>
               <td className={tdCls}>Flat</td>
+              <td className={tdCls}>Save $10 on this bundle</td>
               <td className={tdCls}>Low</td>
               <td className={tdCls}>Fixed amount discounts give customers a concrete dollar value saved, which can feel more tangible than a percentage.</td>
             </tr>
@@ -302,6 +329,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>4</td>
               <td className={tdCls}>Subscription</td>
               <td className={tdCls}>--</td>
+              <td className={tdCls}>Subscribe &amp; save 15% on every delivery</td>
               <td className={tdCls}>Low</td>
               <td className={tdCls}>13% repeat rate shows customers come back. A subscription offer converts that repeat behavior into predictable recurring revenue.</td>
             </tr>
@@ -316,6 +344,7 @@ export default function OfferRecommendationsPage() {
               <th className={thCls}>Rank</th>
               <th className={thCls}>Offer Type</th>
               <th className={thCls}>Variant</th>
+              <th className={thCls}>Template</th>
               <th className={thCls}>Confidence</th>
               <th className={thCls}>Reason</th>
             </tr>
@@ -325,6 +354,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>1</td>
               <td className={tdCls}>Percentage Discount</td>
               <td className={tdCls}>Flat</td>
+              <td className={tdCls}>Get 15% off when you buy this bundle</td>
               <td className={tdCls}>High</td>
               <td className={tdCls}>22% repeat purchase rate -- returning customers respond well to percentage discounts because the savings scale with their cart. A simple flat percentage is easy for returning customers.</td>
             </tr>
@@ -332,6 +362,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>2</td>
               <td className={tdCls}>Fixed Bundle Price</td>
               <td className={tdCls}>Flat</td>
+              <td className={tdCls}>Get all 3 for $49</td>
               <td className={tdCls}>Medium</td>
               <td className={tdCls}>Revenue is spread across the catalog (top product is only 1%). Fixed bundle pricing works well when customers already explore multiple products.</td>
             </tr>
@@ -339,8 +370,9 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>3</td>
               <td className={tdCls}>Fixed Amount Off</td>
               <td className={tdCls}>Tiered</td>
+              <td className={tdCls}>Buy 2 save $5, buy 3 save $10, buy 4+ save $15</td>
               <td className={tdCls}>Low</td>
-              <td className={tdCls}>Fixed amount discounts give customers a concrete dollar value saved. Tiered amounts (&quot;save $5 on 2, $10 on 3&quot;) give a clear reason to add one more item.</td>
+              <td className={tdCls}>Fixed amount discounts give customers a concrete dollar value saved. Tiered amounts give a clear reason to add one more item.</td>
             </tr>
           </tbody>
         </table>
@@ -353,6 +385,7 @@ export default function OfferRecommendationsPage() {
               <th className={thCls}>Rank</th>
               <th className={thCls}>Offer Type</th>
               <th className={thCls}>Variant</th>
+              <th className={thCls}>Template</th>
               <th className={thCls}>Confidence</th>
               <th className={thCls}>Reason</th>
             </tr>
@@ -362,6 +395,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>1</td>
               <td className={tdCls}>Percentage Discount</td>
               <td className={tdCls}>Tiered</td>
+              <td className={tdCls}>Buy 2 get 10% off, buy 3 get 15% off, buy 4+ get 20% off</td>
               <td className={tdCls}>High</td>
               <td className={tdCls}>50% of orders are single-item purchases. Percentage discounts on bundles give these customers a clear incentive to add more. Tiered discounts encourage exploring more products.</td>
             </tr>
@@ -369,13 +403,15 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>2</td>
               <td className={tdCls}>Fixed Bundle Price</td>
               <td className={tdCls}>Tiered</td>
+              <td className={tdCls}>Pick 2 for $29, pick 3 for $39, pick 4 for $49</td>
               <td className={tdCls}>High</td>
-              <td className={tdCls}>Revenue is spread across the catalog (top product is only 11%). Tiered bundle pricing (&quot;pick 2 for $29, pick 3 for $39&quot;) lets customers choose their level.</td>
+              <td className={tdCls}>Revenue is spread across the catalog (top product is only 11%). Tiered bundle pricing lets customers choose their level.</td>
             </tr>
             <tr>
               <td className={tdCls}>3</td>
               <td className={tdCls}>Fixed Amount Off</td>
               <td className={tdCls}>Flat</td>
+              <td className={tdCls}>Save $10 on this bundle</td>
               <td className={tdCls}>Low</td>
               <td className={tdCls}>Fixed amount discounts give customers a concrete dollar value saved, which can feel more tangible than a percentage.</td>
             </tr>
@@ -390,6 +426,7 @@ export default function OfferRecommendationsPage() {
               <th className={thCls}>Rank</th>
               <th className={thCls}>Offer Type</th>
               <th className={thCls}>Variant</th>
+              <th className={thCls}>Template</th>
               <th className={thCls}>Confidence</th>
               <th className={thCls}>Reason</th>
             </tr>
@@ -399,13 +436,15 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>1</td>
               <td className={tdCls}>Fixed Bundle Price</td>
               <td className={tdCls}>Tiered</td>
+              <td className={tdCls}>Pick 2 for $29, pick 3 for $39, pick 4 for $49</td>
               <td className={tdCls}>High</td>
-              <td className={tdCls}>A fixed bundle price simplifies the purchase decision. Tiered bundle pricing (&quot;pick 2 for $29, pick 3 for $39&quot;) lets customers choose their level and naturally upsell.</td>
+              <td className={tdCls}>A fixed bundle price simplifies the purchase decision. Tiered bundle pricing lets customers choose their level and naturally upsell.</td>
             </tr>
             <tr>
               <td className={tdCls}>2</td>
               <td className={tdCls}>Percentage Discount</td>
               <td className={tdCls}>Tiered</td>
+              <td className={tdCls}>Buy 2 get 10% off, buy 3 get 15% off, buy 4+ get 20% off</td>
               <td className={tdCls}>High</td>
               <td className={tdCls}>46% of orders are single-item purchases. Tiered quantity breaks motivate both new and returning customers to buy more.</td>
             </tr>
@@ -413,6 +452,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>3</td>
               <td className={tdCls}>Fixed Amount Off</td>
               <td className={tdCls}>Flat</td>
+              <td className={tdCls}>Save $10 on this bundle</td>
               <td className={tdCls}>High</td>
               <td className={tdCls}>41% of revenue comes from the top product. Fixed amount discounts drive add-on purchases alongside bestsellers. A simple flat dollar-off keeps the offer focused.</td>
             </tr>
@@ -420,6 +460,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>4</td>
               <td className={tdCls}>Subscription</td>
               <td className={tdCls}>--</td>
+              <td className={tdCls}>Subscribe &amp; save 15% on every delivery</td>
               <td className={tdCls}>Medium</td>
               <td className={tdCls}>Beauty &amp; Cosmetics products are often consumable. Subscription discounts lock in recurring revenue from customers who reorder naturally.</td>
             </tr>
@@ -434,6 +475,7 @@ export default function OfferRecommendationsPage() {
               <th className={thCls}>Rank</th>
               <th className={thCls}>Offer Type</th>
               <th className={thCls}>Variant</th>
+              <th className={thCls}>Template</th>
               <th className={thCls}>Confidence</th>
               <th className={thCls}>Reason</th>
             </tr>
@@ -443,6 +485,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>1</td>
               <td className={tdCls}>Percentage Discount</td>
               <td className={tdCls}>Tiered</td>
+              <td className={tdCls}>Buy 2 get 10% off, buy 3 get 15% off, buy 4+ get 20% off</td>
               <td className={tdCls}>High</td>
               <td className={tdCls}>51% repeat purchase rate -- returning customers respond well to percentage discounts. The catalog long tail (bottom 50% = 20% of revenue) means tiered discounts encourage exploring more products.</td>
             </tr>
@@ -450,6 +493,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>2</td>
               <td className={tdCls}>Subscription</td>
               <td className={tdCls}>--</td>
+              <td className={tdCls}>Subscribe &amp; save 15% on every delivery</td>
               <td className={tdCls}>Low</td>
               <td className={tdCls}>51% repeat rate shows customers come back. A subscription offer converts that repeat behavior into predictable recurring revenue.</td>
             </tr>
@@ -457,13 +501,15 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>3</td>
               <td className={tdCls}>Fixed Amount Off</td>
               <td className={tdCls}>Tiered</td>
+              <td className={tdCls}>Buy 2 save $5, buy 3 save $10, buy 4+ save $15</td>
               <td className={tdCls}>Low</td>
-              <td className={tdCls}>29% of revenue from the top product. Tiered fixed amounts (&quot;save $5 on 2, $10 on 3&quot;) give customers a clear reason to add one more item.</td>
+              <td className={tdCls}>29% of revenue from the top product. Tiered fixed amounts give customers a clear reason to add one more item.</td>
             </tr>
             <tr>
               <td className={tdCls}>4</td>
               <td className={tdCls}>Buy X Get Y</td>
               <td className={tdCls}>Flat</td>
+              <td className={tdCls}>Buy 1 bestseller, get a complementary item 50% off</td>
               <td className={tdCls}>Low</td>
               <td className={tdCls}>With 29% of revenue in the top product, Buy X Get Y lets you pair that bestseller with complementary items to drive trial.</td>
             </tr>
@@ -483,6 +529,7 @@ export default function OfferRecommendationsPage() {
               <th className={thCls}>Rank</th>
               <th className={thCls}>Offer Type</th>
               <th className={thCls}>Variant</th>
+              <th className={thCls}>Template</th>
               <th className={thCls}>Confidence</th>
               <th className={thCls}>Reason</th>
             </tr>
@@ -492,6 +539,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>1</td>
               <td className={tdCls}>Percentage Discount</td>
               <td className={tdCls}>Tiered</td>
+              <td className={tdCls}>Buy 2 get 10% off, buy 3 get 15% off, buy 4+ get 20% off</td>
               <td className={tdCls}>High</td>
               <td className={tdCls}>13% repeat purchase rate -- returning customers respond to percentage discounts. The catalog long tail (bottom 50% = 11% of revenue) means tiered discounts encourage exploring more products.</td>
             </tr>
@@ -499,6 +547,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>2</td>
               <td className={tdCls}>Fixed Amount Off</td>
               <td className={tdCls}>Flat</td>
+              <td className={tdCls}>Save $10 on this bundle</td>
               <td className={tdCls}>Medium</td>
               <td className={tdCls}>43% of revenue from the top product. Fixed amount discounts drive add-on purchases alongside bestsellers. A flat dollar-off keeps the offer focused.</td>
             </tr>
@@ -506,6 +555,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>3</td>
               <td className={tdCls}>Subscription</td>
               <td className={tdCls}>--</td>
+              <td className={tdCls}>Subscribe &amp; save 15% on every delivery</td>
               <td className={tdCls}>Low</td>
               <td className={tdCls}>13% repeat rate shows customers come back. A subscription offer converts that into predictable recurring revenue.</td>
             </tr>
@@ -513,6 +563,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>4</td>
               <td className={tdCls}>Fixed Bundle Price</td>
               <td className={tdCls}>Tiered</td>
+              <td className={tdCls}>Pick 2 for $29, pick 3 for $39, pick 4 for $49</td>
               <td className={tdCls}>Low</td>
               <td className={tdCls}>A fixed bundle price simplifies the purchase decision. Tiered pricing lets customers choose their level and naturally upsell.</td>
             </tr>
@@ -527,6 +578,7 @@ export default function OfferRecommendationsPage() {
               <th className={thCls}>Rank</th>
               <th className={thCls}>Offer Type</th>
               <th className={thCls}>Variant</th>
+              <th className={thCls}>Template</th>
               <th className={thCls}>Confidence</th>
               <th className={thCls}>Reason</th>
             </tr>
@@ -536,6 +588,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>1</td>
               <td className={tdCls}>Percentage Discount</td>
               <td className={tdCls}>Tiered</td>
+              <td className={tdCls}>Buy 2 get 10% off, buy 3 get 15% off, buy 4+ get 20% off</td>
               <td className={tdCls}>High</td>
               <td className={tdCls}>24% repeat purchase rate -- returning customers respond well to percentage discounts. Repeat customers spend close to first-timers, so tiered quantity breaks motivate both groups.</td>
             </tr>
@@ -543,6 +596,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>2</td>
               <td className={tdCls}>Fixed Bundle Price</td>
               <td className={tdCls}>Tiered</td>
+              <td className={tdCls}>Pick 2 for $29, pick 3 for $39, pick 4 for $49</td>
               <td className={tdCls}>Medium</td>
               <td className={tdCls}>A fixed bundle price simplifies the purchase decision. Tiered pricing lets customers choose their level.</td>
             </tr>
@@ -550,6 +604,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>3</td>
               <td className={tdCls}>Fixed Amount Off</td>
               <td className={tdCls}>Tiered</td>
+              <td className={tdCls}>Buy 2 save $5, buy 3 save $10, buy 4+ save $15</td>
               <td className={tdCls}>Medium</td>
               <td className={tdCls}>Fixed amount discounts give customers a concrete dollar value. Tiered amounts give a clear reason to add one more item.</td>
             </tr>
@@ -557,6 +612,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>4</td>
               <td className={tdCls}>Buy X Get Y</td>
               <td className={tdCls}>Flat</td>
+              <td className={tdCls}>Buy 1 bestseller, get a complementary item 50% off</td>
               <td className={tdCls}>Low</td>
               <td className={tdCls}>Buy X Get Y is effective in Baby &amp; Kids for introducing customers to new products alongside items they already want.</td>
             </tr>
@@ -571,6 +627,7 @@ export default function OfferRecommendationsPage() {
               <th className={thCls}>Rank</th>
               <th className={thCls}>Offer Type</th>
               <th className={thCls}>Variant</th>
+              <th className={thCls}>Template</th>
               <th className={thCls}>Confidence</th>
               <th className={thCls}>Reason</th>
             </tr>
@@ -580,6 +637,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>1</td>
               <td className={tdCls}>Fixed Bundle Price</td>
               <td className={tdCls}>Flat</td>
+              <td className={tdCls}>Get all 3 for $49</td>
               <td className={tdCls}>Low</td>
               <td className={tdCls}>Revenue is spread across the catalog. Fixed bundle pricing works well when customers explore multiple products. One price for the whole bundle -- simple, clean.</td>
             </tr>
@@ -587,6 +645,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>2</td>
               <td className={tdCls}>Subscription</td>
               <td className={tdCls}>--</td>
+              <td className={tdCls}>Subscribe &amp; save 15% on every delivery</td>
               <td className={tdCls}>Low</td>
               <td className={tdCls}>Supplements &amp; Vitamins products are often consumable. Subscription discounts lock in recurring revenue from customers who reorder naturally.</td>
             </tr>
@@ -594,6 +653,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>3</td>
               <td className={tdCls}>Fixed Amount Off</td>
               <td className={tdCls}>Flat</td>
+              <td className={tdCls}>Save $10 on this bundle</td>
               <td className={tdCls}>Low</td>
               <td className={tdCls}>Fixed amount discounts give customers a concrete dollar value saved.</td>
             </tr>
@@ -601,6 +661,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>4</td>
               <td className={tdCls}>Percentage Discount</td>
               <td className={tdCls}>Flat</td>
+              <td className={tdCls}>Get 15% off when you buy this bundle</td>
               <td className={tdCls}>Low</td>
               <td className={tdCls}>Percentage discounts are versatile and easy for customers to understand, making them a strong default.</td>
             </tr>
@@ -615,6 +676,7 @@ export default function OfferRecommendationsPage() {
               <th className={thCls}>Rank</th>
               <th className={thCls}>Offer Type</th>
               <th className={thCls}>Variant</th>
+              <th className={thCls}>Template</th>
               <th className={thCls}>Confidence</th>
               <th className={thCls}>Reason</th>
             </tr>
@@ -624,6 +686,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>1</td>
               <td className={tdCls}>Fixed Amount Off</td>
               <td className={tdCls}>Tiered</td>
+              <td className={tdCls}>Buy 2 save $5, buy 3 save $10, buy 4+ save $15</td>
               <td className={tdCls}>High</td>
               <td className={tdCls}>56% of revenue from the top product. Fixed amount discounts drive add-on purchases alongside bestsellers. First-time customers spend 77% more than repeats, so tiered savings work especially well for high-spending new customers.</td>
             </tr>
@@ -631,6 +694,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>2</td>
               <td className={tdCls}>Percentage Discount</td>
               <td className={tdCls}>Flat</td>
+              <td className={tdCls}>Get 15% off when you buy this bundle</td>
               <td className={tdCls}>High</td>
               <td className={tdCls}>23% repeat purchase rate -- returning customers respond well to percentage discounts. A simple flat percentage is easy for returning customers and builds on trust.</td>
             </tr>
@@ -638,6 +702,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>3</td>
               <td className={tdCls}>Fixed Bundle Price</td>
               <td className={tdCls}>Flat</td>
+              <td className={tdCls}>Get all 3 for $49</td>
               <td className={tdCls}>Medium</td>
               <td className={tdCls}>87% of orders already have 3+ items -- customers naturally buy in bundles. A fixed bundle price matches this behavior perfectly.</td>
             </tr>
@@ -645,6 +710,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>4</td>
               <td className={tdCls}>Subscription</td>
               <td className={tdCls}>--</td>
+              <td className={tdCls}>Subscribe &amp; save 15% on every delivery</td>
               <td className={tdCls}>Low</td>
               <td className={tdCls}>23% repeat rate shows customers come back. A subscription offer converts that into predictable recurring revenue.</td>
             </tr>
@@ -659,6 +725,7 @@ export default function OfferRecommendationsPage() {
               <th className={thCls}>Rank</th>
               <th className={thCls}>Offer Type</th>
               <th className={thCls}>Variant</th>
+              <th className={thCls}>Template</th>
               <th className={thCls}>Confidence</th>
               <th className={thCls}>Reason</th>
             </tr>
@@ -668,6 +735,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>1</td>
               <td className={tdCls}>Fixed Bundle Price</td>
               <td className={tdCls}>Flat</td>
+              <td className={tdCls}>Get all 3 for $49</td>
               <td className={tdCls}>Low</td>
               <td className={tdCls}>Revenue is spread across the catalog. Fixed bundle pricing works well when customers explore multiple products.</td>
             </tr>
@@ -675,6 +743,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>2</td>
               <td className={tdCls}>Subscription</td>
               <td className={tdCls}>--</td>
+              <td className={tdCls}>Subscribe &amp; save 15% on every delivery</td>
               <td className={tdCls}>Low</td>
               <td className={tdCls}>Coffee &amp; Tea products are often consumable. Subscription discounts lock in recurring revenue from customers who reorder naturally.</td>
             </tr>
@@ -682,6 +751,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>3</td>
               <td className={tdCls}>Fixed Amount Off</td>
               <td className={tdCls}>Flat</td>
+              <td className={tdCls}>Save $10 on this bundle</td>
               <td className={tdCls}>Low</td>
               <td className={tdCls}>Fixed amount discounts give customers a concrete dollar value saved.</td>
             </tr>
@@ -689,6 +759,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>4</td>
               <td className={tdCls}>Percentage Discount</td>
               <td className={tdCls}>Flat</td>
+              <td className={tdCls}>Get 15% off when you buy this bundle</td>
               <td className={tdCls}>Low</td>
               <td className={tdCls}>Percentage discounts are versatile and easy for customers to understand, making them a strong default.</td>
             </tr>
@@ -703,6 +774,7 @@ export default function OfferRecommendationsPage() {
               <th className={thCls}>Rank</th>
               <th className={thCls}>Offer Type</th>
               <th className={thCls}>Variant</th>
+              <th className={thCls}>Template</th>
               <th className={thCls}>Confidence</th>
               <th className={thCls}>Reason</th>
             </tr>
@@ -712,6 +784,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>1</td>
               <td className={tdCls}>Percentage Discount</td>
               <td className={tdCls}>Flat</td>
+              <td className={tdCls}>Get 15% off when you buy this bundle</td>
               <td className={tdCls}>High</td>
               <td className={tdCls}>40% repeat purchase rate -- returning customers respond well to percentage discounts because the savings scale with their cart. A simple flat percentage is easy and builds on trust.</td>
             </tr>
@@ -719,6 +792,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>2</td>
               <td className={tdCls}>Fixed Amount Off</td>
               <td className={tdCls}>Tiered</td>
+              <td className={tdCls}>Buy 2 save $5, buy 3 save $10, buy 4+ save $15</td>
               <td className={tdCls}>Medium</td>
               <td className={tdCls}>21% of revenue from the top product. First-time customers spend 32% more than repeats, so tiered dollar-off savings give escalating incentives for high-spending new customers.</td>
             </tr>
@@ -726,6 +800,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>3</td>
               <td className={tdCls}>Fixed Bundle Price</td>
               <td className={tdCls}>Tiered</td>
+              <td className={tdCls}>Pick 2 for $29, pick 3 for $39, pick 4 for $49</td>
               <td className={tdCls}>Low</td>
               <td className={tdCls}>A fixed bundle price simplifies the purchase decision. Tiered pricing gives customers flexible options at pre-set price points.</td>
             </tr>
@@ -740,6 +815,7 @@ export default function OfferRecommendationsPage() {
               <th className={thCls}>Rank</th>
               <th className={thCls}>Offer Type</th>
               <th className={thCls}>Variant</th>
+              <th className={thCls}>Template</th>
               <th className={thCls}>Confidence</th>
               <th className={thCls}>Reason</th>
             </tr>
@@ -749,6 +825,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>1</td>
               <td className={tdCls}>Percentage Discount</td>
               <td className={tdCls}>Flat</td>
+              <td className={tdCls}>Get 15% off when you buy this bundle</td>
               <td className={tdCls}>High</td>
               <td className={tdCls}>29% repeat purchase rate -- returning customers respond well to percentage discounts. A simple flat percentage is easy for returning customers and builds on trust.</td>
             </tr>
@@ -756,6 +833,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>2</td>
               <td className={tdCls}>Fixed Amount Off</td>
               <td className={tdCls}>Tiered</td>
+              <td className={tdCls}>Buy 2 save $5, buy 3 save $10, buy 4+ save $15</td>
               <td className={tdCls}>High</td>
               <td className={tdCls}>62% of revenue from the top product. Fixed amount discounts drive add-on purchases alongside bestsellers. Tiered amounts give a clear reason to add one more item.</td>
             </tr>
@@ -763,6 +841,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>3</td>
               <td className={tdCls}>Subscription</td>
               <td className={tdCls}>--</td>
+              <td className={tdCls}>Subscribe &amp; save 15% on every delivery</td>
               <td className={tdCls}>Medium</td>
               <td className={tdCls}>29% repeat rate shows customers come back. A subscription offer converts that into predictable recurring revenue.</td>
             </tr>
@@ -770,6 +849,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>4</td>
               <td className={tdCls}>Fixed Bundle Price</td>
               <td className={tdCls}>Tiered</td>
+              <td className={tdCls}>Pick 2 for $29, pick 3 for $39, pick 4 for $49</td>
               <td className={tdCls}>Low</td>
               <td className={tdCls}>A fixed bundle price simplifies the purchase decision. Tiered pricing gives customers flexible options.</td>
             </tr>
@@ -784,6 +864,7 @@ export default function OfferRecommendationsPage() {
               <th className={thCls}>Rank</th>
               <th className={thCls}>Offer Type</th>
               <th className={thCls}>Variant</th>
+              <th className={thCls}>Template</th>
               <th className={thCls}>Confidence</th>
               <th className={thCls}>Reason</th>
             </tr>
@@ -793,6 +874,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>1</td>
               <td className={tdCls}>Percentage Discount</td>
               <td className={tdCls}>Flat</td>
+              <td className={tdCls}>Get 15% off when you buy this bundle</td>
               <td className={tdCls}>High</td>
               <td className={tdCls}>38% of orders are single-item purchases. Percentage discounts on bundles give these customers a clear incentive to add more. A flat percentage is straightforward -- one clear discount, no complexity.</td>
             </tr>
@@ -800,6 +882,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>2</td>
               <td className={tdCls}>Fixed Bundle Price</td>
               <td className={tdCls}>Flat</td>
+              <td className={tdCls}>Get all 3 for $49</td>
               <td className={tdCls}>High</td>
               <td className={tdCls}>Revenue is spread across the catalog (top product is only 8%). Fixed bundle pricing works well when customers already explore multiple products.</td>
             </tr>
@@ -807,6 +890,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>3</td>
               <td className={tdCls}>Subscription</td>
               <td className={tdCls}>--</td>
+              <td className={tdCls}>Subscribe &amp; save 15% on every delivery</td>
               <td className={tdCls}>Medium</td>
               <td className={tdCls}>11% repeat rate shows customers come back. A subscription offer converts that into predictable recurring revenue.</td>
             </tr>
@@ -814,6 +898,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>4</td>
               <td className={tdCls}>Buy X Get Y</td>
               <td className={tdCls}>Flat</td>
+              <td className={tdCls}>Buy 1 bestseller, get a complementary item 50% off</td>
               <td className={tdCls}>Low</td>
               <td className={tdCls}>Buy X Get Y is effective in Beauty &amp; Cosmetics for introducing customers to new products alongside items they already want.</td>
             </tr>
@@ -828,6 +913,7 @@ export default function OfferRecommendationsPage() {
               <th className={thCls}>Rank</th>
               <th className={thCls}>Offer Type</th>
               <th className={thCls}>Variant</th>
+              <th className={thCls}>Template</th>
               <th className={thCls}>Confidence</th>
               <th className={thCls}>Reason</th>
             </tr>
@@ -837,6 +923,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>1</td>
               <td className={tdCls}>Fixed Bundle Price</td>
               <td className={tdCls}>Flat</td>
+              <td className={tdCls}>Get all 3 for $49</td>
               <td className={tdCls}>High</td>
               <td className={tdCls}>Revenue is spread across the catalog (top product is only 1%). Fixed bundle pricing works well when customers already explore multiple products. One price for the whole bundle -- simple, clean.</td>
             </tr>
@@ -844,6 +931,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>2</td>
               <td className={tdCls}>Percentage Discount</td>
               <td className={tdCls}>Flat</td>
+              <td className={tdCls}>Get 15% off when you buy this bundle</td>
               <td className={tdCls}>Medium</td>
               <td className={tdCls}>51% of orders are single-item purchases. Percentage discounts on bundles give these customers a clear incentive to add more.</td>
             </tr>
@@ -851,6 +939,7 @@ export default function OfferRecommendationsPage() {
               <td className={tdCls}>3</td>
               <td className={tdCls}>Fixed Amount Off</td>
               <td className={tdCls}>Flat</td>
+              <td className={tdCls}>Save $10 on this bundle</td>
               <td className={tdCls}>Low</td>
               <td className={tdCls}>Fixed amount discounts give customers a concrete dollar value saved, which can feel more tangible than a percentage.</td>
             </tr>
