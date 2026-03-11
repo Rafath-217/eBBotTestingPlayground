@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Clock, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Loader2, AlertCircle, Calendar, Package, Tag, Search, Filter, MessageSquare, Check, X, AlertTriangle, ExternalLink, Brain, Play, FileEdit } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent, Button, Badge, CodeBlock, cn } from '../components/ui';
 import { ViewMode } from '../components/Layout';
-import { PMResultView, PMDiscountsPanel, PMRulesPanel, PMStepsPanel } from '../components/PMViews';
+import { PMResultView, PMDiscountsPanel, PMRulesPanel, PMStepsPanel, DecisionTracePanel } from '../components/PMViews';
 import { PipelineHistoryLog, PipelineHistoryPagination, FeedbackRating, PipelineResult } from '../types';
 import { getPipelineHistory, searchPipelineHistory, submitFeedback, updateSpec, getPatternTags } from '../services/pipelineHistoryApi';
 import { runPipeline } from '../services/pipelineApi';
@@ -926,7 +926,10 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                               <p className="text-red-600 dark:text-red-400 text-sm mt-1">{log.output.assembledResult.error}</p>
                             </div>
                           ) : (
-                            <PMResultView config={log.output.assembledResult?.bundleConfig || log.output.assembledResult} />
+                            <>
+                              <PMResultView config={log.output.assembledResult?.bundleConfig || log.output.assembledResult} />
+                              <DecisionTracePanel assembledResult={log.output.assembledResult} />
+                            </>
                           )}
                         </div>
                       </div>
@@ -981,9 +984,12 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                           <div className="px-4 py-2 bg-slate-100 dark:bg-slate-800 border-b border-slate-300 dark:border-slate-600">
                             <span className="text-sm font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Original Pipeline Output</span>
                           </div>
-                          <div className="p-4">
+                          <div className="p-4 space-y-4">
                             {viewMode === 'pm' ? (
-                              <PMResultView config={log.output.assembledResult?.bundleConfig || log.output.assembledResult} />
+                              <>
+                                <PMResultView config={log.output.assembledResult?.bundleConfig || log.output.assembledResult} />
+                                <DecisionTracePanel assembledResult={log.output.assembledResult} />
+                              </>
                             ) : (
                               <CodeBlock label="" code={log.output.assembledResult} />
                             )}
@@ -1000,9 +1006,12 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                               </Badge>
                             )}
                           </div>
-                          <div className="p-4">
+                          <div className="p-4 space-y-4">
                             {viewMode === 'pm' ? (
-                              <PMResultView config={rerunResults[log.id].bundleConfig || rerunResults[log.id]} />
+                              <>
+                                <PMResultView config={rerunResults[log.id].bundleConfig || rerunResults[log.id]} />
+                                <DecisionTracePanel assembledResult={rerunResults[log.id]} />
+                              </>
                             ) : (
                               <CodeBlock label="" code={rerunResults[log.id]} />
                             )}

@@ -4,7 +4,7 @@ import { Card, CardHeader, CardTitle, CardContent, Button, Badge, CodeBlock, cn 
 import { PipelineResult, TraceEntry } from '../types';
 import { runPipeline, parseCollections, parseProducts } from '../services/pipelineApi';
 import { ViewMode } from '../components/Layout';
-import { PMResultView } from '../components/PMViews';
+import { PMResultView, DecisionTracePanel } from '../components/PMViews';
 
 const TraceTimeline: React.FC<{ trace: TraceEntry[] }> = ({ trace }) => {
   const getBadgeVariant = (entry: TraceEntry) => {
@@ -350,6 +350,7 @@ const Playground: React.FC<PlaygroundProps> = ({ viewMode }) => {
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Bundle Configuration (PM Mode)</h3>
               <PMResultView config={result.bundleConfig} />
+              <DecisionTracePanel assembledResult={result} />
             </div>
           )}
         </>

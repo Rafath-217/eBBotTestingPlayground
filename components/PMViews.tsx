@@ -349,6 +349,93 @@ export const PMStepsPanel: React.FC<{ steps: any[] }> = ({ steps }) => {
   );
 };
 
+// Decision Trace Panel — renders reasoning for each LLM stage
+export const DecisionTracePanel: React.FC<{ assembledResult: any }> = ({ assembledResult }) => {
+  const trace = assembledResult?.decision_trace;
+  const flags = assembledResult?.flags;
+  const status = assembledResult?.status;
+
+  if (!trace) return null;
+
+  const stages = [
+    { key: 'structure', label: 'Structure', color: 'blue' },
+    { key: 'discount', label: 'Discount', color: 'green' },
+    { key: 'rules', label: 'Rules', color: 'purple' },
+  ] as const;
+
+  const colorMap: Record<string, { bg: string; border: string; badge: string; dot: string }> = {
+    blue: { bg: 'bg-blue-50 dark:bg-blue-950/20', border: 'border-blue-200 dark:border-blue-800', badge: 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300', dot: 'bg-blue-500' },
+    green: { bg: 'bg-green-50 dark:bg-green-950/20', border: 'border-green-200 dark:border-green-800', badge: 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300', dot: 'bg-green-500' },
+    purple: { bg: 'bg-purple-50 dark:bg-purple-950/20', border: 'border-purple-200 dark:border-purple-800', badge: 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300', dot: 'bg-purple-500' },
+  };
+
+  const activeFlags = flags ? Object.entries(flags).filter(([, v]) => v).map(([k]) => k) : [];
+
+  return (
+    <div className="border rounded-lg bg-card">
+      <div className="p-4 border-b flex items-center justify-between">
+        <div>
+          <h3 className="font-semibold">Decision Trace</h3>
+          <p className="text-xs text-muted-foreground mt-0.5">How each LLM output was interpreted and assembled</p>
+        </div>
+        {status && (
+          <span className={cn(
+            'px-2.5 py-1 rounded-full text-xs font-semibold',
+            status === 'AUTO'
+              ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300'
+              : 'bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300'
+          )}>
+            {status}
+          </span>
+        )}
+      </div>
+      <div className="p-4 space-y-3">
+        {stages.map(({ key, label, color }) => {
+          const entry = trace[key];
+          if (!entry) return null;
+          const c = colorMap[color];
+          return (
+            <div key={key} className={cn('rounded-lg border p-3 space-y-2', c.bg, c.border)}>
+              <div className="flex items-center gap-2">
+                <div className={cn('w-2 h-2 rounded-full', c.dot)} />
+                <span className="text-sm font-semibold">{label}</span>
+                <span className={cn('px-2 py-0.5 rounded text-[11px] font-mono font-medium', c.badge)}>
+                  {entry.pattern}
+                </span>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">{entry.reason}</p>
+              {entry.llmReasoning && (
+                <div className="pl-4 border-l-2 border-current/10">
+                  <p className="text-xs text-muted-foreground italic leading-relaxed">{entry.llmReasoning}</p>
+                </div>
+              )}
+            </div>
+          );
+        })}
+
+        {trace.fallbacks_used?.length > 0 && (
+          <div className="rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/20 p-3">
+            <p className="text-sm font-semibold text-amber-700 dark:text-amber-300 mb-1">Fallbacks Used</p>
+            <ul className="list-disc list-inside text-sm text-amber-600 dark:text-amber-400 space-y-0.5">
+              {trace.fallbacks_used.map((fb: string, i: number) => <li key={i}>{fb}</li>)}
+            </ul>
+          </div>
+        )}
+
+        {activeFlags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 pt-1">
+            {activeFlags.map((flag) => (
+              <span key={flag} className="px-2 py-0.5 rounded text-[10px] font-mono bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                {flag}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 // Combined PM Result View (3-column layout)
 export const PMResultView: React.FC<{ config: any }> = ({ config }) => {
   const steps = config?.steps || [];
