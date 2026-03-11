@@ -54,7 +54,7 @@ export default function OfferRecommendationsPage() {
         <h2 className="text-2xl font-semibold mb-4">Basic Plan (3 stores)</h2>
 
         {/* iw2k70-1v */}
-        <h3 className="text-xl font-semibold mb-3">iw2k70-1v (Jewelry, 20 orders, LOW DATA)</h3>
+        <h3 className="text-xl font-semibold mb-3"><a href="https://iw2k70-1v.myshopify.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">iw2k70-1v</a> (Jewelry, 20 orders, LOW DATA)</h3>
         <table className="w-full border border-slate-300 dark:border-slate-600 text-sm mb-8">
           <thead>
             <tr className="bg-slate-50 dark:bg-slate-800">
@@ -91,7 +91,7 @@ export default function OfferRecommendationsPage() {
         </table>
 
         {/* autism-grown-up */}
-        <h3 className="text-xl font-semibold mb-3">autism-grown-up (Books &amp; Education, 452 orders)</h3>
+        <h3 className="text-xl font-semibold mb-3"><a href="https://autism-grown-up.myshopify.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">autism-grown-up</a> (Books &amp; Education, 452 orders)</h3>
         <table className="w-full border border-slate-300 dark:border-slate-600 text-sm mb-8">
           <thead>
             <tr className="bg-slate-50 dark:bg-slate-800">
@@ -128,7 +128,7 @@ export default function OfferRecommendationsPage() {
         </table>
 
         {/* the-housewarming-project */}
-        <h3 className="text-xl font-semibold mb-3">the-housewarming-project (Gifts &amp; Personalization, 202 orders)</h3>
+        <h3 className="text-xl font-semibold mb-3"><a href="https://the-housewarming-project.myshopify.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">the-housewarming-project</a> (Gifts &amp; Personalization, 202 orders)</h3>
         <table className="w-full border border-slate-300 dark:border-slate-600 text-sm mb-8">
           <thead>
             <tr className="bg-slate-50 dark:bg-slate-800">
@@ -177,7 +177,7 @@ export default function OfferRecommendationsPage() {
         <h2 className="text-2xl font-semibold mb-4">Professional Plan (7 stores)</h2>
 
         {/* ga74dv-pf */}
-        <h3 className="text-xl font-semibold mb-3">ga74dv-pf (Baby &amp; Kids, 104 orders)</h3>
+        <h3 className="text-xl font-semibold mb-3"><a href="https://ga74dv-pf.myshopify.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">ga74dv-pf</a> (Baby &amp; Kids, 104 orders)</h3>
         <table className="w-full border border-slate-300 dark:border-slate-600 text-sm mb-8">
           <thead>
             <tr className="bg-slate-50 dark:bg-slate-800">
@@ -221,7 +221,7 @@ export default function OfferRecommendationsPage() {
         </table>
 
         {/* b2ef69-07 */}
-        <h3 className="text-xl font-semibold mb-3">b2ef69-07 (Personal Care &amp; Grooming, 588 orders)</h3>
+        <h3 className="text-xl font-semibold mb-3"><a href="https://b2ef69-07.myshopify.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">b2ef69-07</a> (Personal Care &amp; Grooming, 588 orders)</h3>
         <table className="w-full border border-slate-300 dark:border-slate-600 text-sm mb-8">
           <thead>
             <tr className="bg-slate-50 dark:bg-slate-800">
@@ -265,7 +265,7 @@ export default function OfferRecommendationsPage() {
         </table>
 
         {/* jxsmgi-gz */}
-        <h3 className="text-xl font-semibold mb-3">jxsmgi-gz (Beauty &amp; Cosmetics, 47 orders, LOW DATA)</h3>
+        <h3 className="text-xl font-semibold mb-3"><a href="https://jxsmgi-gz.myshopify.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">jxsmgi-gz</a> (Beauty &amp; Cosmetics, 47 orders, LOW DATA)</h3>
         <table className="w-full border border-slate-300 dark:border-slate-600 text-sm mb-8">
           <thead>
             <tr className="bg-slate-50 dark:bg-slate-800">
@@ -309,7 +309,7 @@ export default function OfferRecommendationsPage() {
         </table>
 
         {/* thilakawardhana */}
-        <h3 className="text-xl font-semibold mb-3">thilakawardhana (Fashion &amp; Apparel, 4,802 orders)</h3>
+        <h3 className="text-xl font-semibold mb-3"><a href="https://thilakawardhana.myshopify.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">thilakawardhana</a> (Fashion &amp; Apparel, 4,802 orders)</h3>
         <table className="w-full border border-slate-300 dark:border-slate-600 text-sm mb-8">
           <thead>
             <tr className="bg-slate-50 dark:bg-slate-800">
@@ -346,7 +346,7 @@ export default function OfferRecommendationsPage() {
         </table>
 
         {/* back-bone-bmx */}
-        <h3 className="text-xl font-semibold mb-3">back-bone-bmx (Fashion &amp; Apparel, 171 orders)</h3>
+        <h3 className="text-xl font-semibold mb-3"><a href="https://back-bone-bmx.myshopify.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">back-bone-bmx</a> (Fashion &amp; Apparel, 171 orders)</h3>
         <table className="w-full border border-slate-300 dark:border-slate-600 text-sm mb-8">
           <thead>
             <tr className="bg-slate-50 dark:bg-slate-800">
@@ -383,7 +383,7 @@ export default function OfferRecommendationsPage() {
         </table>
 
         {/* 160f41-52 */}
-        <h3 className="text-xl font-semibold mb-3">160f41-52 (Beauty &amp; Cosmetics, 4,053 orders)</h3>
+        <h3 className="text-xl font-semibold mb-3"><a href="https://160f41-52.myshopify.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">160f41-52</a> (Beauty &amp; Cosmetics, 4,053 orders)</h3>
         <table className="w-full border border-slate-300 dark:border-slate-600 text-sm mb-8">
           <thead>
             <tr className="bg-slate-50 dark:bg-slate-800">
@@ -427,7 +427,7 @@ export default function OfferRecommendationsPage() {
         </table>
 
         {/* b6cn1r-uy */}
-        <h3 className="text-xl font-semibold mb-3">b6cn1r-uy (Beauty &amp; Cosmetics, 96 orders)</h3>
+        <h3 className="text-xl font-semibold mb-3"><a href="https://b6cn1r-uy.myshopify.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">b6cn1r-uy</a> (Beauty &amp; Cosmetics, 96 orders)</h3>
         <table className="w-full border border-slate-300 dark:border-slate-600 text-sm mb-8">
           <thead>
             <tr className="bg-slate-50 dark:bg-slate-800">
@@ -476,7 +476,7 @@ export default function OfferRecommendationsPage() {
         <h2 className="text-2xl font-semibold mb-4">Unlimited (Advanced) Plan (9 stores)</h2>
 
         {/* plato-pet */}
-        <h3 className="text-xl font-semibold mb-3">plato-pet (Pet Supplies, 1,548 orders)</h3>
+        <h3 className="text-xl font-semibold mb-3"><a href="https://plato-pet.myshopify.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">plato-pet</a> (Pet Supplies, 1,548 orders)</h3>
         <table className="w-full border border-slate-300 dark:border-slate-600 text-sm mb-8">
           <thead>
             <tr className="bg-slate-50 dark:bg-slate-800">
@@ -520,7 +520,7 @@ export default function OfferRecommendationsPage() {
         </table>
 
         {/* terragentle-com */}
-        <h3 className="text-xl font-semibold mb-3">terragentle-com (Baby &amp; Kids, 1,277 orders)</h3>
+        <h3 className="text-xl font-semibold mb-3"><a href="https://terragentle-com.myshopify.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">terragentle-com</a> (Baby &amp; Kids, 1,277 orders)</h3>
         <table className="w-full border border-slate-300 dark:border-slate-600 text-sm mb-8">
           <thead>
             <tr className="bg-slate-50 dark:bg-slate-800">
@@ -564,7 +564,7 @@ export default function OfferRecommendationsPage() {
         </table>
 
         {/* tjgg6m-bi */}
-        <h3 className="text-xl font-semibold mb-3">tjgg6m-bi (Supplements &amp; Vitamins, 0 orders, LOW DATA)</h3>
+        <h3 className="text-xl font-semibold mb-3"><a href="https://tjgg6m-bi.myshopify.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">tjgg6m-bi</a> (Supplements &amp; Vitamins, 0 orders, LOW DATA)</h3>
         <table className="w-full border border-slate-300 dark:border-slate-600 text-sm mb-8">
           <thead>
             <tr className="bg-slate-50 dark:bg-slate-800">
@@ -608,7 +608,7 @@ export default function OfferRecommendationsPage() {
         </table>
 
         {/* b33205-40 */}
-        <h3 className="text-xl font-semibold mb-3">b33205-40 (Health &amp; Wellness, 116 orders)</h3>
+        <h3 className="text-xl font-semibold mb-3"><a href="https://b33205-40.myshopify.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">b33205-40</a> (Health &amp; Wellness, 116 orders)</h3>
         <table className="w-full border border-slate-300 dark:border-slate-600 text-sm mb-8">
           <thead>
             <tr className="bg-slate-50 dark:bg-slate-800">
@@ -652,7 +652,7 @@ export default function OfferRecommendationsPage() {
         </table>
 
         {/* gdn1qq-jb */}
-        <h3 className="text-xl font-semibold mb-3">gdn1qq-jb (Coffee &amp; Tea, 0 orders, LOW DATA)</h3>
+        <h3 className="text-xl font-semibold mb-3"><a href="https://gdn1qq-jb.myshopify.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">gdn1qq-jb</a> (Coffee &amp; Tea, 0 orders, LOW DATA)</h3>
         <table className="w-full border border-slate-300 dark:border-slate-600 text-sm mb-8">
           <thead>
             <tr className="bg-slate-50 dark:bg-slate-800">
@@ -696,7 +696,7 @@ export default function OfferRecommendationsPage() {
         </table>
 
         {/* 7b3c7a-4 */}
-        <h3 className="text-xl font-semibold mb-3">7b3c7a-4 (Automotive &amp; Motorcycle, 159 orders)</h3>
+        <h3 className="text-xl font-semibold mb-3"><a href="https://7b3c7a-4.myshopify.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">7b3c7a-4</a> (Automotive &amp; Motorcycle, 159 orders)</h3>
         <table className="w-full border border-slate-300 dark:border-slate-600 text-sm mb-8">
           <thead>
             <tr className="bg-slate-50 dark:bg-slate-800">
@@ -733,7 +733,7 @@ export default function OfferRecommendationsPage() {
         </table>
 
         {/* cranel */}
-        <h3 className="text-xl font-semibold mb-3">cranel (Supplements &amp; Vitamins, 2,441 orders)</h3>
+        <h3 className="text-xl font-semibold mb-3"><a href="https://cranel.myshopify.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">cranel</a> (Supplements &amp; Vitamins, 2,441 orders)</h3>
         <table className="w-full border border-slate-300 dark:border-slate-600 text-sm mb-8">
           <thead>
             <tr className="bg-slate-50 dark:bg-slate-800">
@@ -777,7 +777,7 @@ export default function OfferRecommendationsPage() {
         </table>
 
         {/* nailberry-london */}
-        <h3 className="text-xl font-semibold mb-3">nailberry-london (Beauty &amp; Cosmetics, 4,182 orders)</h3>
+        <h3 className="text-xl font-semibold mb-3"><a href="https://nailberry-london.myshopify.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">nailberry-london</a> (Beauty &amp; Cosmetics, 4,182 orders)</h3>
         <table className="w-full border border-slate-300 dark:border-slate-600 text-sm mb-8">
           <thead>
             <tr className="bg-slate-50 dark:bg-slate-800">
@@ -821,7 +821,7 @@ export default function OfferRecommendationsPage() {
         </table>
 
         {/* mortantra-store */}
-        <h3 className="text-xl font-semibold mb-3">mortantra-store (Jewelry, 593 orders)</h3>
+        <h3 className="text-xl font-semibold mb-3"><a href="https://mortantra-store.myshopify.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">mortantra-store</a> (Jewelry, 593 orders)</h3>
         <table className="w-full border border-slate-300 dark:border-slate-600 text-sm mb-8">
           <thead>
             <tr className="bg-slate-50 dark:bg-slate-800">
