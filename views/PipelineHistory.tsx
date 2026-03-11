@@ -273,6 +273,8 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
   const [specActiveId, setSpecActiveId] = useState<string | null>(null);
   const [specText, setSpecText] = useState('');
   const [specSubmitting, setSpecSubmitting] = useState(false);
+  const [specSuccess, setSpecSuccess] = useState<string | null>(null);
+  const [specError, setSpecError] = useState<string | null>(null);
 
   // Re-run state
   const [rerunningId, setRerunningId] = useState<string | null>(null);
@@ -328,12 +330,16 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
   const handleSpecSubmit = async (logId: string) => {
     if (!specText.trim()) return;
     setSpecSubmitting(true);
+    setSpecError(null);
     try {
       await updateSpec(logId, specText.trim());
+      setSpecSuccess(logId);
+      setTimeout(() => setSpecSuccess(null), 3000);
       setSpecActiveId(null);
       setSpecText('');
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to update spec:', err);
+      setSpecError(err?.message || 'Failed to update spec');
     } finally {
       setSpecSubmitting(false);
     }
@@ -1204,6 +1210,12 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                       Update Spec
                     </h3>
 
+                    {specSuccess === log.id && (
+                      <div className="flex items-center gap-2 p-2 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded text-sm text-green-700 dark:text-green-300">
+                        <Check className="w-4 h-4" /> Spec updated successfully
+                      </div>
+                    )}
+
                     {specActiveId !== log.id ? (
                       <Button
                         variant="outline"
@@ -1212,6 +1224,7 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                           e.stopPropagation();
                           setSpecActiveId(log.id);
                           setSpecText('');
+                          setSpecError(null);
                         }}
                       >
                         <FileEdit className="w-3.5 h-3.5 mr-1.5" />
@@ -1227,6 +1240,11 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                           className="w-full p-2 text-sm border rounded bg-background resize-none focus:outline-none focus:ring-2 focus:ring-ring font-mono"
                           rows={4}
                         />
+                        {specError && (
+                          <div className="flex items-center gap-2 p-2 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded text-sm text-red-700 dark:text-red-300">
+                            <AlertCircle className="w-4 h-4 flex-shrink-0" /> {specError}
+                          </div>
+                        )}
                         <div className="flex gap-2">
                           <Button
                             size="sm"
@@ -1249,6 +1267,7 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                               e.stopPropagation();
                               setSpecActiveId(null);
                               setSpecText('');
+                              setSpecError(null);
                             }}
                           >
                             Cancel
