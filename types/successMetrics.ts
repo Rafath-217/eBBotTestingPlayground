@@ -55,8 +55,8 @@ export interface ProfilesQueryParams {
   sortOrder?: SortOrder
   industryVerified?: boolean
   bundleType?: string
-  bundleSubtype?: string
   dominantType?: string
+  strategyFamily?: string
   minRevenueShare?: number
   shopifyPlan?: string
 }
@@ -94,6 +94,11 @@ export interface DashboardStatsResponse {
   data: DashboardStats
 }
 
+export interface FilterOption {
+  value: string
+  label: string
+}
+
 export interface FiltersResponse {
   statusCode: number
   message: string
@@ -101,8 +106,9 @@ export interface FiltersResponse {
     ebSuccessTier: SuccessTier[]
     industry: string[]
     priceBand: PriceBand[]
-    bundleType?: string[]
-    bundleSubtype?: string[]
+    bundleType?: FilterOption[]
+    strategyFamily?: FilterOption[]
+    dominantStrategy?: FilterOption[]
   }
 }
 
@@ -137,9 +143,13 @@ export interface ClassicRevenueShare extends RevenueShareEntry {
   subtypes?: Record<string, RevenueShareEntry>
 }
 
+export interface MixAndMatchRevenueShare extends RevenueShareEntry {
+  subtypes?: Record<string, RevenueShareEntry>
+}
+
 export interface RevenueShareByType {
   classic?: ClassicRevenueShare
-  mixAndMatch?: RevenueShareEntry
+  mixAndMatch?: MixAndMatchRevenueShare
 }
 
 export interface BundleLink {
@@ -153,6 +163,7 @@ export interface BundleLink {
 export interface BundleStrategySummary {
   totalActiveBundles?: number
   dominantStrategy?: string
+  dominantStrategyFamily?: string
   bundleTypes?: Record<string, number>
   avgDiscountPercent?: number
   avgProductsPerBundle?: number

@@ -39,6 +39,7 @@ import type {
   SuccessTier,
   PriceBand,
   ProfilesPagination,
+  FiltersResponse,
 } from '../types/successMetrics'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -59,19 +60,26 @@ function tierBadgeVariant(tier: string): 'success' | 'warning' | 'destructive' {
 
 // ─── Bundle label mapping ────────────────────────────────────────────────────
 
-const BUNDLE_TYPE_LABELS: Record<string, string> = {
-  classic: 'Classic',
+const BUNDLE_LABEL_MAP: Record<string, string> = {
+  classic: 'Classic Bundle',
   mixAndMatch: 'Mix & Match',
-  fixedBundlePrice: 'Fixed Bundle Price',
-  tieredDiscount: 'Tiered Discount',
-  volumeDiscount: 'Volume Discount',
-  addonFreeGift: 'Add-on / Free Gift',
-  bxgy: 'BXGY',
+  percentage_flat: 'Percentage Discount',
+  percentage_tiered: 'Tiered Percentage',
+  fixed_amount_flat: 'Fixed Amount Off',
+  fixed_amount_tiered: 'Tiered Fixed Amount',
+  fixed_bundle_price_flat: 'Fixed Bundle Price',
+  fixed_bundle_price_tiered: 'Tiered Bundle Price',
+  bxgy_flat: 'Buy X Get Y',
+  bxgy_tiered: 'Tiered BXGY',
   subscription: 'Subscription',
+  percentage: 'Percentage Discount',
+  fixed_amount: 'Fixed Amount Off',
+  fixed_bundle_price: 'Fixed Bundle Price',
+  bxgy: 'Buy X Get Y',
 }
 
 function bundleLabel(key: string): string {
-  return BUNDLE_TYPE_LABELS[key] ?? key
+  return BUNDLE_LABEL_MAP[key] ?? key
 }
 
 const SHOPIFY_PLAN_LABELS: Record<string, string> = {
@@ -236,7 +244,7 @@ export default function SuccessMetricsPage() {
   const [profiles, setProfiles] = useState<StoreProfile[]>([])
   const [pagination, setPagination] = useState<ProfilesPagination>({ page: 1, limit: 20, total: 0, totalPages: 0 })
   const [stats, setStats] = useState<DashboardStats | null>(null)
-  const [filterOptions, setFilterOptions] = useState<{ ebSuccessTier: SuccessTier[]; industry: string[]; priceBand: PriceBand[]; bundleType?: string[]; bundleSubtype?: string[] } | null>(null)
+  const [filterOptions, setFilterOptions] = useState<FiltersResponse['data'] | null>(null)
 
   // Query state
   const [search, setSearch] = useState('')
@@ -246,7 +254,7 @@ export default function SuccessMetricsPage() {
   const [verifiedFilter, setVerifiedFilter] = useState<'' | 'true' | 'false'>('')
   const [shopifyPlanFilter, setShopifyPlanFilter] = useState('')
   const [bundleTypeFilter, setBundleTypeFilter] = useState('')
-  const [bundleSubtypeFilter, setBundleSubtypeFilter] = useState('')
+  const [strategyFamilyFilter, setStrategyFamilyFilter] = useState('')
   const [dominantTypeFilter, setDominantTypeFilter] = useState('')
   const [minRevenueShare, setMinRevenueShare] = useState(0)
   const [debouncedMinRevShare, setDebouncedMinRevShare] = useState(0)
@@ -309,9 +317,9 @@ export default function SuccessMetricsPage() {
       if (verifiedFilter) params.industryVerified = verifiedFilter === 'true'
       if (shopifyPlanFilter) params.shopifyPlan = shopifyPlanFilter
       if (bundleTypeFilter) params.bundleType = bundleTypeFilter
-      if (bundleSubtypeFilter) params.bundleSubtype = bundleSubtypeFilter
+      if (strategyFamilyFilter) params.strategyFamily = strategyFamilyFilter
       if (dominantTypeFilter) params.dominantType = dominantTypeFilter
-      if (debouncedMinRevShare > 0 && (bundleTypeFilter || bundleSubtypeFilter)) params.minRevenueShare = debouncedMinRevShare / 100
+      if (debouncedMinRevShare > 0 && (bundleTypeFilter || strategyFamilyFilter)) params.minRevenueShare = debouncedMinRevShare / 100
 
       const res = await getProfiles(params)
       const d = res.data?.data
@@ -322,7 +330,7 @@ export default function SuccessMetricsPage() {
     } finally {
       setLoading(false)
     }
-  }, [page, sortBy, sortOrder, debouncedSearch, tierFilter, industryFilter, priceBandFilter, verifiedFilter, shopifyPlanFilter, bundleTypeFilter, bundleSubtypeFilter, dominantTypeFilter, debouncedMinRevShare])
+  }, [page, sortBy, sortOrder, debouncedSearch, tierFilter, industryFilter, priceBandFilter, verifiedFilter, shopifyPlanFilter, bundleTypeFilter, strategyFamilyFilter, dominantTypeFilter, debouncedMinRevShare])
 
   useEffect(() => {
     fetchProfiles()
@@ -348,7 +356,7 @@ export default function SuccessMetricsPage() {
     setVerifiedFilter('')
     setShopifyPlanFilter('')
     setBundleTypeFilter('')
-    setBundleSubtypeFilter('')
+    setStrategyFamilyFilter('')
     setDominantTypeFilter('')
     setMinRevenueShare(0)
     setSortBy('totalRevenue60')
@@ -356,7 +364,7 @@ export default function SuccessMetricsPage() {
     setPage(1)
   }
 
-  const hasFilters = !!search || !!tierFilter || !!industryFilter || !!priceBandFilter || !!verifiedFilter || !!shopifyPlanFilter || !!bundleTypeFilter || !!bundleSubtypeFilter || !!dominantTypeFilter || minRevenueShare > 0
+  const hasFilters = !!search || !!tierFilter || !!industryFilter || !!priceBandFilter || !!verifiedFilter || !!shopifyPlanFilter || !!bundleTypeFilter || !!strategyFamilyFilter || !!dominantTypeFilter || minRevenueShare > 0
 
   // Selection handlers
   const toggleShopSelection = (shopName: string) => {
@@ -565,17 +573,23 @@ export default function SuccessMetricsPage() {
           className="px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/50"
         >
           <option value="">All Bundle Types</option>
-          <option value="classic">Classic</option>
-          <option value="mixAndMatch">Mix & Match</option>
+          {filterOptions?.bundleType?.map((opt) => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          )) ?? (
+            <>
+              <option value="classic">Classic Bundle</option>
+              <option value="mixAndMatch">Mix & Match</option>
+            </>
+          )}
         </select>
         <select
-          value={bundleSubtypeFilter}
-          onChange={(e) => { setBundleSubtypeFilter(e.target.value); setPage(1) }}
+          value={strategyFamilyFilter}
+          onChange={(e) => { setStrategyFamilyFilter(e.target.value); setPage(1) }}
           className="px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/50"
         >
-          <option value="">All Subtypes</option>
-          {(filterOptions?.bundleSubtype ?? Object.keys(BUNDLE_TYPE_LABELS)).map((t) => (
-            <option key={t} value={t}>{bundleLabel(t)}</option>
+          <option value="">All Strategy Families</option>
+          {filterOptions?.strategyFamily?.map((opt) => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
           ))}
         </select>
         <select
@@ -584,8 +598,8 @@ export default function SuccessMetricsPage() {
           className="px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/50"
         >
           <option value="">All Dominant Strategies</option>
-          {Object.entries(BUNDLE_TYPE_LABELS).map(([k, v]) => (
-            <option key={k} value={k}>{v}</option>
+          {filterOptions?.dominantStrategy?.map((opt) => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
           ))}
         </select>
         <div className="flex items-center gap-2">
@@ -597,7 +611,7 @@ export default function SuccessMetricsPage() {
             step={5}
             value={minRevenueShare}
             onChange={(e) => { setMinRevenueShare(Number(e.target.value)); setPage(1) }}
-            disabled={!bundleTypeFilter && !bundleSubtypeFilter}
+            disabled={!bundleTypeFilter && !strategyFamilyFilter}
             className="w-28 accent-primary disabled:opacity-40"
           />
           <span className="text-xs font-mono text-slate-600 dark:text-slate-300 w-10">{minRevenueShare}%</span>

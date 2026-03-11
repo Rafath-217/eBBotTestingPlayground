@@ -250,6 +250,7 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
   // Pattern tags filter
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [selectedPatterns, setSelectedPatterns] = useState<string[]>([]);
+  const [uniqueStores, setUniqueStores] = useState(false);
   const [patternDropdownOpen, setPatternDropdownOpen] = useState(false);
 
   // Shop name search mode (server-side)
@@ -363,6 +364,7 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
           feedback: feedbackFilter,
           merchantText: merchantTextFilter,
           patterns: selectedPatterns.length > 0 ? selectedPatterns : undefined,
+          uniqueStores: uniqueStores || undefined,
         });
       }
 
@@ -644,6 +646,18 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
               )}
             </div>
           )}
+
+          {/* Unique stores toggle */}
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={uniqueStores}
+              onChange={(e) => setUniqueStores(e.target.checked)}
+              className="accent-primary w-4 h-4"
+            />
+            <span className="text-sm font-medium">Unique stores only</span>
+            <span className="text-xs text-muted-foreground">(latest run per store)</span>
+          </label>
 
           {/* Action buttons + result count */}
           <div className="flex items-center gap-4">

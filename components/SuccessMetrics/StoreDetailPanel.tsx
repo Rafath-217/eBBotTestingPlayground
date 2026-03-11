@@ -196,45 +196,48 @@ function fmtPct(n: number): string {
 // ─── Bundle Type Display Names & Tooltips ────────────────────────────────────
 
 const TYPE_DISPLAY_NAMES: Record<string, string> = {
-  classic: 'Classic',
-  mixAndMatch: 'Mix and Match',
-  fixedBundlePrice: 'Fixed Bundle Price',
-  tieredDiscount: 'Tiered Discount',
-  volumeDiscount: 'Volume Discount',
-  addonFreeGift: 'Add-on / Free Gift',
-  bxgy: 'Buy X Get Y',
-  subscription: 'Subscription',
+  classic: 'Classic Bundle',
+  mixAndMatch: 'Mix & Match',
 }
 
 const SUBTYPE_DISPLAY_NAMES: Record<string, string> = {
-  classic: 'Classic (Standard)',
-  fixedBundlePrice: 'Fixed Bundle Price',
-  tieredDiscount: 'Tiered Discount',
-  volumeDiscount: 'Volume Discount',
-  addonFreeGift: 'Add-on / Free Gift',
-  bxgy: 'Buy X Get Y',
+  percentage_flat: 'Percentage Discount',
+  percentage_tiered: 'Tiered Percentage',
+  fixed_amount_flat: 'Fixed Amount Off',
+  fixed_amount_tiered: 'Tiered Fixed Amount',
+  fixed_bundle_price_flat: 'Fixed Bundle Price',
+  fixed_bundle_price_tiered: 'Tiered Bundle Price',
+  bxgy_flat: 'Buy X Get Y',
+  bxgy_tiered: 'Tiered BXGY',
   subscription: 'Subscription',
 }
 
 const TYPE_TOOLTIPS: Record<string, string> = {
   classic: 'Traditional pre-configured product bundles',
-  mixAndMatch: 'Customer-built bundles where shoppers pick items',
-  fixedBundlePrice: 'Bundle sold at a single fixed price (e.g. "3 for $69")',
-  tieredDiscount: 'Spend-based tiers — spend $X, save Y%',
-  volumeDiscount: 'Quantity-based tiers — buy X, save Y%',
-  addonFreeGift: 'Bundle with add-on/free gift products enabled',
-  bxgy: 'e.g. buy 2 get 1 free',
-  subscription: 'Recurring subscription bundle',
+  mixAndMatch: 'Customer-built bundles where shoppers pick items from a grid',
 }
 
 const SUBTYPE_TOOLTIPS: Record<string, string> = {
-  classic: 'Standard bundle with no special discount structure',
-  fixedBundlePrice: TYPE_TOOLTIPS.fixedBundlePrice,
-  tieredDiscount: TYPE_TOOLTIPS.tieredDiscount,
-  volumeDiscount: TYPE_TOOLTIPS.volumeDiscount,
-  addonFreeGift: TYPE_TOOLTIPS.addonFreeGift,
-  bxgy: TYPE_TOOLTIPS.bxgy,
-  subscription: TYPE_TOOLTIPS.subscription,
+  percentage_flat: 'Flat % off the bundle — e.g. "10% off when you buy 2+"',
+  percentage_tiered: 'Escalating % off at quantity/amount tiers — e.g. "Buy 2 save 10%, buy 3 save 20%"',
+  fixed_amount_flat: 'Flat $ off the bundle — e.g. "$5 off any bundle"',
+  fixed_amount_tiered: 'Escalating $ off at tiers — e.g. "Buy 2 save $5, buy 3 save $12"',
+  fixed_bundle_price_flat: 'Set price for the whole bundle — e.g. "Complete set for $49.99"',
+  fixed_bundle_price_tiered: 'Different set prices at different tiers — e.g. "2-piece set $40, 3-piece set $55"',
+  bxgy_flat: 'Buy one item, get another free/discounted — e.g. "Buy shampoo, get conditioner 50% off"',
+  bxgy_tiered: 'BXGY with multiple tier levels — e.g. "Buy 2 get 1 free, buy 4 get 2 free"',
+  subscription: 'Recurring subscription discount — e.g. "Subscribe & save 15%"',
+}
+
+const STRATEGY_COLORS: Record<string, { bar: string; barLight: string }> = {
+  percentage_flat:           { bar: 'bg-blue-500', barLight: 'bg-blue-300 dark:bg-blue-400/60' },
+  percentage_tiered:         { bar: 'bg-blue-600', barLight: 'bg-blue-400 dark:bg-blue-500/60' },
+  fixed_amount_flat:         { bar: 'bg-green-500', barLight: 'bg-green-300 dark:bg-green-400/60' },
+  fixed_amount_tiered:       { bar: 'bg-green-600', barLight: 'bg-green-400 dark:bg-green-500/60' },
+  fixed_bundle_price_flat:   { bar: 'bg-purple-500', barLight: 'bg-purple-300 dark:bg-purple-400/60' },
+  fixed_bundle_price_tiered: { bar: 'bg-purple-600', barLight: 'bg-purple-400 dark:bg-purple-500/60' },
+  bxgy_flat:                 { bar: 'bg-orange-500', barLight: 'bg-orange-300 dark:bg-orange-400/60' },
+  bxgy_tiered:               { bar: 'bg-orange-600', barLight: 'bg-orange-400 dark:bg-orange-500/60' },
 }
 
 // ─── Revenue Share Row ───────────────────────────────────────────────────────
@@ -279,7 +282,11 @@ function RevenueByTypePanel({ data }: { data: RevenueShareByType }) {
   const hasData = (data.classic && data.classic.revenue > 0) || (data.mixAndMatch && data.mixAndMatch.revenue > 0)
 
   const classicSubtypes = data.classic?.subtypes
-    ? Object.entries(data.classic.subtypes).filter(([, v]) => v.revenue > 0)
+    ? Object.entries(data.classic.subtypes).filter(([, v]) => v.revenue > 0).sort(([, a], [, b]) => b.revenue - a.revenue)
+    : []
+
+  const mmSubtypes = data.mixAndMatch?.subtypes
+    ? Object.entries(data.mixAndMatch.subtypes).filter(([, v]) => v.revenue > 0).sort(([, a], [, b]) => b.revenue - a.revenue)
     : []
 
   return (
@@ -306,20 +313,33 @@ function RevenueByTypePanel({ data }: { data: RevenueShareByType }) {
                   tooltip={SUBTYPE_TOOLTIPS[key]}
                   share={entry.share}
                   revenue={entry.revenue}
-                  barColor="bg-indigo-300 dark:bg-indigo-400/60"
+                  barColor={STRATEGY_COLORS[key]?.barLight ?? 'bg-indigo-300 dark:bg-indigo-400/60'}
                   indented
                 />
               ))}
             </>
           )}
           {data.mixAndMatch && data.mixAndMatch.revenue > 0 && (
-            <RevenueShareRow
-              label={TYPE_DISPLAY_NAMES.mixAndMatch}
-              tooltip={TYPE_TOOLTIPS.mixAndMatch}
-              share={data.mixAndMatch.share}
-              revenue={data.mixAndMatch.revenue}
-              barColor="bg-emerald-500"
-            />
+            <>
+              <RevenueShareRow
+                label={TYPE_DISPLAY_NAMES.mixAndMatch}
+                tooltip={TYPE_TOOLTIPS.mixAndMatch}
+                share={data.mixAndMatch.share}
+                revenue={data.mixAndMatch.revenue}
+                barColor="bg-emerald-500"
+              />
+              {mmSubtypes.map(([key, entry]) => (
+                <RevenueShareRow
+                  key={key}
+                  label={SUBTYPE_DISPLAY_NAMES[key] ?? key}
+                  tooltip={SUBTYPE_TOOLTIPS[key]}
+                  share={entry.share}
+                  revenue={entry.revenue}
+                  barColor={STRATEGY_COLORS[key]?.barLight ?? 'bg-emerald-300 dark:bg-emerald-400/60'}
+                  indented
+                />
+              ))}
+            </>
           )}
         </div>
       )}
@@ -335,8 +355,14 @@ function BundleOverviewPanel({ summary }: { summary: BundleStrategySummary }) {
   const mmShare = rev?.mixAndMatch?.share ?? 0
   const hasRevData = rev && ((rev.classic?.revenue ?? 0) > 0 || (rev.mixAndMatch?.revenue ?? 0) > 0)
 
-  const subtypes = rev?.classic?.subtypes
+  const classicSubtypes = rev?.classic?.subtypes
     ? Object.entries(rev.classic.subtypes)
+        .filter(([, v]) => v.revenue > 0)
+        .sort(([, a], [, b]) => b.revenue - a.revenue)
+    : []
+
+  const mmSubtypes = rev?.mixAndMatch?.subtypes
+    ? Object.entries(rev.mixAndMatch.subtypes)
         .filter(([, v]) => v.revenue > 0)
         .sort(([, a], [, b]) => b.revenue - a.revenue)
     : []
@@ -350,7 +376,7 @@ function BundleOverviewPanel({ summary }: { summary: BundleStrategySummary }) {
         <div className="p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50">
           <p className="text-[10px] text-muted-foreground">Strategy</p>
           <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 capitalize">
-            {summary.dominantStrategy ? (TYPE_DISPLAY_NAMES[summary.dominantStrategy] ?? summary.dominantStrategy) : '—'}
+            {summary.dominantStrategy ? (TYPE_DISPLAY_NAMES[summary.dominantStrategy] ?? SUBTYPE_DISPLAY_NAMES[summary.dominantStrategy] ?? summary.dominantStrategy) : '—'}
           </p>
         </div>
         <div className="p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50">
@@ -386,23 +412,50 @@ function BundleOverviewPanel({ summary }: { summary: BundleStrategySummary }) {
       {/* Revenue rows */}
       {hasRevData && rev && <RevenueByTypePanel data={rev} />}
 
-      {/* Subtypes table */}
-      {subtypes.length > 0 && (
-        <div className="mt-2">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Classic Subtypes</p>
-          <div className="divide-y divide-slate-100 dark:divide-slate-800">
-            {subtypes.map(([key, entry]) => (
-              <div key={key} className="flex items-center justify-between py-1">
-                <span className="text-[11px] text-slate-600 dark:text-slate-400 flex items-center">
-                  {SUBTYPE_DISPLAY_NAMES[key] ?? key}
-                  {SUBTYPE_TOOLTIPS[key] && <Tooltip text={SUBTYPE_TOOLTIPS[key]} />}
-                </span>
-                <span className="text-[11px] font-mono text-slate-700 dark:text-slate-200">
-                  {(entry.share * 100).toFixed(1)}% · {fmtCurrency(entry.revenue)}
-                </span>
+      {/* Discount strategy breakdown */}
+      {(classicSubtypes.length > 0 || mmSubtypes.length > 0) && (
+        <div className="mt-3 space-y-3">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Discount Strategies</p>
+
+          {classicSubtypes.length > 0 && (
+            <div>
+              <p className="text-[10px] text-indigo-500 dark:text-indigo-400 font-medium mb-1">Classic</p>
+              <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                {classicSubtypes.map(([key, entry]) => (
+                  <div key={key} className="flex items-center justify-between py-1">
+                    <span className="text-[11px] text-slate-600 dark:text-slate-400 flex items-center gap-1">
+                      <span className={`w-1.5 h-1.5 rounded-full inline-block ${STRATEGY_COLORS[key]?.bar ?? 'bg-indigo-400'}`} />
+                      {SUBTYPE_DISPLAY_NAMES[key] ?? key}
+                      {SUBTYPE_TOOLTIPS[key] && <Tooltip text={SUBTYPE_TOOLTIPS[key]} />}
+                    </span>
+                    <span className="text-[11px] font-mono text-slate-700 dark:text-slate-200">
+                      {(entry.share * 100).toFixed(1)}% · {fmtCurrency(entry.revenue)}
+                    </span>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          )}
+
+          {mmSubtypes.length > 0 && (
+            <div>
+              <p className="text-[10px] text-emerald-500 dark:text-emerald-400 font-medium mb-1">Mix & Match</p>
+              <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                {mmSubtypes.map(([key, entry]) => (
+                  <div key={key} className="flex items-center justify-between py-1">
+                    <span className="text-[11px] text-slate-600 dark:text-slate-400 flex items-center gap-1">
+                      <span className={`w-1.5 h-1.5 rounded-full inline-block ${STRATEGY_COLORS[key]?.bar ?? 'bg-emerald-400'}`} />
+                      {SUBTYPE_DISPLAY_NAMES[key] ?? key}
+                      {SUBTYPE_TOOLTIPS[key] && <Tooltip text={SUBTYPE_TOOLTIPS[key]} />}
+                    </span>
+                    <span className="text-[11px] font-mono text-slate-700 dark:text-slate-200">
+                      {(entry.share * 100).toFixed(1)}% · {fmtCurrency(entry.revenue)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 

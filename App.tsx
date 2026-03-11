@@ -14,6 +14,8 @@ import RunComparison from './views/RunComparison';
 import ChurnAnalysis from './views/ChurnAnalysis';
 import ChurnReport from './views/ChurnReport';
 import SuccessMetricsPage from './views/SuccessMetricsPage';
+import WinningStrategiesPage from './views/WinningStrategiesPage';
+import OfferRecommendationsPage from './views/OfferRecommendationsPage';
 import OnboardingDiagnosisPage from './views/OnboardingDiagnosisPage';
 import OnboardingHistoryPage from './views/OnboardingHistoryPage';
 import StoreProfilingPage from './views/StoreProfilingPage';
@@ -228,6 +230,8 @@ function App() {
           <Route path="/rules" element={specs ? <RulesLLM spec={specs.rulesLLM} viewMode={viewMode} /> : null} />
           <Route path="/assembly" element={<Assembly viewMode={viewMode} />} />
           <Route path="/success-metrics" element={<SuccessMetricsPage />} />
+          <Route path="/winning-strategies" element={<WinningStrategiesPage />} />
+          <Route path="/offer-recommendations" element={<OfferRecommendationsPage />} />
           <Route path="/onboarding-diagnosis" element={<OnboardingDiagnosisPage />} />
           <Route path="/onboarding-history" element={<OnboardingHistoryPage />} />
           <Route path="/store-profiling" element={<StoreProfilingPage />} />

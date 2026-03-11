@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FileJson, Tag, ShieldCheck, BarChart3, Moon, Sun, Menu, ChevronRight, ChevronDown, Play, Boxes, Code, Users, History, ListChecks, ArrowLeftRight, TrendingDown, FileBarChart, Store, Stethoscope, BookOpen, Rocket, HelpCircle, MessageCircleQuestion, ShoppingCart, Target, Package, Sparkles, FileText } from 'lucide-react';
+import { LayoutDashboard, FileJson, Tag, ShieldCheck, BarChart3, Moon, Sun, Menu, ChevronRight, ChevronDown, Play, Boxes, Code, Users, History, ListChecks, ArrowLeftRight, TrendingDown, FileBarChart, Store, Stethoscope, BookOpen, Rocket, HelpCircle, MessageCircleQuestion, ShoppingCart, Target, Package, Sparkles, FileText, Trophy } from 'lucide-react';
 import { Button, cn } from './ui';
 
 interface SidebarItemProps {
@@ -130,9 +130,11 @@ export const Layout: React.FC<LayoutProps> = ({ children, isDark, toggleDark, vi
             <SidebarGroup
               icon={Sparkles}
               label="Magic Bundles"
-              isActive={['/success-metrics', '/onboarding-diagnosis', '/onboarding-history', '/store-profiling', '/onboarding-flow', '/store-profiling-faq', '/onboarding-faq', '/case-study-83a38c', '/case-study-9cfda4'].includes(pathname)}
+              isActive={['/success-metrics', '/winning-strategies', '/offer-recommendations', '/onboarding-diagnosis', '/onboarding-history', '/store-profiling', '/onboarding-flow', '/store-profiling-faq', '/onboarding-faq', '/case-study-83a38c', '/case-study-9cfda4'].includes(pathname)}
             >
               <SidebarItem icon={Store} label="Store Profiles" active={pathname === '/success-metrics'} onClick={() => navigate('/success-metrics')} indent />
+              <SidebarItem icon={Trophy} label="Winning Strategies" active={pathname === '/winning-strategies'} onClick={() => navigate('/winning-strategies')} indent />
+              <SidebarItem icon={FileText} label="Offer Recommendations" active={pathname === '/offer-recommendations'} onClick={() => navigate('/offer-recommendations')} indent />
               <SidebarItem icon={Stethoscope} label="Diagnosis" active={pathname === '/onboarding-diagnosis'} onClick={() => navigate('/onboarding-diagnosis')} indent />
               <SidebarItem icon={History} label="History" active={pathname === '/onboarding-history'} onClick={() => navigate('/onboarding-history')} indent />
               <SidebarItem icon={BookOpen} label="Store Profiling" active={pathname === '/store-profiling'} onClick={() => navigate('/store-profiling')} indent />

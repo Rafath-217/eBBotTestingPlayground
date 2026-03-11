@@ -58,4 +58,7 @@ export const deleteOnboardingHistory = (shopName: string) =>
 export const submitOnboardingFeedback = (shopName: string, body: { rating: string; remarks?: string }) =>
   api.patch(`/onboardingHistory/${encodeURIComponent(shopName)}/feedback`, body)
 
+export const getWinningStrategies = (industry: string) =>
+  api.get('/winningStrategies', { params: { industry } })
+
 export default api

@@ -33,6 +33,9 @@ export async function getPipelineHistory(query: PipelineHistoryQuery = {}): Prom
   if (query.patterns && query.patterns.length > 0) {
     params.append('patterns', query.patterns.join(','));
   }
+  if (query.uniqueStores) {
+    params.append('uniqueStores', 'true');
+  }
 
   const queryString = params.toString();
   const url = `${API_BASE_URL}/api/bundleSetupLlmPipeline/pipelineHistory${queryString ? `?${queryString}` : ''}`;
