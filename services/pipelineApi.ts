@@ -56,3 +56,25 @@ export async function runPipeline(request: PipelineRequest): Promise<PipelineRes
 
   return response.json();
 }
+
+/**
+ * Re-run a pipeline using a previous run's ID.
+ * The backend reads the original input from the DB.
+ */
+export async function rerunPipeline(runId: string): Promise<PipelineResponse> {
+  const response = await fetch(`${API_BASE_URL}/api/bundleSetupLlmPipeline/rerun`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'secret-key': API_SECRET_KEY,
+    },
+    body: JSON.stringify({ runId }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'Network error' }));
+    throw new Error(error.message || `HTTP ${response.status}`);
+  }
+
+  return response.json();
+}

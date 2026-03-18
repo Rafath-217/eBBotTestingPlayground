@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FileJson, Tag, ShieldCheck, BarChart3, Moon, Sun, Menu, ChevronRight, ChevronDown, Play, Boxes, Code, Users, History, ListChecks, ArrowLeftRight, TrendingDown, FileBarChart, Store, Stethoscope, BookOpen, Rocket, HelpCircle, MessageCircleQuestion, ShoppingCart, Target, Package, Sparkles, FileText, Trophy } from 'lucide-react';
+import { LayoutDashboard, FileJson, Tag, ShieldCheck, BarChart3, Moon, Sun, Menu, ChevronRight, ChevronDown, Play, Boxes, Code, Users, History, ListChecks, ArrowLeftRight, TrendingDown, FileBarChart, Store, Stethoscope, BookOpen, Rocket, HelpCircle, MessageCircleQuestion, ShoppingCart, Target, Package, Sparkles, FileText, Trophy, Plane, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { Button, cn } from './ui';
 
 interface SidebarItemProps {
@@ -88,11 +88,11 @@ export const Layout: React.FC<LayoutProps> = ({ children, isDark, toggleDark, vi
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-64 bg-card border-r transition-transform duration-300 md:relative md:translate-x-0",
-          !sidebarOpen && "-translate-x-full md:hidden"
+          "fixed inset-y-0 left-0 z-50 w-64 bg-card border-r transition-all duration-300 md:relative",
+          sidebarOpen ? "translate-x-0" : "-translate-x-full md:w-0 md:overflow-hidden md:border-0"
         )}
       >
-        <div className="h-full flex flex-col">
+        <div className="h-full flex flex-col w-64">
           <div className="p-6 border-b flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold text-xl">
@@ -100,9 +100,14 @@ export const Layout: React.FC<LayoutProps> = ({ children, isDark, toggleDark, vi
               </div>
               <span className="font-bold text-lg">eBBot Testing</span>
             </div>
-            <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setSidebarOpen(false)}>
-              <Menu className="w-4 h-4" />
-            </Button>
+            <div className="flex items-center">
+              <Button variant="ghost" size="icon" className="hidden md:inline-flex" onClick={() => setSidebarOpen(false)}>
+                <PanelLeftClose className="w-4 h-4" />
+              </Button>
+              <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setSidebarOpen(false)}>
+                <Menu className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
 
           <div className="flex-1 py-6 px-4 space-y-1 overflow-y-auto">
@@ -146,6 +151,16 @@ export const Layout: React.FC<LayoutProps> = ({ children, isDark, toggleDark, vi
               </div>
               <SidebarItem icon={FileText} label="83a38c-0c (Candy Shop)" active={pathname === '/case-study-83a38c'} onClick={() => navigate('/case-study-83a38c')} indent />
               <SidebarItem icon={FileText} label="9cfda4-f5 (Skincare)" active={pathname === '/case-study-9cfda4'} onClick={() => navigate('/case-study-9cfda4')} indent />
+            </SidebarGroup>
+
+            {/* 3. Fly Bundles */}
+            <SidebarGroup
+              icon={Package}
+              label="Fly Bundles"
+              isActive={pathname === '/fly-strategy'}
+              defaultOpen={false}
+            >
+              <SidebarItem icon={Play} label="Playground" active={pathname === '/fly-strategy'} onClick={() => navigate('/fly-strategy')} indent />
             </SidebarGroup>
 
             {/* 4. BaaS */}
@@ -204,17 +219,20 @@ export const Layout: React.FC<LayoutProps> = ({ children, isDark, toggleDark, vi
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col h-screen overflow-hidden">
-        {/* Mobile Header */}
-        <header className="md:hidden h-14 border-b flex items-center px-4 bg-card">
+        {/* Header — mobile hamburger + desktop expand */}
+        <header className={cn(
+          "h-14 border-b flex items-center px-4 bg-card",
+          sidebarOpen && "md:hidden"
+        )}>
           <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(true)}>
-            <Menu className="w-5 h-5" />
+            {sidebarOpen ? <Menu className="w-5 h-5" /> : <PanelLeftOpen className="w-5 h-5" />}
           </Button>
           <span className="ml-4 font-semibold">eBBot Dashboard</span>
         </header>
 
         {/* Content Area */}
         <div className="flex-1 overflow-y-auto p-6 md:p-8">
-           <div className="max-w-7xl mx-auto space-y-8">
+           <div className={cn("mx-auto space-y-8 transition-all duration-300", sidebarOpen ? "max-w-[1400px]" : "max-w-[1800px]")}>
              {children}
            </div>
         </div>

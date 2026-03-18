@@ -12,6 +12,25 @@ interface ChurnAnalysisProps {
   viewMode: ViewMode;
 }
 
+const CopyButton: React.FC<{ text: string }> = ({ text }) => {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+  return (
+    <button
+      onClick={handleCopy}
+      title="Copy"
+      className="flex-shrink-0 opacity-0 group-hover/shop:opacity-60 hover:!opacity-100 transition-opacity"
+    >
+      {copied ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
+    </button>
+  );
+};
+
 // PM-friendly view for Structure LLM output
 const PMStructureView: React.FC<{ output: any }> = ({ output }) => {
   if (!output) return <div className="text-muted-foreground text-sm">No structure output</div>;
@@ -840,15 +859,18 @@ const ChurnAnalysis: React.FC<ChurnAnalysisProps> = ({ viewMode }) => {
                 {/* Summary Row */}
                 <TableRow onClick={() => handleRowClick(store.shopName)}>
                   <TableCell className="font-medium text-sm">
-                    <a
-                      href={`https://${store.shopName}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
-                      className="text-blue-600 dark:text-blue-400 hover:underline"
-                    >
-                      {store.shopName}
-                    </a>
+                    <div className="flex items-center gap-1 group/shop">
+                      <a
+                        href={`https://${store.shopName}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-blue-600 dark:text-blue-400 hover:underline truncate"
+                      >
+                        {store.shopName}
+                      </a>
+                      <CopyButton text={store.shopName} />
+                    </div>
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline">{store.pipelineRuns}</Badge>

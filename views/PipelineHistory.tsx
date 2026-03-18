@@ -1,15 +1,101 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Loader2, AlertCircle, Calendar, Package, Tag, Search, Filter, MessageSquare, Check, X, AlertTriangle, ExternalLink, Brain, Play, FileEdit, Copy } from 'lucide-react';
+import { Clock, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Loader2, AlertCircle, Calendar, Package, Tag, Search, Filter, MessageSquare, Check, X, AlertTriangle, ExternalLink, Brain, Play, FileEdit, Copy, Maximize2 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent, Button, Badge, CodeBlock, cn } from '../components/ui';
 import { ViewMode } from '../components/Layout';
 import { PMResultView, PMDiscountsPanel, PMRulesPanel, PMStepsPanel } from '../components/PMViews';
 import { PipelineHistoryLog, PipelineHistoryPagination, FeedbackRating, PipelineResult } from '../types';
 import { getPipelineHistory, searchPipelineHistory, submitFeedback, updateSpec, getPatternTags } from '../services/pipelineHistoryApi';
-import { runPipeline } from '../services/pipelineApi';
+import { rerunPipeline } from '../services/pipelineApi';
 
 interface PipelineHistoryProps {
   viewMode: ViewMode;
 }
+
+const CopyButton: React.FC<{ text: string }> = ({ text }) => {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+  return (
+    <button
+      onClick={handleCopy}
+      title="Copy"
+      className="flex-shrink-0 opacity-0 group-hover/shop:opacity-60 hover:!opacity-100 transition-opacity"
+    >
+      {copied ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
+    </button>
+  );
+};
+
+const JsonCopyButton: React.FC<{ data: any }> = ({ data }) => {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(JSON.stringify(data, null, 2));
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+  return (
+    <button
+      onClick={handleCopy}
+      title="Copy JSON"
+      className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+    >
+      {copied ? <><Check className="w-3.5 h-3.5 text-emerald-500" /> Copied</> : <><Copy className="w-3.5 h-3.5" /> Copy JSON</>}
+    </button>
+  );
+};
+
+const OutputModal: React.FC<{
+  title: string;
+  data: any;
+  config: any;
+  viewMode: ViewMode;
+  status?: string;
+  borderColor?: string;
+  onClose: () => void;
+}> = ({ title, data, config, viewMode, status, borderColor = 'border-slate-300 dark:border-slate-600', onClose }) => {
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [onClose]);
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/50" />
+      <div
+        className={cn("relative bg-card rounded-xl border-2 shadow-2xl w-[90vw] max-w-5xl max-h-[85vh] flex flex-col", borderColor)}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between px-6 py-4 border-b flex-shrink-0">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold uppercase tracking-wider">{title}</span>
+            {status && (
+              <Badge variant={status === 'AUTO' ? 'success' : 'destructive'}>{status}</Badge>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <JsonCopyButton data={data} />
+            <button onClick={onClose} className="p-1 rounded hover:bg-muted transition-colors">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+        <div className="flex-1 overflow-y-auto p-6">
+          {viewMode === 'pm' ? (
+            <PMResultView config={config} />
+          ) : (
+            <CodeBlock label="" code={data} />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // PM-friendly view for Structure LLM output
 const PMStructureView: React.FC<{ output: any }> = ({ output }) => {
@@ -281,16 +367,14 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
   const [rerunResults, setRerunResults] = useState<Record<string, any>>({});
   const [rerunErrors, setRerunErrors] = useState<Record<string, string>>({});
 
+  // Output modal state
+  const [modalData, setModalData] = useState<{ title: string; data: any; config: any; status?: string; borderColor?: string } | null>(null);
+
   const handleRerun = async (log: PipelineHistoryLog) => {
     setRerunningId(log.id);
     setRerunErrors((prev) => { const next = { ...prev }; delete next[log.id]; return next; });
     try {
-      const response = await runPipeline({
-        merchantText: log.input.merchantText,
-        products: log.input.products || [],
-        collections: log.input.collections || [],
-        skipLogging: true,
-      });
+      const response = await rerunPipeline(log.id);
       setRerunResults((prev) => ({ ...prev, [log.id]: response.data }));
     } catch (err: any) {
       setRerunErrors((prev) => ({ ...prev, [log.id]: err.message || 'Pipeline run failed' }));
@@ -740,9 +824,10 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
       {!loading && !error && logs.length > 0 && (
         <div className="space-y-3">
           {/* Column Headers */}
-          <div className="grid grid-cols-[150px_200px_70px_80px_80px_1fr_40px] items-center px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b">
+          <div className="grid grid-cols-[150px_200px_80px_70px_80px_80px_1fr_40px] items-center px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b">
             <span>Date</span>
             <span>Shop</span>
+            <span>Status</span>
             <span>Bundle</span>
             <span>Duration</span>
             <span>Feedback</span>
@@ -754,25 +839,37 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
               {/* Header Row - Always Visible */}
               <div
                 onClick={() => toggleExpand(log.id)}
-                className="grid grid-cols-[150px_200px_70px_80px_80px_1fr_40px] items-center p-4 cursor-pointer hover:bg-muted/50 transition-colors"
+                className="grid grid-cols-[150px_200px_80px_70px_80px_80px_1fr_40px] items-center p-4 cursor-pointer hover:bg-muted/50 transition-colors"
               >
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <Clock className="w-3 h-3 flex-shrink-0" />
                   {formatDate(log.timestamp)}
                 </div>
                 {log.shopName ? (
-                  <a
-                    href={`https://${log.shopName}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline"
-                  >
-                    {log.shopName}
-                  </a>
+                  <div className="flex items-center gap-1 group/shop">
+                    <a
+                      href={`https://${log.shopName}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline truncate"
+                    >
+                      {log.shopName}
+                    </a>
+                    <CopyButton text={log.shopName} />
+                  </div>
                 ) : (
                   <span className="text-xs font-medium text-muted-foreground">-</span>
                 )}
+                <div>
+                  {log.isChurned === true ? (
+                    <Badge variant="destructive" className="text-[10px]">Uninstalled</Badge>
+                  ) : log.isChurned === false ? (
+                    <Badge variant="success" className="text-[10px]">Installed</Badge>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">-</span>
+                  )}
+                </div>
                 {log.bundleLink ? (
                   <a
                     href={log.bundleLink}
@@ -974,6 +1071,9 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                         */}
 
                         <CodeBlock label="Assembled Result" code={log.output.assembledResult} />
+                        {log.output.aiPayload && (
+                          <CodeBlock label="AI Payload" code={log.output.aiPayload} />
+                        )}
                       </div>
                     )}
                   </div>
@@ -1010,8 +1110,18 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                         {/* Original Result */}
                         <div className="rounded-lg border-2 border-slate-300 dark:border-slate-600 overflow-hidden">
-                          <div className="px-4 py-2 bg-slate-100 dark:bg-slate-800 border-b border-slate-300 dark:border-slate-600">
+                          <div className="px-4 py-2 bg-slate-100 dark:bg-slate-800 border-b border-slate-300 dark:border-slate-600 flex items-center justify-between">
                             <span className="text-sm font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Original Pipeline Output</span>
+                            <div className="flex items-center gap-2">
+                              <JsonCopyButton data={log.output.assembledResult} />
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setModalData({ title: 'Original Pipeline Output', data: log.output.assembledResult, config: log.output.assembledResult?.bundleConfig || log.output.assembledResult }); }}
+                                title="Expand"
+                                className="text-muted-foreground hover:text-foreground transition-colors"
+                              >
+                                <Maximize2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
                           </div>
                           <div className="p-4">
                             {viewMode === 'pm' ? (
@@ -1024,13 +1134,25 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
 
                         {/* New Result */}
                         <div className="rounded-lg border-2 border-blue-400 dark:border-blue-500 overflow-hidden">
-                          <div className="px-4 py-2 bg-blue-50 dark:bg-blue-950/40 border-b border-blue-400 dark:border-blue-500">
-                            <span className="text-sm font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wider">Current Pipeline Output</span>
-                            {rerunResults[log.id].status && (
-                              <Badge className="ml-2" variant={rerunResults[log.id].status === 'AUTO' ? 'success' : 'destructive'}>
-                                {rerunResults[log.id].status}
-                              </Badge>
-                            )}
+                          <div className="px-4 py-2 bg-blue-50 dark:bg-blue-950/40 border-b border-blue-400 dark:border-blue-500 flex items-center justify-between">
+                            <div className="flex items-center">
+                              <span className="text-sm font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wider">Current Pipeline Output</span>
+                              {rerunResults[log.id].status && (
+                                <Badge className="ml-2" variant={rerunResults[log.id].status === 'AUTO' ? 'success' : 'destructive'}>
+                                  {rerunResults[log.id].status}
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <JsonCopyButton data={rerunResults[log.id]} />
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setModalData({ title: 'Current Pipeline Output', data: rerunResults[log.id], config: rerunResults[log.id].bundleConfig || rerunResults[log.id], status: rerunResults[log.id].status, borderColor: 'border-blue-400 dark:border-blue-500' }); }}
+                                title="Expand"
+                                className="text-muted-foreground hover:text-foreground transition-colors"
+                              >
+                                <Maximize2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
                           </div>
                           <div className="p-4">
                             {viewMode === 'pm' ? (
@@ -1344,6 +1466,17 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
             </div>
           </CardContent>
         </Card>
+      )}
+      {modalData && (
+        <OutputModal
+          title={modalData.title}
+          data={modalData.data}
+          config={modalData.config}
+          viewMode={viewMode}
+          status={modalData.status}
+          borderColor={modalData.borderColor}
+          onClose={() => setModalData(null)}
+        />
       )}
     </div>
   );

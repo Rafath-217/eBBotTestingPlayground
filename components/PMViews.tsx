@@ -331,14 +331,35 @@ export const PMStepsPanel: React.FC<{ steps: any[] }> = ({ steps }) => {
             </div>
 
             {step.categories?.map((cat: any, catIdx: number) => (
-              <div key={catIdx} className="ml-11 flex items-center gap-2 text-sm py-1">
-                <div className="w-2 h-2 rounded-full bg-muted-foreground" />
-                <span>{cat.label}</span>
-                {cat.collectionId && (
-                  <span className="text-xs text-muted-foreground">(Collection)</span>
-                )}
-                {cat.productIds && (
-                  <span className="text-xs text-muted-foreground">({cat.productIds.length} products)</span>
+              <div key={catIdx} className="ml-11 py-1">
+                <div className="flex items-center gap-2 text-sm">
+                  <div className="w-2 h-2 rounded-full bg-muted-foreground flex-shrink-0" />
+                  <span>{cat.label}</span>
+                  {cat._source === 'collectionSplit' ? (
+                    <span className="text-xs text-muted-foreground">(Split from {cat._splitFromCollection || 'collection'})</span>
+                  ) : cat.collectionId ? (
+                    <span className="text-xs text-muted-foreground">(Collection)</span>
+                  ) : null}
+                  {cat.productIds && (
+                    <span className="text-xs text-muted-foreground">({cat.productIds.length} product{cat.productIds.length !== 1 ? 's' : ''})</span>
+                  )}
+                </div>
+                {cat._source === 'collectionSplit' && cat.enrichedProducts?.length > 0 && (
+                  <div className="ml-4 mt-1.5 space-y-1">
+                    {cat.enrichedProducts.map((ep: any, epIdx: number) => (
+                      <div key={epIdx} className="flex items-center gap-2 text-xs bg-muted/40 rounded px-2 py-1.5">
+                        {ep.images?.[0]?.originalSrc ? (
+                          <img src={ep.images[0].originalSrc} alt={ep.title} className="w-8 h-8 rounded object-cover flex-shrink-0" />
+                        ) : (
+                          <div className="w-8 h-8 rounded bg-muted flex-shrink-0" />
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium truncate">{ep.title}</p>
+                          <p className="text-muted-foreground">{ep.variants?.length || 0} variant{(ep.variants?.length || 0) !== 1 ? 's' : ''} · ${ep.variants?.[0]?.price || '—'}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
             ))}

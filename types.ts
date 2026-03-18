@@ -235,6 +235,7 @@ export interface PipelineHistoryOutput {
   discountLLM: any;
   rulesLLM: any;
   assembledResult: any;
+  aiPayload?: any;
 }
 
 export type FeedbackRating = 'CORRECT' | 'INCORRECT' | 'PARTIALLY_CORRECT';
@@ -259,6 +260,8 @@ export interface PipelineHistoryLog {
   patternTags?: string[];
   llmReasoning?: any;
   decisionSummary?: any;
+  isChurned?: boolean;
+  churnData?: any;
 }
 
 export interface PipelineHistoryPagination {
