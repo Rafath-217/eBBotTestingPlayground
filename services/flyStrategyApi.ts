@@ -1,5 +1,5 @@
-const FLY_API_BASE_URL = process.env.FLY_API_BASE_URL || 'http://localhost:3002';
-const API_SECRET_KEY = process.env.DASHBOARD_KEY || '';
+const FLY_API_BASE_URL = process.env.STAG_GIFTWRAP_API_BASE_URL || 'http://localhost:3002';
+const API_SECRET_KEY = process.env.STAG_GIFTWRAP_KEY || '';
 
 export interface FlyStrategyResult {
   success?: boolean;
@@ -56,12 +56,16 @@ export interface FlyStrategyResult {
   };
 }
 
+export type FeedbackType = 'correct' | 'incorrect' | 'partially_correct';
+
 export interface FlyStrategyHistoryEntry {
   _id: string;
   shopName: string;
   status?: string;
   tier?: number;
   tierLabel?: string;
+  shopifyPlan?: string;
+  recommendationStrength?: string;
   totalRecommendations?: number;
   hasMinimumViable?: boolean;
   productsFound?: number;
@@ -69,9 +73,53 @@ export interface FlyStrategyHistoryEntry {
   organicOrders?: number;
   groupingStrategy?: string;
   durationMs?: number;
+  triggeredBy?: string;
+  variantPairsBlocked?: number;
   error?: string | null;
   result?: FlyStrategyResult;
+  feedback?: FeedbackType;
+  feedbackText?: string;
+  feedbackAt?: string;
   createdAt: string;
+  updatedAt?: string;
+}
+
+export interface HistoryFilters {
+  page?: number;
+  limit?: number;
+  shopName?: string;
+  status?: string;
+  tier?: string;
+  tierLabel?: string;
+  shopifyPlan?: string;
+  recommendationStrength?: string;
+  hasMinimumViable?: string;
+  minProducts?: number;
+  maxProducts?: number;
+  minOrders?: number;
+  maxOrders?: number;
+  minOrganic?: number;
+  noOrganic?: string;
+  from?: string;
+  to?: string;
+  sortBy?: string;
+  sortOrder?: string;
+}
+
+export interface HistoryPagination {
+  page: number;
+  limit: number;
+  totalItems: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}
+
+export interface HistoryResponse {
+  success: boolean;
+  count: number;
+  pagination: HistoryPagination;
+  runs: FlyStrategyHistoryEntry[];
 }
 
 /**
@@ -96,10 +144,18 @@ export async function runFlyStrategy(shopName: string): Promise<FlyStrategyHisto
 }
 
 /**
- * Fetch fly strategy run history
+ * Fetch fly strategy run history with filters and pagination
  */
-export async function getFlyStrategyHistory(limit = 20): Promise<FlyStrategyHistoryEntry[]> {
-  const response = await fetch(`${FLY_API_BASE_URL}/api/flyBundleRecommendations/history?limit=${limit}`, {
+export async function getFlyStrategyHistory(filters: HistoryFilters = {}): Promise<HistoryResponse> {
+  const params = new URLSearchParams();
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      params.set(key, String(value));
+    }
+  });
+  if (!params.has('limit')) params.set('limit', '20');
+
+  const response = await fetch(`${FLY_API_BASE_URL}/api/flyBundleRecommendations/history?${params}`, {
     headers: { 'secret-key': API_SECRET_KEY },
   });
 
@@ -109,11 +165,32 @@ export async function getFlyStrategyHistory(limit = 20): Promise<FlyStrategyHist
   }
 
   const data = await response.json();
-  if (Array.isArray(data)) return data;
-  if (Array.isArray(data.entries)) return data.entries;
-  if (Array.isArray(data.history)) return data.history;
-  if (Array.isArray(data.runs)) return data.runs;
-  return [];
+
+  // Handle both new paginated response and legacy formats
+  if (data.pagination && data.runs) {
+    return data as HistoryResponse;
+  }
+
+  // Legacy fallback: wrap array response in paginated format
+  const runs = Array.isArray(data) ? data
+    : Array.isArray(data.entries) ? data.entries
+    : Array.isArray(data.history) ? data.history
+    : Array.isArray(data.runs) ? data.runs
+    : [];
+
+  return {
+    success: true,
+    count: runs.length,
+    pagination: {
+      page: 1,
+      limit: runs.length,
+      totalItems: runs.length,
+      totalPages: 1,
+      hasNextPage: false,
+      hasPrevPage: false,
+    },
+    runs,
+  };
 }
 
 /**
@@ -167,4 +244,37 @@ export async function pollForResult(
     await new Promise(r => setTimeout(r, intervalMs));
   }
   throw new Error('Recommendation timed out — please try again');
+}
+
+export interface FeedbackResponse {
+  success: boolean;
+  runId: string;
+  feedback: string;
+  feedbackText?: string;
+  feedbackAt: string;
+}
+
+/**
+ * Submit feedback for a pipeline run
+ */
+export async function submitRunFeedback(
+  id: string,
+  feedback: FeedbackType,
+  text?: string,
+): Promise<FeedbackResponse> {
+  const response = await fetch(`${FLY_API_BASE_URL}/api/flyBundleRecommendations/history/${id}/feedback`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'secret-key': API_SECRET_KEY,
+    },
+    body: JSON.stringify({ feedback, text: text || undefined }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'Network error' }));
+    throw new Error(error.message || `HTTP ${response.status}`);
+  }
+
+  return response.json();
 }

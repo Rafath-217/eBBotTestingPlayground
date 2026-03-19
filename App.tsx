@@ -246,7 +246,7 @@ function App() {
           <Route path="/run-strategy" element={<StrategyView />} />
           <Route path="/baas-handoff" element={<BaasHandoffPage />} />
           <Route path="/baas-faq" element={<BaasFAQPage />} />
-          <Route path="/fly-strategy" element={<FlyStrategyPage viewMode={viewMode} />} />
+          <Route path="/fly-recommendations" element={<FlyStrategyPage viewMode={viewMode} />} />
           <Route path="/case-study-83a38c" element={<CaseStudy83a38cPage />} />
           <Route path="/case-study-9cfda4" element={<CaseStudy9cfda4Page />} />
         </Routes>

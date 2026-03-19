@@ -26,6 +26,8 @@ export default defineConfig(({ mode }) => {
         'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
         'process.env.DASHBOARD_KEY': JSON.stringify(env.DASHBOARD_KEY),
         'process.env.API_BASE_URL': JSON.stringify(env.API_BASE_URL),
+        'process.env.STAG_GIFTWRAP_API_BASE_URL': JSON.stringify(env.STAG_GIFTWRAP_API_BASE_URL),
+        'process.env.STAG_GIFTWRAP_KEY': JSON.stringify(env.STAG_GIFTWRAP_KEY),
       },
       resolve: {
         alias: {

@@ -157,10 +157,10 @@ export const Layout: React.FC<LayoutProps> = ({ children, isDark, toggleDark, vi
             <SidebarGroup
               icon={Package}
               label="Fly Bundles"
-              isActive={pathname === '/fly-strategy'}
+              isActive={pathname === '/fly-recommendations'}
               defaultOpen={false}
             >
-              <SidebarItem icon={Play} label="Playground" active={pathname === '/fly-strategy'} onClick={() => navigate('/fly-strategy')} indent />
+              <SidebarItem icon={Play} label="Playground" active={pathname === '/fly-recommendations'} onClick={() => navigate('/fly-recommendations')} indent />
             </SidebarGroup>
 
             {/* 4. BaaS */}
