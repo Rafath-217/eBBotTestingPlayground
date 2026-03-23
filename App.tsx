@@ -30,6 +30,7 @@ import BundleSetupPipelineFAQPage from './views/BundleSetupPipelineFAQPage';
 import BaasHandoffPage from './views/BaasHandoffPage';
 import BaasFAQPage from './views/BaasFAQPage';
 import FlyStrategyPage from './views/FlyStrategyPage';
+import FlyBundleRecommendationsPage from './views/FlyBundleRecommendationsPage';
 import CaseStudy83a38cPage from './views/CaseStudy83a38cPage';
 import CaseStudy9cfda4Page from './views/CaseStudy9cfda4Page';
 import { getMetrics, getAllResults, getEnrichedResults, EnrichedResult, getLLMSpecs, getTestCases } from './services/dataService';
@@ -247,6 +248,7 @@ function App() {
           <Route path="/baas-handoff" element={<BaasHandoffPage />} />
           <Route path="/baas-faq" element={<BaasFAQPage />} />
           <Route path="/fly-recommendations" element={<FlyStrategyPage viewMode={viewMode} />} />
+          <Route path="/fly-pm-handoff" element={<FlyBundleRecommendationsPage />} />
           <Route path="/case-study-83a38c" element={<CaseStudy83a38cPage />} />
           <Route path="/case-study-9cfda4" element={<CaseStudy9cfda4Page />} />
         </Routes>
