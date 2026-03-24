@@ -35,8 +35,8 @@ const TOOLTIPS = {
   } as Record<string, string>,
   shopifyPlan: {
     basic: 'Shopify Basic plan — smallest merchants, typically lower order volume.',
-    shopify: 'Shopify standard plan — mid-tier merchants with moderate traffic.',
-    advanced: 'Shopify Advanced plan — established merchants with higher volume.',
+    professional: 'Shopify Professional plan — mid-tier merchants with moderate traffic.',
+    unlimited: 'Shopify Unlimited plan — established merchants with higher volume.',
     shopify_plus: 'Shopify Plus — enterprise merchants, typically highest order volume and catalog size.',
   } as Record<string, string>,
   hasMinimumViable: {
@@ -229,12 +229,23 @@ const ProductLink: React.FC<{ handle?: string; className?: string; children: Rea
 // --- Decision trace display ---
 const TraceBlock: React.FC<{ trace?: string[]; className?: string }> = ({ trace, className }) => {
   const visible = React.useContext(TraceVisibleContext);
+  const [copied, setCopied] = useState(false);
   if (!visible || !trace?.length) return null;
+  const handleCopy = () => {
+    navigator.clipboard.writeText(trace.join('\n'));
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
   return (
     <div className={cn('rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 p-3 space-y-1', className)}>
-      <p className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wide flex items-center gap-1">
-        <MessageCircle className="w-3 h-3" /> Decision Trace
-      </p>
+      <div className="flex items-center justify-between">
+        <p className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wide flex items-center gap-1">
+          <MessageCircle className="w-3 h-3" /> Decision Trace
+        </p>
+        <button onClick={handleCopy} className="text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 transition-colors">
+          {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+        </button>
+      </div>
       <ul className="space-y-0.5">
         {trace.map((line, i) => (
           <li key={i} className="text-xs text-blue-900 dark:text-blue-200">{line}</li>
@@ -767,8 +778,8 @@ const STRENGTH_OPTIONS = [
 
 const PLAN_OPTIONS = [
   { value: 'basic', label: 'Basic' },
-  { value: 'shopify', label: 'Shopify' },
-  { value: 'advanced', label: 'Advanced' },
+  { value: 'professional', label: 'Professional' },
+  { value: 'unlimited', label: 'Unlimited' },
   { value: 'shopify_plus', label: 'Shopify Plus' },
 ];
 
