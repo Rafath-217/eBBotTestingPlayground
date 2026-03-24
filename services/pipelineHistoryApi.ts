@@ -33,6 +33,9 @@ export async function getPipelineHistory(query: PipelineHistoryQuery = {}): Prom
   if (query.patterns && query.patterns.length > 0) {
     params.append('patterns', query.patterns.join(','));
   }
+  if (query.shopifyPlanName && query.shopifyPlanName !== 'ALL') {
+    params.append('shopifyPlanName', query.shopifyPlanName);
+  }
   if (query.uniqueStores) {
     params.append('uniqueStores', 'true');
   }
@@ -50,6 +53,25 @@ export async function getPipelineHistory(query: PipelineHistoryQuery = {}): Prom
   }
 
   return response.json();
+}
+
+/**
+ * Fetch available Shopify plans for filtering
+ */
+export async function getShopifyPlans(): Promise<string[]> {
+  const url = `${API_BASE_URL}/api/bundleSetupLlmPipeline/pipelineHistory/shopifyPlans`;
+
+  const response = await fetch(url, {
+    headers: { 'secret-key': API_SECRET_KEY },
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'Network error' }));
+    throw new Error(error.message || `HTTP ${response.status}`);
+  }
+
+  const result = await response.json();
+  return result.data?.plans || [];
 }
 
 /**

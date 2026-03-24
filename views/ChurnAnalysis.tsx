@@ -6,7 +6,7 @@ import { Card, CardHeader, CardTitle, CardContent, Button, Badge, CodeBlock, cn,
 import { ViewMode } from '../components/Layout';
 import { PMResultView } from '../components/PMViews';
 import { getChurnedStores, getStoreDetail, analyseStore, backfillChurnData, ChurnedStore, ChurnQuery, StoreDetail, ChurnReason, ChurnAnalysisResult } from '../services/churnAnalysisApi';
-import { getPatternTags } from '../services/pipelineHistoryApi';
+import { getPatternTags, getShopifyPlans } from '../services/pipelineHistoryApi';
 
 interface ChurnAnalysisProps {
   viewMode: ViewMode;
@@ -259,6 +259,8 @@ const ChurnAnalysis: React.FC<ChurnAnalysisProps> = ({ viewMode }) => {
   // Pattern tags filter
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [selectedPatterns, setSelectedPatterns] = useState<string[]>([]);
+  const [shopifyPlanFilter, setShopifyPlanFilter] = useState<string>('ALL');
+  const [availablePlans, setAvailablePlans] = useState<string[]>([]);
   const [patternDropdownOpen, setPatternDropdownOpen] = useState(false);
 
   // Formatting helpers
@@ -302,6 +304,7 @@ const ChurnAnalysis: React.FC<ChurnAnalysisProps> = ({ viewMode }) => {
   // Fetch available pattern tags on mount
   useEffect(() => {
     getPatternTags().then(setAvailableTags).catch(() => {});
+    getShopifyPlans().then(setAvailablePlans).catch(() => {});
   }, []);
 
   const groupedTags = availableTags.reduce<Record<string, string[]>>((acc, tag) => {
@@ -341,6 +344,7 @@ const ChurnAnalysis: React.FC<ChurnAnalysisProps> = ({ viewMode }) => {
       if (maxRuns) query.maxRuns = Number(maxRuns);
       if (hadErrors === 'WITH_ERRORS') query.hadErrors = 'true';
       if (selectedPatterns.length > 0) query.patterns = selectedPatterns;
+      if (shopifyPlanFilter !== 'ALL') query.shopifyPlanName = shopifyPlanFilter;
 
       const response = await getChurnedStores(query);
       setStores(response.data.stores);
@@ -426,6 +430,7 @@ const ChurnAnalysis: React.FC<ChurnAnalysisProps> = ({ viewMode }) => {
     setMaxRuns('');
     setHadErrors('ALL');
     setSelectedPatterns([]);
+    setShopifyPlanFilter('ALL');
     setSortBy('uninstalledAt');
     setSortOrder('desc');
     setCurrentPage(1);
@@ -447,6 +452,7 @@ const ChurnAnalysis: React.FC<ChurnAnalysisProps> = ({ viewMode }) => {
       if (maxRuns) query.maxRuns = Number(maxRuns);
       if (hadErrors === 'WITH_ERRORS') query.hadErrors = 'true';
       if (selectedPatterns.length > 0) query.patterns = selectedPatterns;
+      if (shopifyPlanFilter !== 'ALL') query.shopifyPlanName = shopifyPlanFilter;
 
       const response = await getChurnedStores(query);
       const exportData = {
@@ -680,6 +686,25 @@ const ChurnAnalysis: React.FC<ChurnAnalysisProps> = ({ viewMode }) => {
                 ))}
               </div>
             </div>
+
+            {availablePlans.length > 0 && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium flex items-center gap-2">
+                  <Filter className="w-4 h-4" />
+                  Shopify Plan
+                </label>
+                <select
+                  value={shopifyPlanFilter}
+                  onChange={(e) => setShopifyPlanFilter(e.target.value)}
+                  className="h-9 px-2 rounded-md border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  <option value="ALL">All Plans</option>
+                  {availablePlans.map((plan) => (
+                    <option key={plan} value={plan}>{plan}</option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             <div className="space-y-2">
               <label className="text-sm font-medium">Sort</label>

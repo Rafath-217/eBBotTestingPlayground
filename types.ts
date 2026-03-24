@@ -289,6 +289,7 @@ export interface PipelineHistoryQuery {
   feedback?: 'ALL' | 'CORRECT' | 'INCORRECT' | 'PARTIALLY_CORRECT' | 'NO_FEEDBACK';
   merchantText?: 'ALL' | 'EMPTY' | 'NON_EMPTY';
   patterns?: string[];
+  shopifyPlanName?: string;
   uniqueStores?: boolean;
 }
 

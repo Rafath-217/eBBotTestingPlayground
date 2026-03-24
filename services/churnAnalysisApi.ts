@@ -41,6 +41,7 @@ export interface ChurnQuery {
   hadErrors?: string;
   search?: string;
   patterns?: string[];
+  shopifyPlanName?: string;
 }
 
 export interface StoreDetailRun {

@@ -4,7 +4,7 @@ import { Card, CardHeader, CardTitle, CardContent, Button, Badge, CodeBlock, cn 
 import { ViewMode } from '../components/Layout';
 import { PMResultView, PMDiscountsPanel, PMRulesPanel, PMStepsPanel } from '../components/PMViews';
 import { PipelineHistoryLog, PipelineHistoryPagination, FeedbackRating, PipelineResult } from '../types';
-import { getPipelineHistory, searchPipelineHistory, submitFeedback, updateSpec, getPatternTags } from '../services/pipelineHistoryApi';
+import { getPipelineHistory, searchPipelineHistory, submitFeedback, updateSpec, getPatternTags, getShopifyPlans } from '../services/pipelineHistoryApi';
 import { rerunPipeline } from '../services/pipelineApi';
 
 interface PipelineHistoryProps {
@@ -336,6 +336,8 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
   // Pattern tags filter
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [selectedPatterns, setSelectedPatterns] = useState<string[]>([]);
+  const [shopifyPlanFilter, setShopifyPlanFilter] = useState<string>('ALL');
+  const [availablePlans, setAvailablePlans] = useState<string[]>([]);
   const [uniqueStores, setUniqueStores] = useState(false);
   const [patternDropdownOpen, setPatternDropdownOpen] = useState(false);
 
@@ -429,9 +431,10 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
     }
   };
 
-  // Fetch available pattern tags on mount
+  // Fetch available pattern tags and shopify plans on mount
   useEffect(() => {
     getPatternTags().then(setAvailableTags).catch(() => {});
+    getShopifyPlans().then(setAvailablePlans).catch(() => {});
   }, []);
 
   // Group tags by prefix for display
@@ -476,6 +479,7 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
           feedback: feedbackFilter,
           merchantText: merchantTextFilter,
           patterns: selectedPatterns.length > 0 ? selectedPatterns : undefined,
+          shopifyPlanName: shopifyPlanFilter !== 'ALL' ? shopifyPlanFilter : undefined,
           uniqueStores: uniqueStores || undefined,
         });
       }
@@ -512,6 +516,7 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
     setFeedbackFilter('ALL');
     setMerchantTextFilter('ALL');
     setSelectedPatterns([]);
+    setShopifyPlanFilter('ALL');
     setShopNameSearch('');
     setIsSearchMode(false);
     setCurrentPage(1);
@@ -645,6 +650,24 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                 ))}
               </div>
             </div>
+            {availablePlans.length > 0 && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium flex items-center gap-2">
+                  <Filter className="w-4 h-4" />
+                  Shopify Plan
+                </label>
+                <select
+                  value={shopifyPlanFilter}
+                  onChange={(e) => setShopifyPlanFilter(e.target.value)}
+                  className="h-10 px-3 rounded-md border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  <option value="ALL">All Plans</option>
+                  {availablePlans.map((plan) => (
+                    <option key={plan} value={plan}>{plan}</option>
+                  ))}
+                </select>
+              </div>
+            )}
             <div className="space-y-2 flex-1 min-w-[200px] max-w-sm">
               <label className="text-sm font-medium flex items-center gap-2">
                 <Search className="w-4 h-4" />
