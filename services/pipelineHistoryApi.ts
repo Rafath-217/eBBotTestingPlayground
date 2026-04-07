@@ -36,6 +36,9 @@ export async function getPipelineHistory(query: PipelineHistoryQuery = {}): Prom
   if (query.shopifyPlanName && query.shopifyPlanName !== 'ALL') {
     params.append('shopifyPlanName', query.shopifyPlanName);
   }
+  if (query.bundleType && query.bundleType !== 'ALL') {
+    params.append('bundleType', query.bundleType);
+  }
   if (query.uniqueStores) {
     params.append('uniqueStores', 'true');
   }

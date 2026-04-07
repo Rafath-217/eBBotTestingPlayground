@@ -340,6 +340,7 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
   const [availablePlans, setAvailablePlans] = useState<string[]>([]);
   const [productCountFilter, setProductCountFilter] = useState<string>('ALL');
   const [collectionCountFilter, setCollectionCountFilter] = useState<string>('ALL');
+  const [bundleTypeFilter, setBundleTypeFilter] = useState<string>('ALL');
   const [uniqueStores, setUniqueStores] = useState(false);
   const [patternDropdownOpen, setPatternDropdownOpen] = useState(false);
 
@@ -512,6 +513,7 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
           merchantText: merchantTextFilter,
           patterns: allPatterns.length > 0 ? allPatterns : undefined,
           shopifyPlanName: shopifyPlanFilter !== 'ALL' ? shopifyPlanFilter : undefined,
+          bundleType: bundleTypeFilter !== 'ALL' ? bundleTypeFilter : undefined,
           uniqueStores: uniqueStores || undefined,
         });
       }
@@ -551,6 +553,7 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
     setShopifyPlanFilter('ALL');
     setProductCountFilter('ALL');
     setCollectionCountFilter('ALL');
+    setBundleTypeFilter('ALL');
     setShopNameSearch('');
     setIsSearchMode(false);
     setCurrentPage(1);
@@ -702,6 +705,22 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                 </select>
               </div>
             )}
+            <div className="space-y-2">
+              <label className="text-sm font-medium flex items-center gap-2">
+                <Filter className="w-4 h-4" />
+                Bundle Type
+              </label>
+              <select
+                value={bundleTypeFilter}
+                onChange={(e) => setBundleTypeFilter(e.target.value)}
+                className="h-10 px-3 rounded-md border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value="ALL">All</option>
+                <option value="FULLPAGE_BUNDLE">Full Page Bundle</option>
+                <option value="PRODUCT_PAGE_BUNDLE">Product Page (Mix & Match)</option>
+                <option value="NO_BUNDLE_TYPE">No bundle type</option>
+              </select>
+            </div>
             <div className="space-y-2">
               <label className="text-sm font-medium flex items-center gap-2">
                 <Package className="w-4 h-4" />

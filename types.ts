@@ -260,6 +260,9 @@ export interface PipelineHistoryLog {
   patternTags?: string[];
   llmReasoning?: any;
   decisionSummary?: any;
+  shopifyPlanName?: string;
+  bundleType?: 'FULLPAGE_BUNDLE' | 'PRODUCT_PAGE_BUNDLE' | null;
+  isAppInstalled?: boolean;
   isChurned?: boolean;
   churnData?: any;
 }
@@ -290,6 +293,7 @@ export interface PipelineHistoryQuery {
   merchantText?: 'ALL' | 'EMPTY' | 'NON_EMPTY';
   patterns?: string[];
   shopifyPlanName?: string;
+  bundleType?: string;
   uniqueStores?: boolean;
 }
 
