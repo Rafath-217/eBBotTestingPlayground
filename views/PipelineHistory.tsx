@@ -338,6 +338,8 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
   const [selectedPatterns, setSelectedPatterns] = useState<string[]>([]);
   const [shopifyPlanFilter, setShopifyPlanFilter] = useState<string>('ALL');
   const [availablePlans, setAvailablePlans] = useState<string[]>([]);
+  const [productCountFilter, setProductCountFilter] = useState<string>('ALL');
+  const [collectionCountFilter, setCollectionCountFilter] = useState<string>('ALL');
   const [uniqueStores, setUniqueStores] = useState(false);
   const [patternDropdownOpen, setPatternDropdownOpen] = useState(false);
 
@@ -437,8 +439,8 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
     getShopifyPlans().then(setAvailablePlans).catch(() => {});
   }, []);
 
-  // Group tags by prefix for display
-  const groupedTags = availableTags.reduce<Record<string, string[]>>((acc, tag) => {
+  // Group tags by prefix for display (exclude product_count / collection_count — they have dedicated dropdowns)
+  const groupedTags = availableTags.filter((tag) => !tag.startsWith('product_count:') && !tag.startsWith('collection_count:')).reduce<Record<string, string[]>>((acc, tag) => {
     const [prefix] = tag.split(':');
     const group = prefix.charAt(0).toUpperCase() + prefix.slice(1);
     if (!acc[group]) acc[group] = [];
@@ -457,6 +459,32 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
     );
   };
 
+  const PRODUCT_COUNT_OPTIONS = [
+    { label: 'All', value: 'ALL' },
+    { label: '0 (no products)', value: 'product_count:0' },
+    { label: '1', value: 'product_count:1' },
+    { label: '2', value: 'product_count:2' },
+    { label: '3', value: 'product_count:3' },
+    { label: '4', value: 'product_count:4' },
+    { label: '5', value: 'product_count:5' },
+    { label: '6\u201310', value: 'product_count:6-10' },
+    { label: '11\u201315', value: 'product_count:11-15' },
+    { label: '15+', value: 'product_count:gt15' },
+  ];
+
+  const COLLECTION_COUNT_OPTIONS = [
+    { label: 'All', value: 'ALL' },
+    { label: '0 (no collections)', value: 'collection_count:0' },
+    { label: '1', value: 'collection_count:1' },
+    { label: '2', value: 'collection_count:2' },
+    { label: '3', value: 'collection_count:3' },
+    { label: '4', value: 'collection_count:4' },
+    { label: '5', value: 'collection_count:5' },
+    { label: '6\u201310', value: 'collection_count:6-10' },
+    { label: '11\u201315', value: 'collection_count:11-15' },
+    { label: '15+', value: 'collection_count:gt15' },
+  ];
+
   const fetchHistory = async () => {
     setLoading(true);
     setError(null);
@@ -470,6 +498,10 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
           limit,
         });
       } else {
+        const allPatterns = [...selectedPatterns];
+        if (productCountFilter !== 'ALL') allPatterns.push(productCountFilter);
+        if (collectionCountFilter !== 'ALL') allPatterns.push(collectionCountFilter);
+
         response = await getPipelineHistory({
           startDate: startDate || undefined,
           endDate: endDate || undefined,
@@ -478,7 +510,7 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
           source: sourceFilter,
           feedback: feedbackFilter,
           merchantText: merchantTextFilter,
-          patterns: selectedPatterns.length > 0 ? selectedPatterns : undefined,
+          patterns: allPatterns.length > 0 ? allPatterns : undefined,
           shopifyPlanName: shopifyPlanFilter !== 'ALL' ? shopifyPlanFilter : undefined,
           uniqueStores: uniqueStores || undefined,
         });
@@ -517,6 +549,8 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
     setMerchantTextFilter('ALL');
     setSelectedPatterns([]);
     setShopifyPlanFilter('ALL');
+    setProductCountFilter('ALL');
+    setCollectionCountFilter('ALL');
     setShopNameSearch('');
     setIsSearchMode(false);
     setCurrentPage(1);
@@ -668,6 +702,36 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                 </select>
               </div>
             )}
+            <div className="space-y-2">
+              <label className="text-sm font-medium flex items-center gap-2">
+                <Package className="w-4 h-4" />
+                Product Count
+              </label>
+              <select
+                value={productCountFilter}
+                onChange={(e) => setProductCountFilter(e.target.value)}
+                className="h-10 px-3 rounded-md border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                {PRODUCT_COUNT_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium flex items-center gap-2">
+                <Package className="w-4 h-4" />
+                Collection Count
+              </label>
+              <select
+                value={collectionCountFilter}
+                onChange={(e) => setCollectionCountFilter(e.target.value)}
+                className="h-10 px-3 rounded-md border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                {COLLECTION_COUNT_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
             <div className="space-y-2 flex-1 min-w-[200px] max-w-sm">
               <label className="text-sm font-medium flex items-center gap-2">
                 <Search className="w-4 h-4" />
@@ -847,13 +911,15 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
       {!loading && !error && logs.length > 0 && (
         <div className="space-y-3">
           {/* Column Headers */}
-          <div className="grid grid-cols-[150px_200px_80px_70px_80px_80px_1fr_40px] items-center px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b">
+          <div className="grid grid-cols-[140px_180px_90px_80px_70px_80px_80px_80px_1fr_40px] items-center px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b">
             <span>Date</span>
             <span>Shop</span>
+            <span>Plan</span>
             <span>Status</span>
             <span>Bundle</span>
             <span>Duration</span>
             <span>Feedback</span>
+            <span>Installed</span>
             <span>Input</span>
             <span></span>
           </div>
@@ -862,7 +928,7 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
               {/* Header Row - Always Visible */}
               <div
                 onClick={() => toggleExpand(log.id)}
-                className="grid grid-cols-[150px_200px_80px_70px_80px_80px_1fr_40px] items-center p-4 cursor-pointer hover:bg-muted/50 transition-colors"
+                className="grid grid-cols-[140px_180px_90px_80px_70px_80px_80px_80px_1fr_40px] items-center p-4 cursor-pointer hover:bg-muted/50 transition-colors"
               >
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <Clock className="w-3 h-3 flex-shrink-0" />
@@ -884,6 +950,7 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                 ) : (
                   <span className="text-xs font-medium text-muted-foreground">-</span>
                 )}
+                <span className="text-xs text-muted-foreground truncate">{log.shopifyPlanName || '-'}</span>
                 <div>
                   {log.isChurned === true ? (
                     <Badge variant="destructive" className="text-[10px]">Uninstalled</Badge>
@@ -919,6 +986,15 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                       {log.feedback.rating === 'CORRECT' ? 'Correct' :
                        log.feedback.rating === 'INCORRECT' ? 'Incorrect' : 'Partial'}
                     </Badge>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">-</span>
+                  )}
+                </div>
+                <div>
+                  {log.isAppInstalled === true ? (
+                    <Badge variant="success" className="text-[10px]">Yes</Badge>
+                  ) : log.isAppInstalled === false ? (
+                    <Badge variant="destructive" className="text-[10px]">No</Badge>
                   ) : (
                     <span className="text-xs text-muted-foreground">-</span>
                   )}
