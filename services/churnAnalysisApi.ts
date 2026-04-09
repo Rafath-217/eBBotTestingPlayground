@@ -7,8 +7,15 @@ export interface ChurnReason {
   severity: 'low' | 'medium' | 'high';
 }
 
+export interface StoreAnalytics {
+  totalLifeTimeBundleViews: number;
+  totalLifeTimeOrderValue: number;
+  totalLifeTimeOrderValueInUSD: number;
+}
+
 export interface ChurnedStore {
   shopName: string;
+  shopifyPlanName?: string;
   pipelineRuns: number;
   firstRunDate: string;
   lastRunDate: string;
@@ -19,6 +26,7 @@ export interface ChurnedStore {
   timeSinceLastRunMs: number;
   hadGeminiErrors: boolean;
   churnReasons: ChurnReason[];
+  storeAnalytics?: StoreAnalytics | null;
 }
 
 export interface ChurnPagination {
@@ -66,6 +74,11 @@ export interface StoreDetailRun {
   churnData: any;
   llmReasoning?: any;
   decisionSummary?: any;
+  bundleAnalytics?: {
+    lifeTimeBundleViews: number;
+    lifeTimeOrderValue: number;
+    lifeTimeOrderValueInUSD: number;
+  } | null;
 }
 
 export interface ShopSnapshot {

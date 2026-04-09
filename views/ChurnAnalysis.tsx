@@ -871,9 +871,12 @@ const ChurnAnalysis: React.FC<ChurnAnalysisProps> = ({ viewMode }) => {
           <TableHeader>
             <TableRow>
               <TableHead>Shop Name</TableHead>
+              <TableHead>Plan</TableHead>
               <TableHead>Pipeline Runs</TableHead>
               <TableHead>App Lifetime</TableHead>
               <TableHead>Errors</TableHead>
+              <TableHead>Total Views</TableHead>
+              <TableHead>Total Revenue</TableHead>
               <TableHead>Churn Reasons</TableHead>
               <TableHead className="w-10">{' '}</TableHead>
             </TableRow>
@@ -897,6 +900,7 @@ const ChurnAnalysis: React.FC<ChurnAnalysisProps> = ({ viewMode }) => {
                       <CopyButton text={store.shopName} />
                     </div>
                   </TableCell>
+                  <TableCell className="text-xs text-muted-foreground">{store.shopifyPlanName || '-'}</TableCell>
                   <TableCell>
                     <Badge variant="outline">{store.pipelineRuns}</Badge>
                   </TableCell>
@@ -905,6 +909,16 @@ const ChurnAnalysis: React.FC<ChurnAnalysisProps> = ({ viewMode }) => {
                     <Badge variant={store.hadGeminiErrors ? 'destructive' : 'success'}>
                       {store.hadGeminiErrors ? 'Yes' : 'No'}
                     </Badge>
+                  </TableCell>
+                  <TableCell className="text-xs text-muted-foreground">
+                    {store.storeAnalytics?.totalLifeTimeBundleViews != null
+                      ? store.storeAnalytics.totalLifeTimeBundleViews.toLocaleString()
+                      : '\u2014'}
+                  </TableCell>
+                  <TableCell className="text-xs text-muted-foreground">
+                    {store.storeAnalytics?.totalLifeTimeOrderValueInUSD != null
+                      ? `$${store.storeAnalytics.totalLifeTimeOrderValueInUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                      : '\u2014'}
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
@@ -933,7 +947,7 @@ const ChurnAnalysis: React.FC<ChurnAnalysisProps> = ({ viewMode }) => {
                 {/* Expanded Detail Row */}
                 {expandedShop === store.shopName && (
                   <TableRow className="hover:bg-transparent">
-                    <TableCell colSpan={8} className="p-0">
+                    <TableCell colSpan={10} className="p-0">
                       <div className="border-t bg-muted/30 p-6 space-y-6">
                         {/* Detail Loading */}
                         {detailLoading && (
@@ -1061,6 +1075,18 @@ const ChurnAnalysis: React.FC<ChurnAnalysisProps> = ({ viewMode }) => {
                                             <AlertTriangle className="w-3 h-3 mr-1" />
                                             Error: {run.geminiErrorLLMsFailed?.join(', ') || 'Unknown'}
                                           </Badge>
+                                        )}
+                                        {run.bundleAnalytics ? (
+                                          <>
+                                            <Badge variant="outline" className="text-xs">
+                                              Views: {run.bundleAnalytics.lifeTimeBundleViews.toLocaleString()}
+                                            </Badge>
+                                            <Badge variant="outline" className="text-xs">
+                                              Revenue: ${run.bundleAnalytics.lifeTimeOrderValueInUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                            </Badge>
+                                          </>
+                                        ) : (
+                                          <span className="text-xs text-muted-foreground">{'\u2014'}</span>
                                         )}
                                       </div>
 
