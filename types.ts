@@ -262,6 +262,11 @@ export interface PipelineHistoryLog {
   decisionSummary?: any;
   shopifyPlanName?: string;
   bundleType?: 'FULLPAGE_BUNDLE' | 'PRODUCT_PAGE_BUNDLE' | null;
+  bundleAnalytics?: {
+    lifeTimeBundleViews: number;
+    lifeTimeOrderValue: number;
+    lifeTimeOrderValueInUSD: number;
+  } | null;
   isAppInstalled?: boolean;
   isChurned?: boolean;
   churnData?: any;
