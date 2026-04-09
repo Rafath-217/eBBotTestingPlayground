@@ -39,6 +39,12 @@ export async function getPipelineHistory(query: PipelineHistoryQuery = {}): Prom
   if (query.bundleType && query.bundleType !== 'ALL') {
     params.append('bundleType', query.bundleType);
   }
+  if (query.minViews != null) {
+    params.append('minViews', String(query.minViews));
+  }
+  if (query.minRevenueUSD != null) {
+    params.append('minRevenueUSD', String(query.minRevenueUSD));
+  }
   if (query.uniqueStores) {
     params.append('uniqueStores', 'true');
   }

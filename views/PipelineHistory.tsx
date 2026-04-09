@@ -341,6 +341,10 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
   const [productCountFilter, setProductCountFilter] = useState<string>('ALL');
   const [collectionCountFilter, setCollectionCountFilter] = useState<string>('ALL');
   const [bundleTypeFilter, setBundleTypeFilter] = useState<string>('ALL');
+  const [minViewsFilter, setMinViewsFilter] = useState<string>('');
+  const [minViewsCustom, setMinViewsCustom] = useState<string>('');
+  const [minRevenueFilter, setMinRevenueFilter] = useState<string>('');
+  const [minRevenueCustom, setMinRevenueCustom] = useState<string>('');
   const [uniqueStores, setUniqueStores] = useState(false);
   const [patternDropdownOpen, setPatternDropdownOpen] = useState(false);
 
@@ -514,6 +518,8 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
           patterns: allPatterns.length > 0 ? allPatterns : undefined,
           shopifyPlanName: shopifyPlanFilter !== 'ALL' ? shopifyPlanFilter : undefined,
           bundleType: bundleTypeFilter !== 'ALL' ? bundleTypeFilter : undefined,
+          minViews: minViewsFilter === 'CUSTOM' ? (minViewsCustom ? Number(minViewsCustom) : undefined) : (minViewsFilter ? Number(minViewsFilter) : undefined),
+          minRevenueUSD: minRevenueFilter === 'CUSTOM' ? (minRevenueCustom ? Number(minRevenueCustom) : undefined) : (minRevenueFilter ? Number(minRevenueFilter) : undefined),
           uniqueStores: uniqueStores || undefined,
         });
       }
@@ -554,6 +560,10 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
     setProductCountFilter('ALL');
     setCollectionCountFilter('ALL');
     setBundleTypeFilter('ALL');
+    setMinViewsFilter('');
+    setMinViewsCustom('');
+    setMinRevenueFilter('');
+    setMinRevenueCustom('');
     setShopNameSearch('');
     setIsSearchMode(false);
     setCurrentPage(1);
@@ -750,6 +760,63 @@ const PipelineHistory: React.FC<PipelineHistoryProps> = ({ viewMode }) => {
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium flex items-center gap-2">
+                <Filter className="w-4 h-4" />
+                Min Views
+              </label>
+              <select
+                value={['', '50', '100', '200', '500'].includes(minViewsFilter) ? minViewsFilter : 'CUSTOM'}
+                onChange={(e) => setMinViewsFilter(e.target.value === 'CUSTOM' ? 'CUSTOM' : e.target.value)}
+                className="h-10 px-3 rounded-md border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value="">Any</option>
+                <option value="50">50+</option>
+                <option value="100">100+</option>
+                <option value="200">200+</option>
+                <option value="500">500+</option>
+                <option value="CUSTOM">Custom</option>
+              </select>
+              {minViewsFilter === 'CUSTOM' && (
+                <input
+                  type="number"
+                  min="0"
+                  value={minViewsCustom}
+                  onChange={(e) => setMinViewsCustom(e.target.value)}
+                  placeholder="Min views..."
+                  className="h-10 w-24 px-3 rounded-md border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                />
+              )}
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium flex items-center gap-2">
+                <Filter className="w-4 h-4" />
+                Min Revenue
+              </label>
+              <select
+                value={['', '50', '100', '200', '500'].includes(minRevenueFilter) ? minRevenueFilter : 'CUSTOM'}
+                onChange={(e) => setMinRevenueFilter(e.target.value === 'CUSTOM' ? 'CUSTOM' : e.target.value)}
+                className="h-10 px-3 rounded-md border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value="">Any</option>
+                <option value="50">$50+</option>
+                <option value="100">$100+</option>
+                <option value="200">$200+</option>
+                <option value="500">$500+</option>
+                <option value="CUSTOM">Custom</option>
+              </select>
+              {minRevenueFilter === 'CUSTOM' && (
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={minRevenueCustom}
+                  onChange={(e) => setMinRevenueCustom(e.target.value)}
+                  placeholder="Min USD..."
+                  className="h-10 w-24 px-3 rounded-md border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                />
+              )}
             </div>
             <div className="space-y-2 flex-1 min-w-[200px] max-w-sm">
               <label className="text-sm font-medium flex items-center gap-2">

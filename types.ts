@@ -299,6 +299,8 @@ export interface PipelineHistoryQuery {
   patterns?: string[];
   shopifyPlanName?: string;
   bundleType?: string;
+  minViews?: number;
+  minRevenueUSD?: number;
   uniqueStores?: boolean;
 }
 
