@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { Play, Loader2, AlertCircle, ChevronDown, ChevronRight, Clock, Copy, Check, Package, RefreshCw, ExternalLink, MessageCircle, Search, Filter, X, ChevronLeft, ChevronsLeft, ChevronsRight, Info, ThumbsUp, ThumbsDown, MinusCircle, Send } from 'lucide-react';
+import { Play, Loader2, AlertCircle, ChevronDown, ChevronRight, Clock, Copy, Check, Package, RefreshCw, ExternalLink, MessageCircle, Search, Filter, X, ChevronLeft, ChevronsLeft, ChevronsRight, Info, ThumbsUp, ThumbsDown, MinusCircle, Send, Maximize2 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent, Button, Badge, CodeBlock, cn } from '../components/ui';
 import { ViewMode } from '../components/Layout';
 import { runFlyStrategy, getFlyStrategyHistory, getFlyStrategyHistoryDetail, pollForResult, submitRunFeedback, FlyStrategyResult, FlyStrategyHistoryEntry, HistoryFilters, HistoryPagination, FeedbackType } from '../services/flyStrategyApi';
@@ -67,6 +67,18 @@ const TOOLTIPS = {
     insufficient: 'Could not group products — too few products or no distinguishing signals.',
   } as Record<string, string>,
   fbtSignal: 'This bundle includes products that are frequently bought together based on real order data.',
+  companionSource: {
+    real: 'This pair is backed by real order co-purchase data — customers have bought these two products together.',
+    fallback: 'No order data for this pair. Included to round out the slate based on a product-relationship rule (e.g. peer variant, larger format, accessory).',
+  } as Record<string, string>,
+  relationshipLabel: {
+    peer_variant: 'Different version of the same product (e.g. another color or size).',
+    theme_line: 'Part of the same thematic product line.',
+    upsell_larger_format: 'Larger-format version — a step up from the trigger.',
+    anchor_accessory: 'Accessory that complements the trigger product.',
+    collection_member: 'Sits in the same Shopify collection as the trigger.',
+    routine_step: 'Used together as part of a sequence or routine.',
+  } as Record<string, string>,
   filters: {
     status: 'Filter by pipeline run status — running, completed, or failed.',
     tier: 'Data tier reflects the quality and completeness of a store\'s product and order data.',
@@ -413,6 +425,186 @@ const TierBadge: React.FC<{ tier?: { tier: number; label: string } | number; tie
 };
 
 // =============================================
+// Companion (FBT pair) helpers
+// =============================================
+
+const RELATIONSHIP_LABEL_HUMAN: Record<string, string> = {
+  peer_variant: 'Peer variant',
+  theme_line: 'Theme line',
+  upsell_larger_format: 'Upsell — larger format',
+  anchor_accessory: 'Anchor accessory',
+  collection_member: 'Collection member',
+  routine_step: 'Routine step',
+};
+
+function isFallbackCompanion(c: any): boolean {
+  return c?.relationship?.source === 'fallback_layer'
+    || c?.direction === 'fallback_only'
+    || c?.relationship?.tier === 0;
+}
+
+function humanizeRelationshipLabel(label?: string | null): string | null {
+  if (!label) return null;
+  return RELATIONSHIP_LABEL_HUMAN[label] || label.replace(/_/g, ' ');
+}
+
+const CompanionCard: React.FC<{ c: any }> = ({ c }) => {
+  const [expanded, setExpanded] = useState(false);
+  const fallback = isFallbackCompanion(c);
+  const rel = c?.relationship || {};
+  const primaryLabel: string | null = rel.primary_label || null;
+  const humanLabel = humanizeRelationshipLabel(primaryLabel);
+  const confidence: number | null = typeof rel.confidence === 'number' ? rel.confidence : null;
+  const reasoning: string | undefined = rel.reasoning;
+  const emissionRule: string | undefined = c?.emissionRule;
+
+  return (
+    <div
+      className={cn(
+        'flex flex-col min-w-[130px] max-w-[160px] rounded-lg p-3 relative',
+        fallback
+          ? 'bg-amber-50/60 dark:bg-amber-950/20 border border-dashed border-amber-300 dark:border-amber-700/50'
+          : 'bg-slate-50 dark:bg-slate-800/50 border border-transparent',
+      )}
+    >
+      <ProductLink handle={c.handle} className="flex flex-col items-center text-center">
+        <ProductImage src={c.image} alt={c.title} size={80} />
+        <ProductTitle title={c.title} handle={c.handle} className="text-xs font-medium mt-2 line-clamp-2 block" />
+        <p className="text-xs text-muted-foreground font-mono mt-0.5">{getProductPrice(c)}</p>
+      </ProductLink>
+
+      <div className="flex flex-wrap items-center justify-center gap-1.5 mt-2">
+        {fallback && (
+          <TipBadge
+            className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 text-[10px]"
+            tooltip={TOOLTIPS.companionSource.fallback}
+          >
+            Fallback fill
+          </TipBadge>
+        )}
+        {humanLabel && (
+          <TipBadge
+            variant="outline"
+            className="text-[10px]"
+            tooltip={primaryLabel ? TOOLTIPS.relationshipLabel[primaryLabel] : undefined}
+          >
+            {humanLabel}
+          </TipBadge>
+        )}
+      </div>
+
+      {!fallback && c.coFrequency != null && (
+        <p className="text-[10px] text-muted-foreground text-center mt-1">
+          co:{c.coFrequency}
+          {typeof c.lift === 'number' && <span> · lift {c.lift.toFixed(1)}</span>}
+        </p>
+      )}
+
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); setExpanded(v => !v); }}
+        className="mt-2 text-[10px] text-blue-600 dark:text-blue-400 hover:underline self-center"
+      >
+        {expanded ? 'Hide details' : 'Why this pair?'}
+      </button>
+
+      {expanded && (
+        <div className="mt-2 w-full text-left text-[10px] space-y-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded p-2">
+          <p>
+            <span className="font-semibold text-slate-700 dark:text-slate-300">Source: </span>
+            <span className={fallback ? 'text-amber-700 dark:text-amber-300' : 'text-emerald-700 dark:text-emerald-300'}>
+              {fallback ? 'Fallback fill' : 'Order-data backed'}
+            </span>
+          </p>
+          {humanLabel && (
+            <p><span className="font-semibold">Relationship: </span>{humanLabel}</p>
+          )}
+          {confidence != null && (
+            <p><span className="font-semibold">Confidence: </span>{Math.round(confidence * 100)}%</p>
+          )}
+          {reasoning && (
+            <p><span className="font-semibold">Reasoning: </span>{reasoning}</p>
+          )}
+          {fallback && emissionRule && (
+            <p><span className="font-semibold">Rule: </span><code className="text-[9px]">{emissionRule}</code></p>
+          )}
+          {!fallback && (
+            <p className="text-muted-foreground">
+              lift {typeof c.lift === 'number' ? c.lift.toFixed(2) : '—'} · co {c.coFrequency ?? '—'}
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// =============================================
+// Maximisable wrapper — button on a card that opens its contents in a centered popup
+// =============================================
+
+const Maximisable: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => {
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('keydown', handler);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', handler);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [open]);
+
+  return (
+    <div className="relative group">
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); setOpen(true); }}
+        className="absolute top-2 right-2 z-20 p-1.5 rounded-md bg-white/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-white dark:hover:bg-slate-800 shadow-sm opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
+        title="Maximise"
+        aria-label="Maximise"
+      >
+        <Maximize2 className="w-3.5 h-3.5" />
+      </button>
+      {children}
+      {open && createPortal(
+        <div
+          className="fixed inset-0 z-[10000] bg-black/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4"
+          onClick={() => setOpen(false)}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            className="bg-white dark:bg-slate-950 rounded-xl shadow-2xl w-[96vw] h-[94vh] max-w-[1600px] overflow-hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900">
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate pr-4">{title}</h3>
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400"
+                aria-label="Close"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="overflow-auto flex-1">
+              <div className="p-6" style={{ zoom: 1.5 }}>
+                {children}
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body,
+      )}
+    </div>
+  );
+};
+
+// =============================================
 // Merchant card sections (PM view)
 // =============================================
 
@@ -422,48 +614,50 @@ const FBTTriggersSection: React.FC<{ triggers: any[] }> = ({ triggers }) => {
     <CollapsibleSection title="Frequently Bought Together" count={triggers.length}>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {triggers.map((t: any, i: number) => (
-          <Card key={i} className="overflow-hidden">
-            <CardContent className="p-4 space-y-4">
-              <ProductLink handle={t.trigger?.handle} className="flex gap-4">
-                <ProductImage src={t.trigger?.image} alt={t.trigger?.title} size={96} />
-                <div className="flex-1 min-w-0">
-                  <ProductTitle title={t.trigger?.title} handle={t.trigger?.handle} className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate block" />
-                  <div className="flex items-center gap-2 mt-1 flex-wrap">
-                    <Badge variant="outline" className="text-[10px]">{t.trigger?.productType}</Badge>
-                    <span className="text-sm font-mono text-slate-600 dark:text-slate-400">{getProductPrice(t.trigger || {})}</span>
-                    {getVariantSummary(t.trigger) && (
-                      <span className="text-[10px] text-muted-foreground">{getVariantSummary(t.trigger)}</span>
-                    )}
+          <Maximisable key={i} title={`FBT — ${t.trigger?.title ?? 'Trigger'}`}>
+            <Card className="overflow-hidden">
+              <CardContent className="p-4 space-y-4">
+                <ProductLink handle={t.trigger?.handle} className="flex gap-4">
+                  <ProductImage src={t.trigger?.image} alt={t.trigger?.title} size={96} />
+                  <div className="flex-1 min-w-0">
+                    <ProductTitle title={t.trigger?.title} handle={t.trigger?.handle} className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate block" />
+                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                      {t.strength && <StrengthBadge strength={t.strength} type="recommendation" />}
+                      <Badge variant="outline" className="text-[10px]">{t.trigger?.productType}</Badge>
+                      <span className="text-sm font-mono text-slate-600 dark:text-slate-400">{getProductPrice(t.trigger || {})}</span>
+                      {getVariantSummary(t.trigger) && (
+                        <span className="text-[10px] text-muted-foreground">{getVariantSummary(t.trigger)}</span>
+                      )}
+                    </div>
+                    <div className="mt-1.5">
+                      <ScoreBar score={t.score || 0} />
+                    </div>
                   </div>
-                  <div className="mt-1.5">
-                    <ScoreBar score={t.score || 0} />
+                </ProductLink>
+                <TraceBlock trace={t.trace} />
+                {t.companions?.length > 0 && (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">Pairs with</p>
+                      {t.companions.some((c: any) => isFallbackCompanion(c)) && (
+                        <span className="text-[10px] text-amber-700 dark:text-amber-400">
+                          (includes fallback fills)
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex gap-4 overflow-x-auto items-start">
+                      {t.companions.map((c: any, j: number) => (
+                        <CompanionCard key={j} c={c} />
+                      ))}
+                    </div>
                   </div>
+                )}
+                <div className="flex justify-end pt-1">
+                  <SetUpButton label="Set Up FBT" />
                 </div>
-              </ProductLink>
-              <TraceBlock trace={t.trace} />
-              {t.companions?.length > 0 && (
-                <div className="space-y-2">
-                  <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">Pairs with</p>
-                  <div className="flex gap-4 overflow-x-auto">
-                    {t.companions.map((c: any, j: number) => (
-                      <ProductLink key={j} handle={c.handle} className="flex flex-col items-center text-center min-w-[110px] max-w-[130px] bg-slate-50 dark:bg-slate-800/50 rounded-lg p-3">
-                        <ProductImage src={c.image} alt={c.title} size={80} />
-                        <ProductTitle title={c.title} handle={c.handle} className="text-xs font-medium mt-2 line-clamp-2 block" />
-                        <p className="text-xs text-muted-foreground font-mono mt-0.5">{getProductPrice(c)}</p>
-                        <div className="flex items-center gap-1.5 mt-1">
-                          <StrengthBadge strength={c.strength} type="companion" />
-                          <span className="text-[10px] text-muted-foreground">co:{c.coFrequency}</span>
-                        </div>
-                      </ProductLink>
-                    ))}
-                  </div>
-                </div>
-              )}
-              <div className="flex justify-end pt-1">
-                <SetUpButton label="Set Up FBT" />
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </Maximisable>
         ))}
       </div>
     </CollapsibleSection>
@@ -477,44 +671,46 @@ const CustomPoolsSection: React.FC<{ pools: any[] }> = ({ pools }) => {
       <MerchantSectionHeading title="Mix & Match Pools" count={pools.length} />
       <div className="space-y-4">
         {pools.map((pool: any, i: number) => (
-          <Card key={i}>
-            <CardContent className="p-4 space-y-3">
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                    {pool.category || pool.categories?.join(' + ')}
-                  </span>
-                  <Badge variant="outline" className="text-xs">Pick {pool.pickCount}</Badge>
-                  {pool.suggestedDiscount && (
-                    <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 text-xs">
-                      {pool.suggestedDiscount} off
-                    </Badge>
-                  )}
+          <Maximisable key={i} title={`Mix & Match — ${pool.category || pool.categories?.join(' + ') || 'Pool'}`}>
+            <Card>
+              <CardContent className="p-4 space-y-3">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                      {pool.category || pool.categories?.join(' + ')}
+                    </span>
+                    <Badge variant="outline" className="text-xs">Pick {pool.pickCount}</Badge>
+                    {pool.suggestedDiscount && (
+                      <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 text-xs">
+                        {pool.suggestedDiscount} off
+                      </Badge>
+                    )}
+                  </div>
+                  <ScoreBar score={pool.score || 0} max={400} />
                 </div>
-                <ScoreBar score={pool.score || 0} max={400} />
-              </div>
-              {pool.products?.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                  {pool.products.map((p: any, j: number) => (
-                    <ProductLink key={j} handle={p.handle} className="flex items-center gap-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg p-2.5">
-                      <ProductImage src={p.image} alt={p.title} size={64} />
-                      <div className="min-w-0 flex-1">
-                        <ProductTitle title={p.title} handle={p.handle} className="text-sm font-medium truncate block" />
-                        <p className="text-xs text-muted-foreground font-mono">{getProductPrice(p)}</p>
-                        {getVariantSummary(p) && (
-                          <p className="text-[10px] text-muted-foreground">{getVariantSummary(p)}</p>
-                        )}
-                      </div>
-                    </ProductLink>
-                  ))}
+                {pool.products?.length > 0 && (
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                    {pool.products.map((p: any, j: number) => (
+                      <ProductLink key={j} handle={p.handle} className="flex items-center gap-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg p-2.5">
+                        <ProductImage src={p.image} alt={p.title} size={64} />
+                        <div className="min-w-0 flex-1">
+                          <ProductTitle title={p.title} handle={p.handle} className="text-sm font-medium truncate block" />
+                          <p className="text-xs text-muted-foreground font-mono">{getProductPrice(p)}</p>
+                          {getVariantSummary(p) && (
+                            <p className="text-[10px] text-muted-foreground">{getVariantSummary(p)}</p>
+                          )}
+                        </div>
+                      </ProductLink>
+                    ))}
+                  </div>
+                )}
+                <TraceBlock trace={pool.trace} />
+                <div className="flex justify-end pt-1">
+                  <SetUpButton label="Set Up Pool" />
                 </div>
-              )}
-              <TraceBlock trace={pool.trace} />
-              <div className="flex justify-end pt-1">
-                <SetUpButton label="Set Up Pool" />
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </Maximisable>
         ))}
       </div>
     </section>
@@ -527,39 +723,41 @@ const FixedBundlesSection: React.FC<{ bundles: any[] }> = ({ bundles }) => {
     <CollapsibleSection title="Fixed Bundles" count={bundles.length}>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {bundles.map((b: any, i: number) => (
-          <Card key={i}>
-            <CardContent className="p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-lg font-bold text-slate-900 dark:text-slate-100">${b.bundlePrice}</span>
-                  {b.hasFBTSignal && (
-                    <TipBadge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 text-[10px]" tooltip={TOOLTIPS.fbtSignal}>
-                      FBT Signal
-                    </TipBadge>
-                  )}
+          <Maximisable key={i} title={`Fixed Bundle — $${b.bundlePrice ?? ''}`}>
+            <Card>
+              <CardContent className="p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-bold text-slate-900 dark:text-slate-100">${b.bundlePrice}</span>
+                    {b.hasFBTSignal && (
+                      <TipBadge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 text-[10px]" tooltip={TOOLTIPS.fbtSignal}>
+                        FBT Signal
+                      </TipBadge>
+                    )}
+                  </div>
+                  <ScoreBar score={b.score || 0} max={25} />
                 </div>
-                <ScoreBar score={b.score || 0} max={25} />
-              </div>
-              {b.products?.length > 0 && (
-                <div className="flex gap-4 overflow-x-auto">
-                  {b.products.map((p: any, j: number) => (
-                    <ProductLink key={j} handle={p.handle} className="flex flex-col items-center text-center min-w-[110px]">
-                      <ProductImage src={p.image} alt={p.title} size={96} />
-                      <ProductTitle title={p.title} handle={p.handle} className="text-sm font-medium mt-1.5 line-clamp-2 block" />
-                      <p className="text-xs text-muted-foreground font-mono">{getProductPrice(p)}</p>
-                      {getVariantSummary(p) && (
-                        <p className="text-[10px] text-muted-foreground">{getVariantSummary(p)}</p>
-                      )}
-                    </ProductLink>
-                  ))}
+                {b.products?.length > 0 && (
+                  <div className="flex gap-4 overflow-x-auto">
+                    {b.products.map((p: any, j: number) => (
+                      <ProductLink key={j} handle={p.handle} className="flex flex-col items-center text-center min-w-[110px]">
+                        <ProductImage src={p.image} alt={p.title} size={96} />
+                        <ProductTitle title={p.title} handle={p.handle} className="text-sm font-medium mt-1.5 line-clamp-2 block" />
+                        <p className="text-xs text-muted-foreground font-mono">{getProductPrice(p)}</p>
+                        {getVariantSummary(p) && (
+                          <p className="text-[10px] text-muted-foreground">{getVariantSummary(p)}</p>
+                        )}
+                      </ProductLink>
+                    ))}
+                  </div>
+                )}
+                <TraceBlock trace={b.trace} />
+                <div className="flex justify-end pt-1">
+                  <SetUpButton label="Set Up Bundle" />
                 </div>
-              )}
-              <TraceBlock trace={b.trace} />
-              <div className="flex justify-end pt-1">
-                <SetUpButton label="Set Up Bundle" />
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </Maximisable>
         ))}
       </div>
     </CollapsibleSection>
@@ -573,29 +771,31 @@ const VolumeDiscountsSection: React.FC<{ discounts: any[] }> = ({ discounts }) =
       <MerchantSectionHeading title="Volume Discounts" count={discounts.length} />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {discounts.map((d: any, i: number) => (
-          <Card key={i}>
-            <CardContent className="p-4 space-y-3">
-              <ProductLink handle={d.handle || d.product?.handle} className="flex gap-3">
-                <ProductImage src={d.image || d.product?.image} alt={d.title || d.product?.title || 'Product'} size={80} />
-                <div className="flex-1">
-                  <ProductTitle title={d.title || d.product?.title || d.category} handle={d.handle || d.product?.handle} className="text-sm font-semibold block" />
-                  {d.tiers && (
-                    <div className="mt-2 space-y-1">
-                      {d.tiers.map((tier: any, j: number) => (
-                        <div key={j} className="flex items-center justify-between text-xs bg-slate-50 dark:bg-slate-800/50 rounded px-2 py-1">
-                          <span>Buy {tier.quantity}</span>
-                          <Badge variant="default" className="text-[10px]">{tier.discount}% off</Badge>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+          <Maximisable key={i} title={`Volume Discount — ${d.title || d.product?.title || d.category || 'Product'}`}>
+            <Card>
+              <CardContent className="p-4 space-y-3">
+                <ProductLink handle={d.handle || d.product?.handle} className="flex gap-3">
+                  <ProductImage src={d.image || d.product?.image} alt={d.title || d.product?.title || 'Product'} size={80} />
+                  <div className="flex-1">
+                    <ProductTitle title={d.title || d.product?.title || d.category} handle={d.handle || d.product?.handle} className="text-sm font-semibold block" />
+                    {d.tiers && (
+                      <div className="mt-2 space-y-1">
+                        {d.tiers.map((tier: any, j: number) => (
+                          <div key={j} className="flex items-center justify-between text-xs bg-slate-50 dark:bg-slate-800/50 rounded px-2 py-1">
+                            <span>Buy {tier.quantity}</span>
+                            <Badge variant="default" className="text-[10px]">{tier.discount}% off</Badge>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </ProductLink>
+                <div className="flex justify-end pt-1">
+                  <SetUpButton label="Set Up Discount" />
                 </div>
-              </ProductLink>
-              <div className="flex justify-end pt-1">
-                <SetUpButton label="Set Up Discount" />
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </Maximisable>
         ))}
       </div>
     </section>
@@ -1450,11 +1650,15 @@ const DevResultView: React.FC<{ result: FlyStrategyResult }> = ({ result }) => {
         <Section title="FBT Triggers" count={bs.fbtTriggers.length}>
           <div className="space-y-3">
             {bs.fbtTriggers.map((t: any, i: number) => (
-              <div key={i} className="border rounded-lg p-3 space-y-2">
-                <div className="flex items-center justify-between">
+              <Maximisable key={i} title={`FBT — ${t.trigger?.title ?? 'Trigger'}`}>
+              <div className="border rounded-lg p-3 space-y-2">
+                <div className="flex items-center justify-between pr-10">
                   <div>
                     <p className="text-sm font-medium">{t.trigger?.title}</p>
-                    <p className="text-xs text-muted-foreground">{t.trigger?.productType} &middot; {t.trigger?.orderCount} orders &middot; ${t.trigger?.price}</p>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      {t.strength && <StrengthBadge strength={t.strength} type="recommendation" />}
+                      <span>{t.trigger?.productType} &middot; {t.trigger?.orderCount} orders &middot; ${t.trigger?.price}</span>
+                    </div>
                   </div>
                   <div className="text-right">
                     <p className="text-xs text-muted-foreground">Score</p>
@@ -1466,19 +1670,61 @@ const DevResultView: React.FC<{ result: FlyStrategyResult }> = ({ result }) => {
                 {t.companions && t.companions.length > 0 && (
                   <div className="pl-4 border-l-2 border-muted space-y-1">
                     <p className="text-xs font-medium text-muted-foreground">Companions</p>
-                    {t.companions.map((c: any, j: number) => (
-                      <div key={j} className="flex items-center justify-between text-xs">
-                        <span>{c.title} <span className="text-muted-foreground">({c.productType})</span></span>
-                        <span className="flex items-center gap-2">
-                          <TipBadge variant={c.strength === 'strong' ? 'success' : c.strength === 'moderate' ? 'default' : 'outline'} className="text-[10px]" tooltip={TOOLTIPS.companionStrength[c.strength]}>{c.strength}</TipBadge>
-                          <span className="font-mono">lift {c.lift?.toFixed(1)}</span>
-                          <span className="text-muted-foreground">co:{c.coFrequency}</span>
-                        </span>
-                      </div>
-                    ))}
+                    {t.companions.map((c: any, j: number) => {
+                      const fallback = isFallbackCompanion(c);
+                      const primaryLabel: string | null = c?.relationship?.primary_label || null;
+                      const humanLabel = humanizeRelationshipLabel(primaryLabel);
+                      const confidence = typeof c?.relationship?.confidence === 'number' ? c.relationship.confidence : null;
+                      return (
+                        <div key={j} className="flex items-start justify-between gap-3 text-xs">
+                          <div className="flex-1 min-w-0">
+                            <div className="truncate">
+                              {c.title} <span className="text-muted-foreground">({c.productType})</span>
+                            </div>
+                            {(c?.relationship?.reasoning || c?.emissionRule) && (
+                              <div className="text-[10px] text-muted-foreground mt-0.5">
+                                {c?.relationship?.reasoning}
+                                {c?.emissionRule && (
+                                  <span className="ml-1"><code className="text-[9px]">{c.emissionRule}</code></span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                          <span className="flex items-center gap-2 flex-wrap justify-end shrink-0">
+                            {fallback && (
+                              <TipBadge
+                                className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 text-[10px]"
+                                tooltip={TOOLTIPS.companionSource.fallback}
+                              >
+                                Fallback fill
+                              </TipBadge>
+                            )}
+                            {humanLabel && (
+                              <TipBadge
+                                variant="outline"
+                                className="text-[10px]"
+                                tooltip={primaryLabel ? TOOLTIPS.relationshipLabel[primaryLabel] : undefined}
+                              >
+                                {humanLabel}
+                              </TipBadge>
+                            )}
+                            {!fallback && typeof c.lift === 'number' && (
+                              <span className="font-mono">lift {c.lift.toFixed(1)}</span>
+                            )}
+                            {!fallback && c.coFrequency != null && (
+                              <span className="text-muted-foreground">co:{c.coFrequency}</span>
+                            )}
+                            {fallback && confidence != null && (
+                              <span className="text-muted-foreground">conf {Math.round(confidence * 100)}%</span>
+                            )}
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>
+              </Maximisable>
             ))}
           </div>
         </Section>
@@ -1515,18 +1761,20 @@ const DevResultView: React.FC<{ result: FlyStrategyResult }> = ({ result }) => {
         <Section title="Fixed Bundles" count={bs.fixedBundles.length}>
           <div className="space-y-3">
             {bs.fixedBundles.map((b: any, i: number) => (
-              <div key={i} className="border rounded-lg p-3 space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">Bundle ${b.bundlePrice}</span>
-                    {b.hasFBTSignal && <TipBadge variant="success" className="text-[10px]" tooltip={TOOLTIPS.fbtSignal}>FBT signal</TipBadge>}
+              <Maximisable key={i} title={`Fixed Bundle — $${b.bundlePrice ?? ''}`}>
+                <div className="border rounded-lg p-3 space-y-2">
+                  <div className="flex items-center justify-between pr-10">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium">Bundle ${b.bundlePrice}</span>
+                      {b.hasFBTSignal && <TipBadge variant="success" className="text-[10px]" tooltip={TOOLTIPS.fbtSignal}>FBT signal</TipBadge>}
+                    </div>
+                    <span className="text-xs font-mono">score {b.score?.toFixed(1)}</span>
                   </div>
-                  <span className="text-xs font-mono">score {b.score?.toFixed(1)}</span>
+                  <p className="text-xs text-muted-foreground">{b.reasoning}</p>
+                  <TraceBlock trace={b.trace} />
+                  {b.products && <ProductList products={b.products} />}
                 </div>
-                <p className="text-xs text-muted-foreground">{b.reasoning}</p>
-                <TraceBlock trace={b.trace} />
-                {b.products && <ProductList products={b.products} />}
-              </div>
+              </Maximisable>
             ))}
           </div>
         </Section>
@@ -1591,7 +1839,6 @@ const DevResultView: React.FC<{ result: FlyStrategyResult }> = ({ result }) => {
                   <span className="font-medium">{pair.product2?.title}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <TipBadge variant={pair.strength === 'strong' ? 'success' : pair.strength === 'moderate' ? 'default' : 'outline'} className="text-[10px]" tooltip={TOOLTIPS.companionStrength[pair.strength]}>{pair.strength}</TipBadge>
                   <span className="font-mono">lift {pair.lift?.toFixed(1)}</span>
                   <span className="text-muted-foreground">co:{pair.coFrequency}</span>
                 </div>
@@ -1812,8 +2059,7 @@ const HistoryTable: React.FC<{ entries: FlyStrategyHistoryEntry[]; viewMode: Vie
   const [feedbackCache, setFeedbackCache] = useState<Record<string, { feedback: FeedbackType; text: string; at: string }>>({});
 
   const fetchDetail = async (id: string) => {
-    const entry = entries.find(e => e._id === id);
-    if (detailCache[id] || entry?.result) return;
+    if (detailCache[id]) return;
     setDetailLoading(id);
     try {
       const detail = await getFlyStrategyHistoryDetail(id);
@@ -1828,12 +2074,17 @@ const HistoryTable: React.FC<{ entries: FlyStrategyHistoryEntry[]; viewMode: Vie
   };
 
   const toggleTrace = (id: string) => {
+    const wasVisible = traceVisibleIds.has(id);
     setTraceVisibleIds(prev => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
       return next;
     });
+    if (!wasVisible && expandedId !== id) {
+      setExpandedId(id);
+      fetchDetail(id);
+    }
   };
 
   const handleExpand = async (id: string) => {

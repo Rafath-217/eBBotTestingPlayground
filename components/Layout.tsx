@@ -111,7 +111,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, isDark, toggleDark, vi
           </div>
 
           <div className="flex-1 py-6 px-4 space-y-1 overflow-y-auto">
-            {/* 1. EB Bundle Setup */}
+            {/* 1. EB Bundle Setup — hidden
             <SidebarGroup
               icon={Package}
               label="EB Bundle Setup"
@@ -130,8 +130,9 @@ export const Layout: React.FC<LayoutProps> = ({ children, isDark, toggleDark, vi
               <SidebarItem icon={Rocket} label="Pipeline Handoff" active={pathname === '/bundle-setup-pipeline'} onClick={() => navigate('/bundle-setup-pipeline')} indent />
               <SidebarItem icon={MessageCircleQuestion} label="Pipeline FAQ" active={pathname === '/bundle-setup-pipeline-faq'} onClick={() => navigate('/bundle-setup-pipeline-faq')} indent />
             </SidebarGroup>
+            */}
 
-            {/* 2. Magic Bundles */}
+            {/* 2. Magic Bundles — hidden
             <SidebarGroup
               icon={Sparkles}
               label="Magic Bundles"
@@ -152,19 +153,34 @@ export const Layout: React.FC<LayoutProps> = ({ children, isDark, toggleDark, vi
               <SidebarItem icon={FileText} label="83a38c-0c (Candy Shop)" active={pathname === '/case-study-83a38c'} onClick={() => navigate('/case-study-83a38c')} indent />
               <SidebarItem icon={FileText} label="9cfda4-f5 (Skincare)" active={pathname === '/case-study-9cfda4'} onClick={() => navigate('/case-study-9cfda4')} indent />
             </SidebarGroup>
+            */}
 
             {/* 3. Fly Bundles */}
             <SidebarGroup
               icon={Package}
               label="Fly Bundles"
               isActive={pathname.startsWith('/fly-')}
-              defaultOpen={false}
+              defaultOpen={true}
             >
               <SidebarItem icon={Play} label="Playground" active={pathname === '/fly-recommendations'} onClick={() => navigate('/fly-recommendations')} indent />
               <SidebarItem icon={FileText} label="PM Handoff" active={pathname === '/fly-pm-handoff'} onClick={() => navigate('/fly-pm-handoff')} indent />
             </SidebarGroup>
 
-            {/* 4. BaaS */}
+            {/* 4. Merchant Diagnostics — hidden
+            <SidebarGroup
+              icon={BarChart3}
+              label="Merchant Diagnostics"
+              isActive={pathname.startsWith('/merchant-diagnostics')}
+              defaultOpen={pathname.startsWith('/merchant-diagnostics')}
+            >
+              <SidebarItem icon={LayoutDashboard} label="Overview" active={pathname === '/merchant-diagnostics'} onClick={() => navigate('/merchant-diagnostics')} indent />
+              <SidebarItem icon={Store} label="Baseline Insights" active={pathname === '/merchant-diagnostics/baseline'} onClick={() => navigate('/merchant-diagnostics/baseline')} indent />
+              <SidebarItem icon={TrendingDown} label="AOV Impact" active={pathname === '/merchant-diagnostics/aov-impact'} onClick={() => navigate('/merchant-diagnostics/aov-impact')} indent />
+              <SidebarItem icon={Package} label="Bundle Drivers" active={pathname === '/merchant-diagnostics/bundle-drivers'} onClick={() => navigate('/merchant-diagnostics/bundle-drivers')} indent />
+            </SidebarGroup>
+            */}
+
+            {/* 5. BaaS — hidden
             <SidebarGroup
               icon={ShoppingCart}
               label="BaaS"
@@ -175,6 +191,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, isDark, toggleDark, vi
               <SidebarItem icon={BookOpen} label="BaaS Handoff" active={pathname === '/baas-handoff'} onClick={() => navigate('/baas-handoff')} indent />
               <SidebarItem icon={HelpCircle} label="BaaS FAQ" active={pathname === '/baas-faq'} onClick={() => navigate('/baas-faq')} indent />
             </SidebarGroup>
+            */}
 
           </div>
 

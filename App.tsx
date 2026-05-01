@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
+import { Routes, Route, useNavigate, Navigate, useLocation } from 'react-router-dom';
 import { Layout, ViewMode } from './components/Layout';
 import Overview from './views/Overview';
 import StructureLLM from './views/StructureLLM';
@@ -33,6 +33,7 @@ import FlyStrategyPage from './views/FlyStrategyPage';
 import FlyBundleRecommendationsPage from './views/FlyBundleRecommendationsPage';
 import CaseStudy83a38cPage from './views/CaseStudy83a38cPage';
 import CaseStudy9cfda4Page from './views/CaseStudy9cfda4Page';
+import { MerchantDiagnosticsOverview, MerchantDiagnosticsBaseline, MerchantDiagnosticsAovImpact, MerchantDiagnosticsBundleDrivers, MerchantDiagnosticsStoreDrilldown } from './views/MerchantDiagnostics';
 import { getMetrics, getAllResults, getEnrichedResults, EnrichedResult, getLLMSpecs, getTestCases } from './services/dataService';
 import { getLatestEvaluationRun, getPromptVersionStats } from './services/evaluationApi';
 import { Metrics, LLMSpecs, TestCase, EvaluationRunDetail, PromptVersionStats } from './types';
@@ -42,6 +43,8 @@ const API_SECRET_KEY = process.env.DASHBOARD_KEY || '';
 
 function App() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isMerchantDiagnosticsRoute = location.pathname.startsWith('/merchant-diagnostics');
   const [isDark, setIsDark] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('pm');
   const [authenticated, setAuthenticated] = useState(() => sessionStorage.getItem('eb_authenticated') === 'true');
@@ -91,6 +94,12 @@ function App() {
 
   // Load Data
   useEffect(() => {
+    if (isMerchantDiagnosticsRoute) {
+      setError(null);
+      setLoading(false);
+      return;
+    }
+
     const fetchData = async () => {
         try {
             const [m, s, tc, structRes, discRes, rulesRes, latestRunData, promptVersionsData] = await Promise.all([
@@ -120,7 +129,7 @@ function App() {
         }
     };
     fetchData();
-  }, []);
+  }, [isMerchantDiagnosticsRoute]);
 
   // Theme Toggle
   useEffect(() => {
@@ -251,6 +260,11 @@ function App() {
           <Route path="/fly-pm-handoff" element={<FlyBundleRecommendationsPage />} />
           <Route path="/case-study-83a38c" element={<CaseStudy83a38cPage />} />
           <Route path="/case-study-9cfda4" element={<CaseStudy9cfda4Page />} />
+          <Route path="/merchant-diagnostics" element={<MerchantDiagnosticsOverview />} />
+          <Route path="/merchant-diagnostics/baseline" element={<MerchantDiagnosticsBaseline />} />
+          <Route path="/merchant-diagnostics/aov-impact" element={<MerchantDiagnosticsAovImpact />} />
+          <Route path="/merchant-diagnostics/bundle-drivers" element={<MerchantDiagnosticsBundleDrivers />} />
+          <Route path="/merchant-diagnostics/store/:shopName" element={<MerchantDiagnosticsStoreDrilldown />} />
         </Routes>
     </Layout>
   );
