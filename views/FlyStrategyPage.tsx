@@ -2151,7 +2151,7 @@ const HistoryTable: React.FC<{ entries: FlyStrategyHistoryEntry[]; viewMode: Vie
               </div>
               {/* Right: trace toggle + date */}
               <div className="flex items-center gap-2 flex-shrink-0 ml-3" onClick={e => e.stopPropagation()}>
-                <button
+                {/* <button
                   onClick={e => { e.stopPropagation(); toggleTrace(entry._id); }}
                   className={cn(
                     'px-2.5 py-1 rounded-md text-[11px] font-medium border transition-colors',
@@ -2164,7 +2164,7 @@ const HistoryTable: React.FC<{ entries: FlyStrategyHistoryEntry[]; viewMode: Vie
                     <MessageCircle className="w-3 h-3" />
                     {traceVisibleIds.has(entry._id) ? 'Hide Traces' : 'Show Traces'}
                   </span>
-                </button>
+                </button> */}
                 <span className="text-xs text-muted-foreground whitespace-nowrap">{new Date(entry.createdAt).toLocaleString()}</span>
               </div>
             </div>
