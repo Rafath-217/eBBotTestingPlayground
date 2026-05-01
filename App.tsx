@@ -45,6 +45,7 @@ function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const isMerchantDiagnosticsRoute = location.pathname.startsWith('/merchant-diagnostics');
+  const isFlyRoute = location.pathname.startsWith('/fly-');
   const [isDark, setIsDark] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('pm');
   const [authenticated, setAuthenticated] = useState(true);
@@ -94,7 +95,7 @@ function App() {
 
   // Load Data
   useEffect(() => {
-    if (isMerchantDiagnosticsRoute) {
+    if (isMerchantDiagnosticsRoute || isFlyRoute) {
       setError(null);
       setLoading(false);
       return;
@@ -129,7 +130,7 @@ function App() {
         }
     };
     fetchData();
-  }, [isMerchantDiagnosticsRoute]);
+  }, [isMerchantDiagnosticsRoute, isFlyRoute]);
 
   // Theme Toggle
   useEffect(() => {
@@ -210,15 +211,7 @@ function App() {
     >
         <Routes>
           <Route path="/" element={
-            metrics ? (
-              <Overview
-                metrics={metrics}
-                viewMode={viewMode}
-                latestRun={latestRun}
-                promptVersions={promptVersions}
-                onViewAllRuns={() => navigate('/evaluation-runs')}
-              />
-            ) : null
+            <Navigate to="/fly-recommendations" replace />
           } />
           <Route path="/playground" element={<Playground viewMode={viewMode} />} />
           <Route path="/history" element={<PipelineHistory viewMode={viewMode} />} />
