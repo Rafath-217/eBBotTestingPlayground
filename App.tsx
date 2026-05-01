@@ -47,7 +47,7 @@ function App() {
   const isMerchantDiagnosticsRoute = location.pathname.startsWith('/merchant-diagnostics');
   const [isDark, setIsDark] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('pm');
-  const [authenticated, setAuthenticated] = useState(() => sessionStorage.getItem('eb_authenticated') === 'true');
+  const [authenticated, setAuthenticated] = useState(true);
   const [apiKey, setApiKey] = useState('');
   const [authError, setAuthError] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
@@ -142,6 +142,7 @@ function App() {
 
   const toggleDark = () => setIsDark(!isDark);
 
+  /* API Key auth screen — commented out
   if (!authenticated) {
     return (
       <div className="h-screen w-screen flex items-center justify-center bg-background text-foreground">
@@ -168,6 +169,7 @@ function App() {
       </div>
     );
   }
+  */
 
   if (loading) {
       return (

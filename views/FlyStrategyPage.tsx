@@ -2318,6 +2318,7 @@ const FlyStrategyPage: React.FC<FlyStrategyPageProps> = ({ viewMode }) => {
         <p className="text-muted-foreground">Test bundle recommendations for any Shopify store</p>
       </div>
 
+      {/* Store Input card — hidden
       <Card>
         <CardHeader>
           <CardTitle>Store Input</CardTitle>
@@ -2351,6 +2352,7 @@ const FlyStrategyPage: React.FC<FlyStrategyPageProps> = ({ viewMode }) => {
           </Button>
         </CardContent>
       </Card>
+      */}
 
       {/* Loading skeleton for PM mode */}
       {loading && viewMode === 'pm' && <LoadingSkeleton message={progressMsg} />}
@@ -2392,11 +2394,11 @@ const FlyStrategyPage: React.FC<FlyStrategyPageProps> = ({ viewMode }) => {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <HistoryFiltersPanel
+          {/* <HistoryFiltersPanel
             filters={filters}
             onChange={setFilters}
             onApply={handleApplyFilters}
-          />
+          /> */}
           {historyLoading ? (
             <div className="flex items-center gap-2 py-4 text-sm text-muted-foreground">
               <Loader2 className="w-4 h-4 animate-spin" />

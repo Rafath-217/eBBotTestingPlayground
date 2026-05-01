@@ -163,7 +163,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, isDark, toggleDark, vi
               defaultOpen={true}
             >
               <SidebarItem icon={Play} label="Playground" active={pathname === '/fly-recommendations'} onClick={() => navigate('/fly-recommendations')} indent />
-              <SidebarItem icon={FileText} label="PM Handoff" active={pathname === '/fly-pm-handoff'} onClick={() => navigate('/fly-pm-handoff')} indent />
+              {/* <SidebarItem icon={FileText} label="PM Handoff" active={pathname === '/fly-pm-handoff'} onClick={() => navigate('/fly-pm-handoff')} indent /> */}
             </SidebarGroup>
 
             {/* 4. Merchant Diagnostics — hidden
