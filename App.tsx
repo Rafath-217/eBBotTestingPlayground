@@ -172,6 +172,7 @@ function App() {
   }
   */
 
+  /* Loading and error guards — commented out (EB Bundle views hidden)
   if (loading) {
       return (
           <div className="h-screen w-screen flex items-center justify-center bg-background text-foreground">
@@ -200,6 +201,7 @@ function App() {
           </div>
       );
   }
+  */
 
   return (
     <Layout
